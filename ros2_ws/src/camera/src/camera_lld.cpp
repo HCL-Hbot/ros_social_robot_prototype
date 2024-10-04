@@ -1,3 +1,4 @@
+#include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.hpp>
 #include "camera_lld.hpp"
 
@@ -5,34 +6,36 @@
 CameraLLD::CameraLLD(const std::string& node_name) :
   rclcpp::Node(node_name),
   publisher_(this->create_publisher<sensor_msgs::msg::Image>("raw_image", 10)),
-  timer_(this->create_wall_timer(std::chrono::milliseconds(100),std::bind(&CameraLLD::publishImage, this))) 
+  camera_thread_(std::thread(std::bind(&CameraLLD::captureAndPublish,this)))
 {
-  cap_.open(0); // Open the default camera (camera index 0)
-  if (!cap_.isOpened()) 
-  {
-    RCLCPP_ERROR(this->get_logger(), "Could not open camera");
-  }
 }
 
 /*virtual*/ CameraLLD::~CameraLLD()
 {
-}
-
-void CameraLLD::publishImage()
-{
-  cv::Mat frame;
-  cap_ >> frame; // Capture a frame from the camera
-
-  if (!frame.empty())
+  if (camera_thread_.joinable())
   {
-    // Convert OpenCV image (cv::Mat) to ROS 2 image message
-    std::shared_ptr<sensor_msgs::msg::Image> msg = cv_bridge::CvImage(
-        std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-    
-    publisher_->publish(*msg);
+    camera_thread_.join();
   }
 }
 
+void CameraLLD::captureAndPublish()
+{
+    cv::VideoCapture cap(0);  // Open de camera
+    if (!cap.isOpened()) {
+      RCLCPP_ERROR(this->get_logger(), "Failed to open camera.");
+      return;
+    }
+
+    while (rclcpp::ok())  // Continue draaien zolang de node actief is
+    {
+      cv::Mat frame;
+      cap >> frame;  // Lees een frame van de camera
+      if (!frame.empty()) {
+        auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+        publisher_->publish(*msg);  // Publiceer het beeld
+      }
+    }
+}
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);

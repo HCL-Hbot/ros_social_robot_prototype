@@ -17,7 +17,6 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
-#include <opencv2/opencv.hpp>
 
 class CameraLLD : public rclcpp::Node
 {
@@ -25,10 +24,9 @@ public:
   CameraLLD(const std::string& node_name);
   virtual ~CameraLLD();
 private:
-  void publishImage();
+  void captureAndPublish();
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
-  rclcpp::TimerBase::SharedPtr timer_;
-  cv::VideoCapture cap_;
+  std::thread camera_thread_;
 };
 
 #endif // CAMERA_INCLUDE_CAMERA_CAMERA_LLD_HPP_

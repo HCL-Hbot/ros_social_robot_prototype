@@ -18,10 +18,23 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 
+/**
+ * @brief High level driver for a camera
+ * This class will detect a face from a image and publish it coordintes to a topic.
+ */
 class CameraHLD : public rclcpp::Node
 {
 public:
+  /**
+   * @brief Construct a new Camera HLD object
+   * 
+   * @param node_name Name of the high level driver node.
+   */
   CameraHLD(const std::string& node_name);
+
+  /**
+   * @brief Destroy the Camera HLD object
+   */
   virtual ~CameraHLD();
 private:
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);

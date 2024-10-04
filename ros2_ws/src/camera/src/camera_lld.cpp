@@ -20,22 +20,24 @@ CameraLLD::CameraLLD(const std::string& node_name) :
 
 void CameraLLD::captureAndPublish()
 {
-    cv::VideoCapture cap(0);  // Open de camera
+    cv::VideoCapture cap(0);  // Open any camera
     if (!cap.isOpened()) {
       RCLCPP_ERROR(this->get_logger(), "Failed to open camera.");
       return;
     }
 
-    while (rclcpp::ok())  // Continue draaien zolang de node actief is
+    while (rclcpp::ok()) 
     {
       cv::Mat frame;
-      cap >> frame;  // Lees een frame van de camera
-      if (!frame.empty()) {
+      cap >> frame; //read frame
+      if (!frame.empty())
+      {
         auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-        publisher_->publish(*msg);  // Publiceer het beeld
+        publisher_->publish(*msg);  // publish frame
       }
     }
 }
+
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);

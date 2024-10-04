@@ -19,6 +19,7 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   // Convert the ROS 2 image message to an OpenCV image
   cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image;
  
+
   // Display the image
   cv::imshow("Received Image", frame);
   cv::waitKey(1); // Wait for a key event to allow image display

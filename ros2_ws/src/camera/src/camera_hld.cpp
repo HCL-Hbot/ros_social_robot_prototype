@@ -1,31 +1,33 @@
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/image.hpp>
-#include <cv_bridge/cv_bridge.hpp>
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.hpp>
+#include "camera_hld.hpp"
 
-class CameraSubscriber : public rclcpp::Node {
-public:
-    CameraSubscriber() : Node("camera_subscriber") {
-        subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-            "camera_image", 10, std::bind(&CameraSubscriber::image_callback, this, std::placeholders::_1));
-    }
 
-private:
-    void image_callback(const sensor_msgs::msg::Image::SharedPtr msg) {
-        // Convert the ROS 2 image message to an OpenCV image
-        cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image;
+CameraHLD::CameraHLD(const std::string& node_name) : 
+  rclcpp::Node(node_name),
+  subscription_(create_subscription<sensor_msgs::msg::Image>(
+            "raw_image", 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
+{
+}
 
-        // Display the image
-        cv::imshow("Received Image", frame);
-        cv::waitKey(1); // Wait for a key event to allow image display
-    }
+/*virtual*/ CameraHLD::~CameraHLD()
+{
+}
 
-    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
-};
+void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
+{
+  // Convert the ROS 2 image message to an OpenCV image
+  cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image;
+ 
+  // Display the image
+  cv::imshow("Received Image", frame);
+  cv::waitKey(1); // Wait for a key event to allow image display
+}
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<CameraSubscriber>());
+    rclcpp::spin(std::make_shared<CameraHLD>("camera_hld"));
     rclcpp::shutdown();
     return 0;
 }

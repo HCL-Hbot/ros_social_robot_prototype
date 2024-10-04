@@ -1,42 +1,42 @@
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/image.hpp>
 #include <cv_bridge/cv_bridge.hpp>
-#include <opencv2/opencv.hpp>
+#include "camera_lld.hpp"
 
-class CameraLLD : public rclcpp::Node {
-public:
-    CameraLLD() : Node("camera_publisher") {
-        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("camera_image", 10);
-        timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
-                                         std::bind(&CameraLLD::publish_image, this));
-        cap_.open(0); // Open the default camera (camera index 0)
-        if (!cap_.isOpened()) {
-            RCLCPP_ERROR(this->get_logger(), "Could not open camera");
-        }
-    }
 
-private:
-    void publish_image() {
-        cv::Mat frame;
-        cap_ >> frame; // Capture a frame from the camera
+CameraLLD::CameraLLD(const std::string& node_name) :
+  rclcpp::Node(node_name),
+  publisher_(this->create_publisher<sensor_msgs::msg::Image>("raw_image", 10)),
+  timer_(this->create_wall_timer(std::chrono::milliseconds(100),std::bind(&CameraLLD::publishImage, this))) 
+{
+  cap_.open(0); // Open the default camera (camera index 0)
+  if (!cap_.isOpened()) 
+  {
+    RCLCPP_ERROR(this->get_logger(), "Could not open camera");
+  }
+}
 
-        if (!frame.empty()) {
-            // Convert OpenCV image (cv::Mat) to ROS 2 image message
-            std::shared_ptr<sensor_msgs::msg::Image> msg = cv_bridge::CvImage(
-                std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+/*virtual*/ CameraLLD::~CameraLLD()
+{
+}
 
-            publisher_->publish(*msg);
-        }
-    }
+void CameraLLD::publishImage()
+{
+  cv::Mat frame;
+  cap_ >> frame; // Capture a frame from the camera
 
-    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
-    rclcpp::TimerBase::SharedPtr timer_;
-    cv::VideoCapture cap_;
-};
+  if (!frame.empty())
+  {
+    // Convert OpenCV image (cv::Mat) to ROS 2 image message
+    std::shared_ptr<sensor_msgs::msg::Image> msg = cv_bridge::CvImage(
+        std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+    
+    publisher_->publish(*msg);
+  }
+}
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<CameraLLD>());
+    rclcpp::spin(std::make_shared<CameraLLD>("camera_lld"));
     rclcpp::shutdown();
     return 0;
 }

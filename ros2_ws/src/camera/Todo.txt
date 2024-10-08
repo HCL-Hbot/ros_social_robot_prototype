@@ -1,0 +1,8 @@
+Uitzoeken voor package.xml welke soort van depend gebruiken. Voor nu <depend> dan heb je alles..
+
+In de package.xml van een ROS2-pakket zijn er verschillende typen afhankelijkheden die een specifieke rol spelen:
+
+<build_depend>: Dit gebruik je voor dependencies die nodig zijn om het pakket te bouwen (compileren).
+<exec_depend>: Dit gebruik je voor dependencies die nodig zijn tijdens de uitvoering van het pakket.
+<depend>: Dit gebruik je om dezelfde afhankelijkheid zowel als build_depend en exec_depend te specificeren.
+Het gebruik van <depend> kan nuttig zijn als je afhankelijkheid zowel tijdens het bouwen als tijdens de uitvoering nodig is, omdat het korter is en je niet elke afhankelijkheid dubbel hoeft te vermelden. In de context van ROS2-pakketten kan dit je package.xml compacter maken.

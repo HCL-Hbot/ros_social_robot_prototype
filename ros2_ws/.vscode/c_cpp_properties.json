@@ -6,11 +6,10 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "${workspaceFolder}/**",
+        "/home/agit/ros_social_robot_prototype/ros2_ws/install/camera/include/**",
         "/opt/ros/jazzy/include/**",
         "/home/agit/ros_social_robot_prototype/ros2_ws/src/camera/include/**",
-        "/usr/include/**",
-        "/home/agit/ros_social_robot_prototype/ros2_ws/install/camera/include/**"
+        "/usr/include/**"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",

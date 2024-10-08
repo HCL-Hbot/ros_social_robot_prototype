@@ -17,6 +17,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include "camera/msg/face_info.hpp"
 
 /**
  * @brief High level driver for a camera
@@ -37,8 +38,14 @@ public:
    */
   virtual ~CameraHLD();
 private:
+  
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
-  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
+  
+
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
+  rclcpp::Publisher<camera::msg::FaceInfo>::SharedPtr face_info_pub_;
+
+  //face dector toevoegen
 };
 
 #endif // CAMERA_INCLUDE_CAMERA_CAMERA_HLD_HPP_

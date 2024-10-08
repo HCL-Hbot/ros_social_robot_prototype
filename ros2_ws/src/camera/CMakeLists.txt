@@ -8,9 +8,22 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
+
+set(msg_files
+  "msg/FaceInfo.msg"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+  DEPENDENCIES std_msgs geometry_msgs
+)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(camera_lld src/camera_lld.cpp)
 ament_target_dependencies(camera_lld rclcpp sensor_msgs cv_bridge OpenCV)
@@ -35,6 +48,16 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
   )
 
+rosidl_get_typesupport_target(cpp_typesupport_target
+${PROJECT_NAME} rosidl_typesupport_cpp)
+
+target_link_libraries(camera_hld "${cpp_typesupport_target}")
+
+
+# Install launch files
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

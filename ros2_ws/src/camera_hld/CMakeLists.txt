@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(camera)
+project(camera_hld)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -25,33 +26,24 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 ament_export_dependencies(rosidl_default_runtime)
 
-add_executable(camera_lld src/camera_lld.cpp)
-ament_target_dependencies(camera_lld rclcpp sensor_msgs cv_bridge OpenCV)
+add_executable(camera_hld_node src/main.cpp src/camera_hld.cpp)
 
-add_executable(camera_hld src/camera_hld.cpp)
-ament_target_dependencies(camera_hld rclcpp sensor_msgs cv_bridge OpenCV )
+target_include_directories(camera_hld_node PUBLIC
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
+$<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
-target_include_directories(camera_lld PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/camera>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-
-target_include_directories(camera_hld PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/camera>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-
-target_compile_features(camera_lld PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-target_compile_features(camera_hld PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(camera_hld_node rclcpp sensor_msgs cv_bridge OpenCV )
+target_compile_features(camera_hld_node PUBLIC cxx_std_17)  # Require C99 and C++17
 
 install(TARGETS 
-  camera_lld
-  camera_hld
+  camera_hld_node
   DESTINATION lib/${PROJECT_NAME}
   )
 
 rosidl_get_typesupport_target(cpp_typesupport_target
 ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-target_link_libraries(camera_hld "${cpp_typesupport_target}")
+target_link_libraries(camera_hld_node "${cpp_typesupport_target}")
 
 
 # Install launch files

@@ -7,7 +7,7 @@ CameraHLD::CameraHLD(const std::string& node_name) :
   raw_image_sub_(create_subscription<sensor_msgs::msg::Image>(
             "raw_image", 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
 {
-  face_info_pub_ = this->create_publisher<camera::msg::FaceInfo>("face_info_topic", 10);
+  face_info_pub_ = this->create_publisher<camera_hld::msg::FaceInfo>("face_info_topic", 10);
 }
 
 /*virtual*/ CameraHLD::~CameraHLD()
@@ -23,7 +23,7 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   cv::imshow("Received Image", frame);
   cv::waitKey(1); // Wait for a key event to allow image display
 
-  auto message = camera::msg::FaceInfo();
+  auto message = camera_hld::msg::FaceInfo();
   message.header.stamp = this->get_clock()->now();
   message.header.frame_id = "camera_voor_aanzicht_frame"; //TODO uit configurtie halen.
   message.bounding_box_x = 10;
@@ -39,12 +39,4 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   // Vul andere velden van de message in zoals nodig.
   face_info_pub_->publish(message);
   RCLCPP_INFO(this->get_logger(), "Published FaceInfo");
-}
-
-int main(int argc, char *argv[])
-{
-    rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<CameraHLD>("camera_hld"));
-    rclcpp::shutdown();
-    return 0;
 }

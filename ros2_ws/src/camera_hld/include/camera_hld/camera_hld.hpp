@@ -12,12 +12,12 @@
  * Copyright (c) 2024 Agit - HCL
  */
 
-#ifndef CAMERA_INCLUDE_CAMERA_CAMERA_HLD_HPP_
-#define CAMERA_INCLUDE_CAMERA_CAMERA_HLD_HPP_
+#ifndef CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_
+#define CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
-#include "camera/msg/face_info.hpp"
+#include "camera_hld/msg/face_info.hpp"
 
 /**
  * @brief High level driver for a camera
@@ -43,9 +43,9 @@ private:
   
 
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
-  rclcpp::Publisher<camera::msg::FaceInfo>::SharedPtr face_info_pub_;
+  rclcpp::Publisher<camera_hld::msg::FaceInfo>::SharedPtr face_info_pub_;
 
   //face dector toevoegen
 };
 
-#endif // CAMERA_INCLUDE_CAMERA_CAMERA_HLD_HPP_
+#endif // CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_

@@ -7,7 +7,10 @@ CameraHLD::CameraHLD(const std::string& node_name) :
   raw_image_sub_(create_subscription<sensor_msgs::msg::Image>(
             "raw_image", 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
 {
+
   face_info_pub_ = this->create_publisher<camera_hld::msg::FaceInfo>("face_info_topic", 10);
+  RCLCPP_INFO(this->get_logger(), "Starting CameraHLD with node name: %s", node_name.c_str());
+
 }
 
 /*virtual*/ CameraHLD::~CameraHLD()

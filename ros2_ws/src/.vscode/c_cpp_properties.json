@@ -6,11 +6,11 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "${workspaceFolder}/**",
         "/opt/ros/jazzy/include/**",
-        "/home/agit/ros_social_robot_prototype/ros2_ws/src/camera/include/**",
         "/usr/include/**",
-        "/home/agit/ros_social_robot_prototype/ros2_ws/install/camera/include/**"
+        "/home/agit/ros_social_robot_prototype/ros2_ws/src/camera_hld/include/**",
+        "/home/agit/ros_social_robot_prototype/ros2_ws/install/camera_hld/include/**",
+        "/home/agit/ros_social_robot_prototype/ros2_ws/src/camera_lld/include/**"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",

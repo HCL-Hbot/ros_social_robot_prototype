@@ -2,15 +2,20 @@
 #include <cv_bridge/cv_bridge.hpp>
 #include "camera_hld.hpp"
 
-CameraHLD::CameraHLD(const std::string& node_name) : 
-  rclcpp::Node(node_name),
+CameraHLD::CameraHLD() : 
+  rclcpp::Node("camera_hld"),
   raw_image_sub_(create_subscription<sensor_msgs::msg::Image>(
             "raw_image", 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
 {
+  tf_frame_id_ = this->declare_parameter<std::string>("tf_frame_id", "");
+  if(tf_frame_id_== "")
+  {
+    RCLCPP_WARN(this->get_logger(), "Parameter 'tf_frame_id' is not configured for the node '%s'. Node will be aborted.",this->get_name());
+    rclcpp::shutdown();
+  }
 
   face_info_pub_ = this->create_publisher<camera_hld::msg::FaceInfo>("face_info_topic", 10);
-  RCLCPP_INFO(this->get_logger(), "Starting CameraHLD with node name: %s", node_name.c_str());
-
+  RCLCPP_INFO(this->get_logger(), "Starting CameraHLD with node name '%s' and frame_id '%s' ", this->get_name(), tf_frame_id_.c_str());
 }
 
 /*virtual*/ CameraHLD::~CameraHLD()
@@ -28,7 +33,7 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 
   auto message = camera_hld::msg::FaceInfo();
   message.header.stamp = this->get_clock()->now();
-  message.header.frame_id = "camera_voor_aanzicht_frame"; //TODO uit configurtie halen.
+  message.header.frame_id = tf_frame_id_;
   message.bounding_box_x = 10;
   message.bounding_box_y = 20;
   message.bounding_box_width = 100;
@@ -39,7 +44,6 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   message.orientation.z = 0;
   message.orientation.w = 0;
   
-  // Vul andere velden van de message in zoals nodig.
   face_info_pub_->publish(message);
   RCLCPP_INFO(this->get_logger(), "Published FaceInfo");
 }

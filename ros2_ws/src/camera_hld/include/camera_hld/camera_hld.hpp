@@ -22,30 +22,35 @@
 /**
  * @brief High level driver for a camera
  * This class will detect a face from a image and publish it coordintes to a topic.
+ * 
+ * The following parameters are configurable via 
+ * @param node_name The name for this node, default value is "camera_hld"
+ * @param frame_id The frame id name for this publishing node (ex. "camera_vooraanzicht_linker_oog")
+ * 
+ * @example The following example shows how to 
+ *          "ros2 run camera_hld camera_hld_node --ros-args --remap __node:=new_node_name -p frame_id:=camera_link"
+ * 
+ * @see See the SDD documentation how to configure the above parameters (via "/parameters_events")
  */
 class CameraHLD : public rclcpp::Node
 {
 public:
   /**
    * @brief Construct a new Camera HLD object
-   * 
-   * @param node_name Name of the high level driver node.
    */
-  CameraHLD(const std::string& node_name);
+  CameraHLD();
 
   /**
    * @brief Destroy the Camera HLD object
    */
   virtual ~CameraHLD();
+
 private:
-  
   void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
-  
 
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
   rclcpp::Publisher<camera_hld::msg::FaceInfo>::SharedPtr face_info_pub_;
-
-  //face dector toevoegen
+  std::string tf_frame_id_;
 };
 
 #endif // CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_

@@ -5,47 +5,27 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
 
-    launch_arguments = [
-        DeclareLaunchArgument(
-            'node_name',
-            default_value='default_camera_node',
-            description='Name of the camera node'
-        ),
-        # DeclareLaunchArgument(
-        #     'usb_port',
-        #     default_value='/dev/video0',
-        #     description='USB port for the camera'
-        # ),
-        DeclareLaunchArgument(
-            'frame_id',
-            default_value='camera_frame',
-            description='Frame ID for the camera data'
-        )
-    ]
-
-    # Node configuratie
-    # camera_lld_node = Node(
-    #     package='camera_lld',
-    #     executable='camera_lld_node',
-    #     name=LaunchConfiguration('node_name'),
-    #     output='screen',
-    #     parameters=[{
-    #         'node_name': LaunchConfiguration('node_name'),
-    #         'usb_port': LaunchConfiguration('usb_port')
-    #     }]
-    # )
-
-    camera_hld_node = Node(
-        package='camera_hld',
-        executable='camera_hld_node',
-        name=LaunchConfiguration('node_name'),
+    camera_lld_node_front_view = Node(
+        package='camera_lld',
+        executable='camera_lld_node',
+        name='camera_lld_camera_front_view',  #Node name (with package name as prefix)
         output='screen',
         parameters=[{
-            'node_name': LaunchConfiguration('node_name'),
-            'frame_id': LaunchConfiguration('frame_id')
+            'usb_port': '/dev/ttyUSB0'
         }]
     )
 
-    return LaunchDescription(launch_arguments + [camera_hld_node])
+    camera_hld_node_front_view = Node(
+        package='camera_hld',
+        executable='camera_hld_node',
+        name='camera_hld_camera_front_view',  #Node name (with package name as prefix)
+        output='screen', #Log to terminal
+        parameters=[{
+            'tf_frame_id': 'camera_frame'  # Configurable parameters for this node <param name> : <value>
+        }]
+    )
 
-    #return LaunchDescription(launch_arguments + [camera_lld_node, camera_hld_node])
+    return LaunchDescription([
+        camera_lld_node_front_view,
+        camera_hld_node_front_view
+        ])

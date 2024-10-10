@@ -45,7 +45,6 @@ ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 target_link_libraries(camera_hld_node "${cpp_typesupport_target}")
 
-
 # Install launch files
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/

@@ -39,16 +39,12 @@ public:
   
 private:
   /**
-   * @brief Init function to load parameters 
-   */
-  bool init();
-
-  /**
    * @brief capture a frame from the camera and publish it to a topic.
    */
   void captureAndPublish();
   
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr raw_image_pub_;
+  std::string camera_device_location_; //where can we the camera
   std::thread camera_thread_;
 };
 

@@ -11,7 +11,7 @@ def generate_launch_description():
         name='camera_lld_camera_front_view',  #Node name (with package name as prefix)
         output='screen',
         parameters=[{
-            'usb_port': '/dev/ttyUSB0'
+            'camera_device_location': '/dev/video0'
         }]
     )
 

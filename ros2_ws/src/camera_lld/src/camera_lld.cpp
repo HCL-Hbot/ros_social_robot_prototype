@@ -4,21 +4,17 @@
 
 constexpr const char* DEFAULT_NODE_NAME = "camera_lld_node";
 constexpr const char* DEFAULT_TOPIC_NAME = "raw_image";
+constexpr const char* DEFAULT_CAMERA = "/dev/video0";
+constexpr const char* CAMERA_PARAMETER = "camera_device_location";
 
 CameraLLD::CameraLLD() :
   rclcpp::Node(DEFAULT_NODE_NAME),
-  raw_image_pub_(this->create_publisher<sensor_msgs::msg::Image>(DEFAULT_TOPIC_NAME, 10))
-  //camera_thread_(std::thread(std::bind(&CameraLLD::captureAndPublish,this)))
+  raw_image_pub_(this->create_publisher<sensor_msgs::msg::Image>(DEFAULT_TOPIC_NAME, 10)),
+  camera_device_location_(DEFAULT_CAMERA)
 {
-  if(init())
-  {
-    camera_thread_= std::thread(std::bind(&CameraLLD::captureAndPublish,this));
-  }
-  else
-  {
-    RCLCPP_ERROR(this->get_logger(), "All parameters not configured for the node '%s'. Node will be aborted.",this->get_name());
-    rclcpp::shutdown();
-  }
+  camera_device_location_ = this->declare_parameter<std::string>(CAMERA_PARAMETER, DEFAULT_CAMERA);
+  RCLCPP_INFO(this->get_logger(), "Node '%s' will use camera '%s' ",this->get_name(),camera_device_location_.c_str());
+  camera_thread_= std::thread(std::bind(&CameraLLD::captureAndPublish,this));
 }
 
 /*virtual*/ CameraLLD::~CameraLLD()
@@ -29,19 +25,14 @@ CameraLLD::CameraLLD() :
   }
 }
 
-bool CameraLLD::init()
-{
-  bool init_result = true;
-  return init_result;
-}
-
 void CameraLLD::captureAndPublish()
 {
-    cv::VideoCapture cap(0);  // Open any camera
+    cv::VideoCapture cap(camera_device_location_);
+
     if (!cap.isOpened())
     {
       RCLCPP_ERROR(this->get_logger(), "Failed to open camera.");
-      return;
+      rclcpp::shutdown();
     }
 
     std_msgs::msg::Header header;

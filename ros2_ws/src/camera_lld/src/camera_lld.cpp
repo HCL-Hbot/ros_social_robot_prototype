@@ -3,13 +3,13 @@
 #include "camera_lld.hpp"
 
 constexpr const char* DEFAULT_NODE_NAME = "camera_lld_node";
-constexpr const char* DEFAULT_TOPIC_NAME = "raw_image";
+constexpr const char* DEFAULT_TOPIC_NAME_SUB = "raw_image";
 constexpr const char* DEFAULT_CAMERA = "/dev/video0";
 constexpr const char* CAMERA_PARAMETER = "camera_device_location";
 
 CameraLLD::CameraLLD() :
   rclcpp::Node(DEFAULT_NODE_NAME),
-  raw_image_pub_(this->create_publisher<sensor_msgs::msg::Image>(DEFAULT_TOPIC_NAME, 10)),
+  raw_image_pub_(this->create_publisher<sensor_msgs::msg::Image>(DEFAULT_TOPIC_NAME_SUB, 10)),
   camera_device_location_(DEFAULT_CAMERA)
 {
   camera_device_location_ = this->declare_parameter<std::string>(CAMERA_PARAMETER, DEFAULT_CAMERA);

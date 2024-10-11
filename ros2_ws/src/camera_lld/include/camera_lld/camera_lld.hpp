@@ -29,10 +29,8 @@ class CameraLLD : public rclcpp::Node
 public:
   /**
   * @brief Construct a new Camera LLD object
-  * 
-  * @param node_name Name of the low level driver node.
   */
-  CameraLLD(const std::string& node_name);
+  CameraLLD();
 
   /**
    * @brief Destroy the Camera LLD object
@@ -40,13 +38,17 @@ public:
   virtual ~CameraLLD();
   
 private:
+  /**
+   * @brief Init function to load parameters 
+   */
+  bool init();
 
   /**
    * @brief capture a frame from the camera and publish it to a topic.
    */
   void captureAndPublish();
   
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr raw_image_pub_;
   std::thread camera_thread_;
 };
 

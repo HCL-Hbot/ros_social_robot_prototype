@@ -5,9 +5,7 @@
 constexpr const char* DEFAULT_NODE_NAME = "camera_hld_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB = "raw_image";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB = "face_info";
-
 constexpr const char* TF_CAMERA_FRAME_ID_PARAMETER = "tf_frame_id";
-
 constexpr const char* DEFAULT_TF_CAMERA_FRAME_ID = "camera";
 
 CameraHLD::CameraHLD() : 
@@ -32,11 +30,9 @@ CameraHLD::CameraHLD() :
 void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
   // Convert the ROS 2 image message to an OpenCV image
-  cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image;
+  cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image; //Maybe change to toCVCopy. Let's see when we do real image processing..
  
-  // Display the image
-  cv::imshow("Received Image frame id: " + tf_frame_id_, frame);
-  cv::waitKey(1); // Wait for a key event to allow image display
+  if(frame.empty()) return; // no need to to processing on empty image.
 
   auto message = camera_hld::msg::FaceInfo();
   message.header.stamp = msg->header.stamp;

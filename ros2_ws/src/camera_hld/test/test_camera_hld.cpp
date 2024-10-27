@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
-// #include <rclcpp/rclcpp.hpp>
-// #include <sensor_msgs/msg/image.hpp>
-// #include <camera_hld/msg/face_info.hpp>
-// #include <cv_bridge/cv_bridge.hpp>
-// #include <opencv2/opencv.hpp>
-// #include "camera_hld/camera_hld.hpp" 
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <camera_hld/msg/face_info.hpp>
+#include <cv_bridge/cv_bridge.hpp>
+#include <opencv2/opencv.hpp>
 #include "camera_hld.hpp"
 
 class CameraHLDTest : public ::testing::Test
@@ -17,10 +16,17 @@ protected:
   camera_hld::msg::FaceInfo received_msg_;
   bool msg_received_;
 
+  // Niet-gebruikte pointer die niet wordt verwijderd (Memory leak) Express ingezet voor cppcheck...
+  int* unused_ptr;
+
   void SetUp() override
   {
-    // Initialize ROS 2
-    rclcpp::init(0, nullptr);
+    // Ongebruikte variabele die nooit wordt gebruikt
+    int unused_variable;
+
+    // Niet-geïnitialiseerde variabele die wordt gebruikt
+    int uninitialized_var; // cppcheck zou hier een waarschuwing moeten geven
+    RCLCPP_INFO(rclcpp::get_logger("test"), "Value: %d", uninitialized_var); // Verkeerd gebruik
 
     // Creëer een node voor de test
     test_node_ = std::make_shared<rclcpp::Node>("camera_hld_test_node");
@@ -37,11 +43,9 @@ protected:
       });
 
     msg_received_ = false;
-  }
 
-  void TearDown() override
-  {
-    rclcpp::shutdown();
+    // Fout: pointer wordt niet verwijderd, wat tot een geheugenlek leidt express ingezet voor cppcheck
+    unused_ptr = new int(5);
   }
 
   // Helper functie om een testafbeelding te maken
@@ -59,7 +63,7 @@ protected:
 TEST_F(CameraHLDTest, NodeInitializationTest)
 {
   auto camera_hld_node = std::make_shared<CameraHLD>();
-  EXPECT_EQ(camera_hld_node->get_name(), "camera_hld_node");
+  EXPECT_STREQ(camera_hld_node->get_name(), "camera_hld_node");
 }
 
 // Test de functionaliteit van de pub-sub

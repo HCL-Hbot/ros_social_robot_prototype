@@ -62,9 +62,9 @@ if(BUILD_TESTING)
   # Handmatige aanroep van cppcheck met aangepaste opties
   add_custom_target(run_cppcheck ALL
     COMMAND cppcheck --enable=all --force --inline-suppr --std=c++17 --suppress=missingIncludeSystem -I ${CMAKE_SOURCE_DIR}/include 
-    ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Running cppcheck with C++17"
+    COMMENT "Running cppcheck with C++17 (handmatig)"
   )
 
   # Disable all linters except cppcheck (from ament_lint_auto). Will use the linters later in the project.. low priority..
@@ -81,14 +81,16 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies() # enable ament_lint_auto
 
   # Voeg de test executable toe
-  ament_add_gtest(${PROJECT_NAME}_test test/test_camera_hld.cpp)
+  ament_add_gtest(${PROJECT_NAME}_test test/test_camera_hld.cpp src/camera_hld.cpp)
 
   target_include_directories(${PROJECT_NAME}_test PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   )
 
-  #target_link_libraries(${PROJECT_NAME}_test rclcpp sensor_msgs cv_bridge OpenCV)
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp sensor_msgs cv_bridge OpenCV )
+
+  target_link_libraries(${PROJECT_NAME}_test "${cpp_typesupport_target}")  
 
 endif()
 

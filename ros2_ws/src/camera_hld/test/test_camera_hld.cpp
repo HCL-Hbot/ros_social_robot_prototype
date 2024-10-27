@@ -17,16 +17,16 @@ protected:
   bool msg_received_;
 
   // Niet-gebruikte pointer die niet wordt verwijderd (Memory leak) Express ingezet voor cppcheck...
-  int* unused_ptr;
+  //int* unused_ptr;
 
   void SetUp() override
   {
     // Ongebruikte variabele die nooit wordt gebruikt
-    int unused_variable;
+    //int unused_variable;
 
     // Niet-geïnitialiseerde variabele die wordt gebruikt
-    int uninitialized_var; // cppcheck zou hier een waarschuwing moeten geven
-    RCLCPP_INFO(rclcpp::get_logger("test"), "Value: %d", uninitialized_var); // Verkeerd gebruik
+    //int uninitialized_var; // cppcheck zou hier een waarschuwing moeten geven
+    //RCLCPP_INFO(rclcpp::get_logger("test"), "Value: %d", uninitialized_var); // Verkeerd gebruik
 
     // Creëer een node voor de test
     test_node_ = std::make_shared<rclcpp::Node>("camera_hld_test_node");
@@ -45,7 +45,7 @@ protected:
     msg_received_ = false;
 
     // Fout: pointer wordt niet verwijderd, wat tot een geheugenlek leidt express ingezet voor cppcheck
-    unused_ptr = new int(5);
+    //unused_ptr = new int(5);
   }
 
   // Helper functie om een testafbeelding te maken

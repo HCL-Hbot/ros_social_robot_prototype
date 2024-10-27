@@ -60,12 +60,12 @@ if(BUILD_TESTING)
 
 
   # Handmatige aanroep van cppcheck met aangepaste opties
-  add_custom_target(run_cppcheck ALL
-    COMMAND cppcheck --enable=all --force --inline-suppr --std=c++17 --suppress=missingIncludeSystem -I ${CMAKE_SOURCE_DIR}/include 
-    ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Running cppcheck with C++17 (handmatig)"
-  )
+  #add_custom_target(run_cppcheck ALL
+  #  COMMAND cppcheck --enable=all --force --inline-suppr --std=c++17 --suppress=missingIncludeSystem -I ${CMAKE_SOURCE_DIR}/include 
+  #  ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test
+  #  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #  COMMENT "Running cppcheck with C++17 (handmatig)"
+  #)
 
   # Disable all linters except cppcheck (from ament_lint_auto). Will use the linters later in the project.. low priority..
   set(ament_cmake_cpplint_FOUND TRUE)     # Skip cpplint

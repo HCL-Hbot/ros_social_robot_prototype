@@ -7,14 +7,17 @@
       },
       "includePath": [
         "/opt/ros/jazzy/include/**",
-        "/home/agit/ros_social_robot_prototype/ros2_ws/src/camera/include/**",
-        "/usr/include/**"
+        "/usr/include/**",
+        "${workspaceFolder}/src/**",
+        "${workspaceFolder}/install/**",
+        "${workspaceFolder}/install/camera_hld/include/**",
+        "${workspaceFolder}/build/**"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",
       "compilerPath": "/usr/bin/gcc",
       "cStandard": "gnu11",
-      "cppStandard": "c++14"
+      "cppStandard": "c++17"
     }
   ],
   "version": 4

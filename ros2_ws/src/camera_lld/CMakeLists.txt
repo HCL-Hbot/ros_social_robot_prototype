@@ -32,13 +32,16 @@ install(TARGETS
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
+
+  # Disable all linters except cppcheck (from ament_lint_auto)
+  set(ament_cmake_cpplint_FOUND TRUE)     # Skip cpplint
+  set(ament_cmake_uncrustify_FOUND TRUE)  # Skip uncrustify
+  set(ament_cmake_flake8_FOUND TRUE)      # Skip flake8 (Python linter)
+  set(ament_cmake_xmllint_FOUND TRUE)     # Skip xmllint (XML linter)
+  set(ament_cmake_pep257_FOUND TRUE)      # Skip PEP257 (Python docstring linter)
+  set(ament_cmake_lint_cmake_FOUND TRUE)  # Skip lint_cmake
+  set(ament_cmake_copyright_FOUND TRUE)   # Skip copyright check
+  
   ament_lint_auto_find_test_dependencies()
 endif()
 

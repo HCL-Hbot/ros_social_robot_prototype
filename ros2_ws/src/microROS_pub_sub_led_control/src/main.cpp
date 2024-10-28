@@ -7,9 +7,23 @@
 
 #include <std_msgs/msg/int32.h>
 
-#if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
-#error This example is only avaliable for Arduino framework with serial transport.
+// #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
+// #error This example is only avaliable for Arduino framework with serial transport.
+// #endif
+
+#ifdef MICRO_ROS_TRANSPORT_ARDUINO_WIFI
+#include <WiFi.h>  // WiFi-bibliotheek voor ESP32 (WPA2-Personal)
+
+
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
+IPAddress agent_ip = IPAddress().fromString(AGENT_IP);
+const uint16_t agent_port = AGENT_PORT;
+
 #endif
+
+#define RED_LED_PIN 3
+#define YELLOW_LED_PIN 4
 
 rcl_publisher_t publisher;
 std_msgs__msg__Int32 msg;
@@ -24,13 +38,15 @@ rcl_timer_t timer;
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
 // Error handle loop
-void error_loop() {
+void error_loop()
+{
   while(1) {
     delay(100);
   }
 }
 
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
+void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
+{
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
     RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
@@ -38,11 +54,26 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
   }
 }
 
-void setup() {
-  // Configure serial transport
-  Serial.begin(115200);
+void setup()
+{
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+#ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
+  Serial.begin(SERIAL_BAUDRATE);
   set_microros_serial_transports(Serial);
   delay(2000);
+#elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
+  IPAddress agent_ip(10, 42, 0, 1);
+
+  size_t agent_port = 8888;
+
+  digitalWrite(RED_LED_PIN, HIGH);
+
+  set_microros_wifi_transports((char*) ssid, (char*) password, agent_ip, agent_port);
+  
+  digitalWrite(YELLOW_LED_PIN, HIGH);
+
+#endif
 
   allocator = rcl_get_default_allocator();
 
@@ -75,7 +106,8 @@ void setup() {
   msg.data = 0;
 }
 
-void loop() {
+void loop()
+{
   delay(100);
   RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
 }

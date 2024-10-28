@@ -148,6 +148,27 @@ Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to a
 
 
 # Brief Steps for micro-ros agent setups
+For now brief description
+
 sudo apt install python3-rosdep
 sudo rosdep init
 rosdep update && rosdep install --from-paths src --ignore-src -y
+
+
+# Steps to run micro-ros node succsfully
+For now brief description
+
+1. Stop micro-ros agent (especfilly if it uses the serial port, because this occupies the port and there for we can't flash!)
+2. flash firmware to mcu
+3. Start micro-ros agent
+4. Press the reboot button of MCU.
+
+Now we can see node and topic's from the MCU.
+
+
+# Micro-ros pub_sub_led_control
+
+Some parameters for this node can be configured compile time. The parameters can be found in config_example.ini. 
+To use the parameters: Create a file "config.ini" with the same contents of config_example.ini. config.ini will always be used and not be pushed to git, this way your configruation will stay private :).
+
+When building this node the parameters will be automatically loaded with the pythonscript "load_config.py". The configuration file config.ini will always be used.

@@ -14,7 +14,7 @@
 
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
-IPAddress agent_ip = IPAddress().fromString(AGENT_IP);
+IPAddress agent_ip;
 const uint16_t agent_port = AGENT_PORT;
 
 #endif
@@ -34,10 +34,11 @@ rcl_timer_t timer;
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-// Error handle loop
+// Error handle loop, prefents for now that the esp won't reboot
 void error_loop()
 {
-  while(1) {
+  while(1)
+  {
     delay(100);
   }
 }
@@ -60,12 +61,11 @@ void setup()
   set_microros_serial_transports(Serial);
   delay(2000);
 #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
-  IPAddress agent_ip(10, 42, 0, 1);
-
-  size_t agent_port = 8888;
 
   digitalWrite(RED_LED_PIN, HIGH);
-
+  
+  agent_ip.fromString(AGENT_IP);
+  
   set_microros_wifi_transports((char*) ssid, (char*) password, agent_ip, agent_port);
   
   digitalWrite(YELLOW_LED_PIN, HIGH);
@@ -74,7 +74,7 @@ void setup()
 
   allocator = rcl_get_default_allocator();
 
-  //create init_options
+  //create init_options (micro ros agent must be on or else we will be stuck forever)
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
   // create node

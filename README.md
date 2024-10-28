@@ -143,3 +143,11 @@ Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to a
 ```bash
   SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", GROUP="“dialout”", MODE="0666"
 ```
+
+
+
+
+
+sudo apt install python3-rosdep
+sudo rosdep init
+rosdep update && rosdep install --from-paths src --ignore-src -y

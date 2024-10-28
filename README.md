@@ -147,7 +147,7 @@ Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to a
 
 
 
-
+# Brief Steps for micro-ros agent setups
 sudo apt install python3-rosdep
 sudo rosdep init
 rosdep update && rosdep install --from-paths src --ignore-src -y

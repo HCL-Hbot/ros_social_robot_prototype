@@ -7,12 +7,9 @@
 
 #include <std_msgs/msg/int32.h>
 
-// #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
-// #error This example is only avaliable for Arduino framework with serial transport.
-// #endif
 
 #ifdef MICRO_ROS_TRANSPORT_ARDUINO_WIFI
-#include <WiFi.h>  // WiFi-bibliotheek voor ESP32 (WPA2-Personal)
+#include <WiFi.h>  // (Supports only WPA2-Personal)
 
 
 const char* ssid = WIFI_SSID;

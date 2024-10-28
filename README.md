@@ -101,9 +101,9 @@ You will need to log out and log back in again (or reboot) for the user group ch
 
 # Platform IO setup for ubuntu
 
-step 1 : sudo apt install -y git cmake python3-pip
-step 2 : sudo apt install python3-venv
-step 3 : install the platform io extension: search this in the extension bar in VSstudio code (ctrl+P) -> "ext install platformio.platformio-ide"    
+1. sudo apt install -y git cmake python3-pip
+2. sudo apt install python3-venv
+3. install the platform io extension: search this in the extension bar in VSstudio code (ctrl+P) -> "ext install platformio.platformio-ide"    
 
 **NOTE** **&#9432;**
 To be able to flash to a MCU from platform IO, we need read and write access to the serial port. 

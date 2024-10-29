@@ -56,8 +56,10 @@ void led_control_callback(const void *req, void *res)
     }
 
     response->success = true;
-    //response->message.data = (char *)malloc(25 * sizeof(char));
-    //strcpy(response->message.data, (request->data) ? "Red LED turned on" : "Red LED turned off");
+
+    strcpy(response->message.data, (request->data) ? "Red LED turned on" : "Red LED turned off");
+    response->message.size = strlen(response->message.data);
+
 }
 
 // Callback for the LED status publisher timer
@@ -78,6 +80,13 @@ void setup()
     pinMode(YELLOW_LED_PIN, OUTPUT);
     digitalWrite(RED_LED_PIN, LOW);
     digitalWrite(YELLOW_LED_PIN, LOW);
+
+    //init msg size
+    led_response_msg.message.capacity = 20;
+    led_response_msg.message.data = (char*) malloc(led_response_msg.message.capacity * sizeof(char));
+    led_response_msg.message.size = 0;
+    //strcpy(led_response_msg.message.data, "Hello World");
+    //led_response_msg.message.size = strlen(led_response_msg.message.data);
 
     // Initialize serial or WiFi transport
 #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL

@@ -56,8 +56,8 @@ void led_control_callback(const void *req, void *res)
     }
 
     response->success = true;
-    response->message.data = (char *)malloc(25 * sizeof(char));
-    strcpy(response->message.data, (request->data) ? "Red LED turned on" : "Red LED turned off");
+    //response->message.data = (char *)malloc(25 * sizeof(char));
+    //strcpy(response->message.data, (request->data) ? "Red LED turned on" : "Red LED turned off");
 }
 
 // Callback for the LED status publisher timer

@@ -144,9 +144,6 @@ Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to a
   SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", GROUP="“dialout”", MODE="0666"
 ```
 
-
-
-
 # Brief Steps for micro-ros agent setups
 For now brief description
 
@@ -172,3 +169,81 @@ Some parameters for this node can be configured compile time. The parameters can
 To use the parameters: Create a file "config.ini" with the same contents of config_example.ini. config.ini will always be used and not be pushed to git, this way your configruation will stay private :).
 
 When building this node the parameters will be automatically loaded with the pythonscript "load_config.py". The configuration file config.ini will always be used.
+
+
+# Adding Custom messages types or Custom micro-ROS packages (to micro_ros_platformio)
+Whenever a new colcon package is added the platformio project should then be build from scratch.
+This can be done with the following steps:
+1. Remove the .pio directory 
+2. Build the project with PlatformIO:Build, see image below with which icon.
+
+![alt text](platformio_build.png)
+
+Colcon packages can be added to the build process using one of the methods:
+
+### Method 1 Copy package
+Package directories copied on the `<Project_directory>/extra_packages` folder.
+
+Example abstract:
+```bash
+cp -r /path/to/your/ros_package /path/to/platformio_project/extra_packages/
+```
+
+Example in my case:
+```bash
+cd ~/ros_social_robot_prototype/ros2_ws/src #Go to the src directory of the ros2_ws 
+cp -r my_custom_led_interface/ microROS_pub_sub_led_control/extra_packages/ #Copy the package.
+```
+
+### Method 2 Include external git repro (github example)
+Git repositories included on the `<Project_directory>/extra_packages/extra_packages.repos` yaml file.
+
+Example in my case (let's say we want to use example_interface package from ros2)
+
+```bash
+cd /path/to/platformio_project/ #Go to your platform io project (navigate to the root directory)
+mkdir extra_packages #If you don't have a extra_packages directory in the root of the platform io project, create one.
+cd extra_packages
+nano extra_packages.repos #Create a .repos file (content: Yaml)
+```
+Add the following content in the extra_packages.repos:
+```yaml
+repositories:
+  example_interfaces:
+    type: git
+    url: https://github.com/ros2/example_interfaces
+    version: jazzy
+```
+
+With this setup platformio will download (using vcstool internally) the package using git.
+
+### Method 3 Include internal git repro (experimantal)
+It is possible that the package we want use is not aviable on the internet and is package we have created our own.
+Instead of copying using method 1. We could use git to pull from a local directory. 
+
+To be able to do this the target package must be a local repository.
+The example below shows how we create a local repository 
+```bash
+cd ~/ros_social_robot_prototype/ros2_ws/src/my_custom_led_interface
+git init #Create (local) git repository
+git add . #Add current package
+git commit -m "A commit message needed to publish the package to the local repro"
+```
+
+Create .repos file in the extra_packages directory if this is not done:
+```bash
+cd /path/to/platformio_project/ #Go to your platform io project (navigate to the root directory)
+mkdir extra_packages #If you don't have a extra_packages directory in the root of the platform io project, create one.
+cd extra_packages
+nano extra_packages.repos #Create a .repos file (Content: Yaml)
+```
+
+Add the following content in the extra_packages.repos:
+```yaml
+repositories:
+  my_custom_led_interface:
+    type: git
+    url: file:///home/hcl/ros_social_robot_prototype/ros2_ws/src/my_custom_led_interface
+    version: master
+```
+**NOTE** **&#9432;** Method 3 requires that each package need to have a local git repro. This could be improved by having every package in one local git repro, or having script which does the manual process. For now we create git repro manually for each desired package, due to the time constraint of the current project.

@@ -14,9 +14,8 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}} 
 
-// Node, Publisher, and Service Handles
+// Node and Service Handles
 rcl_node_t node;
-rcl_publisher_t led_status_publisher;
 rcl_service_t led_control_service;
 rcl_timer_t led_status_timer;
 rclc_executor_t executor;

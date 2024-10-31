@@ -3,12 +3,8 @@
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
-#include <std_srvs/srv/set_bool.h>
-#include <std_msgs/msg/bool.h>
-
-//#include <example_interfaces/srv/add_two_ints.h>
-//#include <my_custom_message/msg/my_custom_message.h>
-
+//#include <std_msgs/msg/string.h>
+//#include <std_msgs/msg/int32.h>
 #include <my_custom_led_interface/srv/my_custom_led_control.h>
 
 // Define pins for red and yellow LEDs
@@ -27,9 +23,12 @@ rcl_timer_t led_status_timer;
 rclc_executor_t executor;
 
 // Request and Response message allocations
-std_srvs__srv__SetBool_Request led_request_msg;
-std_srvs__srv__SetBool_Response led_response_msg;
+my_custom_led_interface__srv__MyCustomLedControl_Request led_request_msg;
+my_custom_led_interface__srv__MyCustomLedControl_Response led_response_msg;
 
+//publish msgs
+//std_msgs__msg__String led_pub_msg;
+//std_msgs__msg__Int32 msg;
 
 // Status variables for the LEDs
 bool red_led_status = false;
@@ -47,37 +46,46 @@ void error_loop()
 // Callback function for LED control service
 void led_control_callback(const void *req, void *res)
 {
-    const std_srvs__srv__SetBool_Request *request = (const std_srvs__srv__SetBool_Request *)req;
-    std_srvs__srv__SetBool_Response *response = (std_srvs__srv__SetBool_Response *)res;
-
-    if (request->data)
-    {
-        digitalWrite(RED_LED_PIN, HIGH);
-        red_led_status = true;
-    } 
-    else
-    {
-        digitalWrite(RED_LED_PIN, LOW);
-        red_led_status = false;
-    }
+    const my_custom_led_interface__srv__MyCustomLedControl_Request *request = (const my_custom_led_interface__srv__MyCustomLedControl_Request *)req;
+    my_custom_led_interface__srv__MyCustomLedControl_Response *response = (my_custom_led_interface__srv__MyCustomLedControl_Response *)res;
 
     response->success = true;
 
-    strcpy(response->message.data, (request->data) ? "Red LED turned on" : "Red LED turned off");
-    response->message.size = strlen(response->message.data);
+    if (request->led_color == 1)
+    {
+        digitalWrite(RED_LED_PIN, request->led_on);
+        red_led_status = request->led_on;
+        strcpy(response->message.data, (red_led_status) ? "Red LED turned on" : "Red LED turned off");
+    }
+    else if (request->led_color == 2)
+    {
+        digitalWrite(YELLOW_LED_PIN, request->led_on);
+        yellow_led_status = request->led_on;
+        strcpy(response->message.data, (yellow_led_status) ? "Yellow LED turned on" : "Yellow LED turned off");
+    }
+    else
+    {
+        response->success = false;
+        strcpy(response->message.data, "Invalid request");
+    }  
 
+    response->message.size = strlen(response->message.data);
 }
 
 // Callback for the LED status publisher timer
-void led_status_publish_callback(rcl_timer_t *timer, int64_t last_call_time)
-{
-    if (timer != NULL)
-    {
-        std_msgs__msg__Bool msg;
-        msg.data = red_led_status;
-        RCSOFTCHECK(rcl_publish(&led_status_publisher, &msg, NULL));
-    }
-}
+// void led_status_publish_callback(rcl_timer_t *timer, int64_t last_call_time)
+// {
+//     if (timer != NULL)
+//     {
+//         RCSOFTCHECK(rcl_publish(&led_status_publisher, &msg, NULL));
+//         msg.data++;
+//         // char buffer[50];
+//         // sprintf(buffer, "Red LED is %s and Yellow LED is %s" , (red_led_status) ? "On" : "Off",  (yellow_led_status) ? "On" : "Off" );
+//         // strcpy(led_pub_msg.data.data, buffer);
+//         // led_pub_msg.data.size = strlen(led_pub_msg.data.data);
+//         // RCSOFTCHECK(rcl_publish(&led_status_publisher, &led_pub_msg, NULL));
+//     }
+// }
 
 void setup()
 {
@@ -87,12 +95,15 @@ void setup()
     digitalWrite(RED_LED_PIN, LOW);
     digitalWrite(YELLOW_LED_PIN, LOW);
 
-    //init msg size
-    led_response_msg.message.capacity = 20;
+    //init msg sizes
+    led_response_msg.message.capacity = 25;
     led_response_msg.message.data = (char*) malloc(led_response_msg.message.capacity * sizeof(char));
     led_response_msg.message.size = 0;
-    //strcpy(led_response_msg.message.data, "Hello World");
-    //led_response_msg.message.size = strlen(led_response_msg.message.data);
+
+    // led_pub_msg.data.capacity = 50;
+    // led_pub_msg.data.data = (char*) malloc(led_pub_msg.data.capacity * sizeof(char));
+    // led_pub_msg.data.size = 0;
+    // msg.data = 0;
 
     // Initialize serial or WiFi transport
 #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
@@ -123,14 +134,20 @@ void setup()
     // RCCHECK(rclc_publisher_init_default(
     //     &led_status_publisher,
     //     &node,
-    //     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+    //     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
     //     "led_status"));
 
-    // Initialize service
+    // RCCHECK(rclc_publisher_init_default(
+    //     &led_status_publisher,
+    //     &node,
+    //     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+    //     "led_status"));
+
+    //Initialize service
     RCCHECK(rclc_service_init_default(
         &led_control_service,
         &node,
-        ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool),
+        ROSIDL_GET_SRV_TYPE_SUPPORT(my_custom_led_interface, srv, MyCustomLedControl),
         "control_led"));
 
     // Initialize timer

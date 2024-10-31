@@ -1,8 +1,0 @@
-repositories:
-  my_custom_led_interface:
-    type: git
-    url: file:///home/hcl/ros_social_robot_prototype/ros2_ws/src/my_custom_led_interface
-    version: master
-
-
- #TODO url van absoluut naar relatief herschrijven   

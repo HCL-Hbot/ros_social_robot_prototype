@@ -29,8 +29,8 @@ my_custom_led_interface__srv__MyCustomLedControl_Request led_request_msg;
 my_custom_led_interface__srv__MyCustomLedControl_Response led_response_msg;
 
 // Status variables for the LEDs
-volatile bool red_led_status = false;
-volatile bool yellow_led_status = false;
+bool red_led_status = false;
+bool yellow_led_status = false;
 
 // Error handle loop, prefents for now that the esp won't reboot
 void error_loop()

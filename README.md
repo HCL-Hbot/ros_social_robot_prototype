@@ -42,7 +42,8 @@ echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 9. [Brief Steps for micro-ros agent setups](#brief-steps-for-micro-ros-agent-setups)
 10. [Steps to run micro-ros node successfully](#steps-to-run-micro-ros-node-succsfully)
 11. [Adding Custom messages types or Custom micro-ROS packages](#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio)
-12. [Micro-ros pub_sub_led_control](#micro-ros-pub_sub_led_control)
+12. [Micro-ros pub_sub_led_control example / proof of concept](#micro-ros-pub_sub_led_control-example--proof-of-concept)
+
 
 # How to build project without tests (Fast build)
 ```bash
@@ -166,7 +167,7 @@ Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to a
 ```
 
 # Brief Steps for micro-ros agent setup
-TODO
+TODO NOT DONE YET
 
 For now brief description
 

@@ -287,7 +287,8 @@ The source code of this project can be found here [src](./ros2_ws/src/microROS_p
 
 When building this project the parameters will be automatically loaded with the pythonscript "load_config.py". The configuration file config.ini will always be used.
 
-1. Add my_custom_led_interface package to the extra_packages: [Adding Custom messages types or Custom micro-ROS packages](#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio)
+## Steps to have this project running on your esp32
+1. Add my_custom_led_interface package to the extra_packages directory: [Adding Custom messages types or Custom micro-ROS packages](#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio)
 2. Remove .pio directory in the microRos_pubs_sub_led_control directory.
 3. Wire your setup, see: [Wiring setup](#wiring-setup). And connect the esp32 to your pc.
 4. Build and flash to the eps32.

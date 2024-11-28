@@ -17,6 +17,8 @@ void setup(void)
   Serial.begin(115200); // USB
   //radar.debug(Serial); //Uncomment to show debug information from the library on the Serial Monitor. By default this does not show sensor reads as they are very frequent.
 
+  Serial2.begin(256000, SERIAL_8N1, L_RADAR_RX, L_RADAR_TX);
+
   delay(500);
   Serial.print(F("\nLD2410 radar sensor initialising: "));
   if(radar.begin(Serial2))
@@ -33,7 +35,7 @@ void setup(void)
 void loop()
 {
   radar.read();
-  if(radar.isConnected() && millis() - lastReading > 1000)  //Report every 1000ms
+  if(radar.isConnected() && millis() - lastReading > 500)  //Report every 1000ms
   {
     lastReading = millis();
     

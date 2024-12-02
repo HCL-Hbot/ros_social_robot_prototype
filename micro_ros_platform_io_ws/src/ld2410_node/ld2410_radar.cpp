@@ -16,7 +16,7 @@ bool Ld2410Radar::begin(Stream &uart_radar)
 
 bool Ld2410Radar::read()
 {
-    return radar_sensor_.read();
+    return radar_sensor_.read() && radar_sensor_.isConnected();
 }
 
 const TargetFrameData &Ld2410Radar::getCurrentTargetFrame()

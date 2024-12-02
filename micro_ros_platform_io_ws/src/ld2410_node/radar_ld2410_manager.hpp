@@ -15,37 +15,65 @@
 #include "uartconfig.hpp"
 #include "wificonfig.hpp"
 
-template <size_t N_RADAR_SENSORS>  // N: aantal sensoren
+/**
+ * @brief Manager class for handling multiple LD2410 radar sensors.
+ *
+ * This class manages multiple LD2410 radar sensors, initializes them, reads data,
+ * and publishes the data using micro-ROS.
+ *
+ * @tparam N_RADAR_SENSORS The number of radar sensors to manage.
+ */
+template <size_t N_RADAR_SENSORS> 
 class RadarLd2410Manager
 {
     public:
 
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
         /**
-         * @brief Construct a new Radar Ld2410 Manager object
+         * @brief Construct a new RadarLd2410Manager object using UART configuration.
+         *
+         * @param node_name The name of the ROS node.
+         * @param ros_serial_config The UART configuration for ROS serial communication.
+         * @param device_id The device ID. This ID is used to identify which device or manager
+         *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
         RadarLd2410Manager(const std::string& node_name, const UartConfig& ros_serial_config, uint8_t device_id);
         
         #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
         /**
-         * @brief Construct a new Radar Ld 2 4 1 0 Manager object
-         * 
-         * @param node_name 
-         * @param wifi_config 
+         * @brief Construct a new RadarLd2410Manager object using WiFi configuration.
+         *
+         * @param node_name The name of the ROS node.
+         * @param wifi_config The WiFi configuration for ROS communication.
+         * @param device_id The device ID. This ID is used to identify which device or manager
+         *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
         RadarLd2410Manager(const std::string& node_name, WifiConfig& wifi_config, uint8_t device_id);
         #endif
 
         /**
-         * @brief Destroy the Radar Ld2410 Lld object
-         * 
+         * @brief Destroy the RadarLd2410Manager object.
          */
         ~RadarLd2410Manager();
 
+        /**
+         * @brief Initialize the radar sensors with the given configurations.
+         *
+         * @param radar_configs An array of UART configurations for the radar sensors.
+         */
         void initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs);
         
+        /**
+         * @brief Spin the ROS node to process callbacks.
+         * @note  Blocking function.
+         */
         void spin();
 
+        /**
+         * @brief Spin the ROS node to process callbacks for a specified duration.
+         *
+         * @param timeout_ns The timeout duration in nanoseconds.
+         */
         void spinSome(uint64_t timeout_ns);
     private:
 
@@ -68,9 +96,6 @@ class RadarLd2410Manager
         rcl_publisher_t target_frame_array_publisher_;
         rcl_timer_t publish_target_frame_array_timer_;
         ld2410_interface__msg__LD2410TargetDataFrameArray target_frame_array_msg_;
-
-        //Subscribe handles
-        //rcl_subscription_t max_scan_range_sub_;
 
         //Radar sensors
         std::array<Ld2410Radar,N_RADAR_SENSORS> sensors_;

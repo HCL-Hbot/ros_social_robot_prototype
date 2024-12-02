@@ -27,28 +27,29 @@ template <size_t N_RADAR_SENSORS>
 class RadarLd2410Manager
 {
     public:
-
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
         /**
          * @brief Construct a new RadarLd2410Manager object using UART configuration.
          *
          * @param node_name The name of the ROS node.
+         * @param radar_publish_topic_name The name of the ROS topic to publish the radar data.
          * @param ros_serial_config The UART configuration for ROS serial communication.
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, const UartConfig& ros_serial_config, uint8_t device_id);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id);
         
         #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
         /**
          * @brief Construct a new RadarLd2410Manager object using WiFi configuration.
          *
          * @param node_name The name of the ROS node.
+         * @param radar_publish_topic_name The name of the ROS topic to publish the radar data.
          * @param wifi_config The WiFi configuration for ROS communication.
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, WifiConfig& wifi_config, uint8_t device_id);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id);
         #endif
 
         /**
@@ -77,7 +78,7 @@ class RadarLd2410Manager
         void spinSome(uint64_t timeout_ns);
     private:
 
-        void initMicroRos(const std::string& node_name, uint8_t device_id);
+        void initMicroRos(const std::string& node_name, const std::string& radar_publish_topic_name, uint8_t device_id);
 
         void publishDetectedRegions();
 

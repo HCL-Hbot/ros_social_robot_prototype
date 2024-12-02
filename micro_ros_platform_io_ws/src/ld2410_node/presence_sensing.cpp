@@ -20,10 +20,10 @@ void setup(void)
 {
   #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL //Start node in serial communciation mode.
     const UartConfig ros_serial_config {0,0,0,SERIAL_BAUDRATE}; //UART=0, Baudrate=256000 
-    radar_node.reset(new RadarLd2410Manager<NUM_SENSORS>("ld2410_manager_node", ros_serial_config, 0));
+    radar_node.reset(new RadarLd2410Manager<NUM_SENSORS>("ld2410_manager_node", "ld2410_target_frames", ros_serial_config, 0));
   #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI) //Start node in wifi coumminciation mode.
     WifiConfig wifi_config {AGENT_PORT, AGENT_IP, WIFI_SSID, WIFI_PASSWORD};
-    radar_node.reset(new RadarLd2410Manager<NUM_SENSORS>("ld2410_manager_node", wifi_config, 0));
+    radar_node.reset(new RadarLd2410Manager<NUM_SENSORS>("ld2410_manager_node", "ld2410_target_frames", wifi_config, 0));
   #endif
 
   /*Order of config decides the sensor id. So sensor with uart 1 in this case will get id 0*/

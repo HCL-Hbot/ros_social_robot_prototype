@@ -58,6 +58,15 @@ class RadarLd2410Manager
         ~RadarLd2410Manager();
 
         /**
+         * @brief Check if the ROS-agent is available. Pings once and returns the result.
+         *
+         * @return true if the agent is available, false otherwise.
+         */
+        bool isAgentAvialable();
+
+        bool initMicroRos();
+
+        /**
          * @brief Initialize the radar sensors with the given configurations.
          *
          * @param radar_configs An array of UART configurations for the radar sensors.
@@ -76,15 +85,26 @@ class RadarLd2410Manager
          * @param timeout_ns The timeout duration in nanoseconds.
          */
         void spinSome(uint64_t timeout_ns);
+
+       
+        bool mostRecentpublishFailed();
+
+        bool clean();
     private:
 
-        void initMicroRos(const std::string& node_name, const std::string& radar_publish_topic_name, uint8_t device_id);
+        
 
         void publishDetectedRegions();
 
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
         std::unique_ptr<HardwareSerial> ros_serial_;
         #endif
+
+        std::string node_name_;
+        std::string radar_publish_topic_name_;
+        uint8_t device_id_;
+
+        bool most_recent_publish_failed_;
 
         //Node handles
         rcl_allocator_t allocator_;

@@ -49,7 +49,7 @@ void setup(void)
 
   while(!radar_node->isAgentAvialable()) //ping the agent to check if it is available.
   {
-    Serial.println("Failed to init micro-ROS, retrying...");
+    Serial.println("Agent not avialable. Retrying...");
   }
   
   bool initResult = radar_node->initMicroRos();
@@ -68,6 +68,7 @@ void loop()
 {
   if(radar_node->mostRecentpublishFailed() && !radar_node->isAgentAvialable())
   {
+    Serial.println("Agent not avialable...");
     bool result = radar_node->clean();
     //cleaning seems to be failing, but in reality it is not.
     if(!result)
@@ -80,7 +81,7 @@ void loop()
     }
     while(!radar_node->isAgentAvialable()) //ping the agent to check if it is available.
     {
-      Serial.println("Failed to init micro-ROS, retrying!...");
+      Serial.println("Agent not avialable. Retrying!...");
     }
     result = radar_node->initMicroRos();
     if(!result)
@@ -94,7 +95,7 @@ void loop()
   }
   else
   {
-    radar_node->spinSome(RCL_MS_TO_NS(1000)); //spin for 100ms
+    radar_node->spinSome(RCL_MS_TO_NS(1000)); //spin for 1000ms
   }
 
 }

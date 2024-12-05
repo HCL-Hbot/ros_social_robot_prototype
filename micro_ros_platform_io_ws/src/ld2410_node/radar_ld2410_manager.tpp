@@ -207,7 +207,7 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::clean()
     Serial.print("Support fini: ");
     Serial.println(ret);
 
-    return ret == RCL_RET_OK;
+    return ret_total == RCL_RET_OK;
 }
 
 template <size_t N_RADAR_SENSORS>

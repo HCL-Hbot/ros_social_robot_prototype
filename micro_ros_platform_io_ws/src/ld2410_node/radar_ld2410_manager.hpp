@@ -14,6 +14,19 @@
 #include "ld2410_radar.hpp"
 #include "uartconfig.hpp"
 #include "wificonfig.hpp"
+#include "rgb_led.hpp"
+
+/**
+ * @brief The state of the radar manager.
+ */
+enum class RadarManagerState : uint8_t
+{
+    WAITING_FOR_AGENT,
+    CREATE_ROS_NODE,
+    RUNNING_ROS_NODE, /*<-- Runs internal switch case / statemachine of micro_ros (i.e. check all handlers and execute them)*/
+    DESTROY_ROS_NODE
+};
+
 
 /**
  * @brief Manager class for handling multiple LD2410 radar sensors.
@@ -37,7 +50,7 @@ class RadarLd2410Manager
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id, uint8_t led_pin);
         
         #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
         /**
@@ -49,7 +62,7 @@ class RadarLd2410Manager
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id, uint8_t led_pin);
         #endif
 
         /**
@@ -58,13 +71,11 @@ class RadarLd2410Manager
         ~RadarLd2410Manager();
 
         /**
-         * @brief Check if the ROS-agent is available. Pings once and returns the result.
+         * @brief Check if the ROS-agent is available. Pings once with a timeout of 1 second and returns the result.
          *
          * @return true if the agent is available, false otherwise.
          */
         bool isAgentAvialable();
-
-        bool initMicroRos();
 
         /**
          * @brief Initialize the radar sensors with the given configurations.
@@ -74,26 +85,32 @@ class RadarLd2410Manager
         void initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs);
         
         /**
-         * @brief Spin the ROS node to process callbacks.
-         * @note  Blocking function.
+         * @brief Initialize micro-ROS node.
+         *
+         * @return true if initialization was successful, false otherwise.
          */
-        void spin();
+        bool initMicroRos();
 
         /**
-         * @brief Spin the ROS node to process callbacks for a specified duration.
-         *
-         * @param timeout_ns The timeout duration in nanoseconds.
+         * @brief Destroy micro-ROS node.
          */
-        void spinSome(uint64_t timeout_ns);
+        void destroyMicroRos();
 
-       
-        bool mostRecentpublishFailed();
+        /**
+         * @brief Update the state machine. Run one iteration of the state machine.
+         */
+        void updateStateMachine();
 
-        bool clean();
-    private:
+    private:        
+        /**
+         * @brief Initialize common parts of the radar manager. (There are two constructors, so this function is used to avoid code duplication.)
+         * @note Used in the constructor.
+         */
+        void initCommonParts();
 
-        
-
+        /**
+         * @brief Read data from the radar sensors and publish the detected regions.(nog naam veranderen)
+         */
         void publishDetectedRegions();
 
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
@@ -103,8 +120,12 @@ class RadarLd2410Manager
         std::string node_name_;
         std::string radar_publish_topic_name_;
         uint8_t device_id_;
+        RGBLed state_led_visualizer_;
+        RadarManagerState current_state_;
 
-        bool most_recent_publish_failed_;
+        //Radar sensors
+        std::array<Ld2410Radar,N_RADAR_SENSORS> sensors_;
+        std::array<std::unique_ptr<HardwareSerial>,N_RADAR_SENSORS> serials_;
 
         //Node handles
         rcl_allocator_t allocator_;
@@ -112,20 +133,12 @@ class RadarLd2410Manager
         rcl_node_t node_;
         rclc_executor_t executor_;
 
-
         //Publish handles
         rcl_publisher_t target_frame_array_publisher_;
         rcl_timer_t publish_target_frame_array_timer_;
         ld2410_interface__msg__LD2410TargetDataFrameArray target_frame_array_msg_;
 
-        //Radar sensors
-        std::array<Ld2410Radar,N_RADAR_SENSORS> sensors_;
-
-        //pointer is needed, because hardwareserial does not have a default constructor.
-        std::array<std::unique_ptr<HardwareSerial>,N_RADAR_SENSORS> serials_;
-
         static std::map<rcl_timer_t*, RadarLd2410Manager*> radar_manager_instance_map_;
-
 };
 
 #include "radar_ld2410_manager.tpp"

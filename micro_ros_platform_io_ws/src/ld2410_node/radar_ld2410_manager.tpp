@@ -24,11 +24,12 @@ std::map<rcl_timer_t*, RadarLd2410Manager<N_RADAR_SENSORS>*> RadarLd2410Manager<
 
 #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
 template <size_t N_RADAR_SENSORS>
-RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id)
+RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id, uint8_t led_pin)
 : node_name_(node_name)
 , radar_publish_topic_name_(radar_publish_topic_name)
 , device_id_(device_id)
-, most_recent_publish_failed_(false)
+, state_led_visualizer_(led_pin)
+, current_state_(RadarManagerState::WAITING_FOR_AGENT)
 , allocator_(rcutils_get_default_allocator())
 {
     ros_serial_.reset(new HardwareSerial(ros_serial_config.uart_num_));
@@ -45,7 +46,6 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
     set_microros_serial_transports(*ros_serial_);
     delay(2000); //give some time to init.
 
-    
     target_frame_array_msg_.device_id = device_id_;
     target_frame_array_msg_.sensors.capacity = N_RADAR_SENSORS;
     target_frame_array_msg_.sensors.size = 0;
@@ -53,31 +53,31 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
 
     //map class timer with class instance. This way we can execute our callback function with a lambda. ROS C API does not have binding for callback function for non-static member functions.
     radar_manager_instance_map_[&publish_target_frame_array_timer_] = this;
+    
+    state_led_visualizer_.setBrightness(10);
 }
 
 #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
 template <size_t N_RADAR_SENSORS>
-RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id)
+RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id, uint8_t led_pin)
 : node_name_(node_name)
 , radar_publish_topic_name_(radar_publish_topic_name)
 , device_id_(device_id)
-, most_recent_publish_failed_(false)
+, state_led_visualizer_(led_pin)
+, current_state_(RadarManagerState::WAITING_FOR_AGENT)
+, sensors_()
+, serials_()
 , allocator_(rcutils_get_default_allocator())
-
+, node_(rcl_get_zero_initialized_node())
+, target_frame_array_publisher_(rcl_get_zero_initialized_publisher())
+, publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
 {
     IPAddress agent_ip;
     agent_ip.fromString(wifi_config.ip_.c_str());
 
     //Casting is safe in this case, implementation of wifi_transport won't modify the string. (Wifi library, which micro ros uses, casts it back to const char*)
     set_microros_wifi_transports(const_cast<char*>(wifi_config.ssid_.c_str()), const_cast<char*>(wifi_config.password_.c_str()), agent_ip, wifi_config.port_);
-
-    target_frame_array_msg_.device_id = device_id_;
-    target_frame_array_msg_.sensors.capacity = N_RADAR_SENSORS;
-    target_frame_array_msg_.sensors.size = 0;
-    target_frame_array_msg_.sensors.data = (ld2410_interface__msg__LD2410TargetDataFrame*) allocator_.allocate(target_frame_array_msg_.sensors.capacity * sizeof(ld2410_interface__msg__LD2410TargetDataFrame), allocator_.state);
-    
-    //map class timer with class instance. This way we can execute our callback function with a lambda. ROS C API does not have binding for callback function for non-static member functions.
-    radar_manager_instance_map_[&publish_target_frame_array_timer_] = this;
+    initCommonParts();
 }
 #endif
 
@@ -85,7 +85,17 @@ template <size_t N_RADAR_SENSORS>
 RadarLd2410Manager<N_RADAR_SENSORS>::~RadarLd2410Manager()
 {
     radar_manager_instance_map_.erase(&publish_target_frame_array_timer_);
+    destroyMicroRos();
 }
+
+template <size_t N_RADAR_SENSORS>
+bool RadarLd2410Manager<N_RADAR_SENSORS>::isAgentAvialable()
+{
+    auto r = rmw_uros_ping_agent(1000,1);
+    Serial.print("Ping agent: ");
+    Serial.println(r);
+    return r == RMW_RET_OK;
+};
 
 template <size_t N_RADAR_SENSORS>
 void RadarLd2410Manager<N_RADAR_SENSORS>::initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs)
@@ -102,42 +112,10 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::initializeRadars(const std::array<Uart
 }
 
 
-template <size_t N_RADAR_SENSORS>
-void RadarLd2410Manager<N_RADAR_SENSORS>::spin()
-{
-    Serial.println("Radar node begin spin loop");
-
-    rclc_executor_spin(&executor_);
-    Serial.println("Radar node exited spin loop");
-    // pinMode(LED_BUILTIN, OUTPUT);
-    // digitalWrite(LED_BUILTIN, HIGH);
-}
-
-template <size_t N_RADAR_SENSORS>
-void RadarLd2410Manager<N_RADAR_SENSORS>::spinSome(uint64_t timeout_ns)
-{
-    rclc_executor_spin_some(&executor_, timeout_ns);
-}
-
-template <size_t N_RADAR_SENSORS>
-bool RadarLd2410Manager<N_RADAR_SENSORS>::mostRecentpublishFailed()
-{
-    return most_recent_publish_failed_;
-}
-
-
-template <size_t N_RADAR_SENSORS>
-bool RadarLd2410Manager<N_RADAR_SENSORS>::isAgentAvialable()
-{
-    auto r = rmw_uros_ping_agent(1000,1);
-    Serial.print("Ping agent: ");
-    Serial.println(r);
-    return r == RMW_RET_OK;
-};
 
 template <size_t N_RADAR_SENSORS>
 bool RadarLd2410Manager<N_RADAR_SENSORS>::initMicroRos()
-{   
+{       
     RC_RETURN_FALSE_ON_FAIL(rclc_support_init(&support_, 0, NULL, &allocator_));
     RC_RETURN_FALSE_ON_FAIL(rclc_node_init_default(&node_, node_name_.c_str(), "", &support_));
 
@@ -169,13 +147,11 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::initMicroRos()
 
     RC_RETURN_FALSE_ON_FAIL(rclc_executor_add_timer(&executor_, &publish_target_frame_array_timer_));
 
-    most_recent_publish_failed_ = false;
-
     return true; //return true if we pass all the checks above.
 }
 
 template <size_t N_RADAR_SENSORS>
-bool RadarLd2410Manager<N_RADAR_SENSORS>::clean()
+void RadarLd2410Manager<N_RADAR_SENSORS>::destroyMicroRos()
 {
     rcl_ret_t ret;
     rcl_ret_t ret_total;
@@ -206,8 +182,81 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::clean()
     ret_total+=ret;
     Serial.print("Support fini: ");
     Serial.println(ret);
+}
+template <size_t N_RADAR_SENSORS>
+void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
+{
 
-    return ret_total == RCL_RET_OK;
+    switch (current_state_)
+    {
+        case RadarManagerState::WAITING_FOR_AGENT:
+            state_led_visualizer_.setColor(0, 0, 255); //blue 
+            state_led_visualizer_.show();
+            Serial.println("WAITING_FOR_AGENT");
+            if(isAgentAvialable())
+            {
+                current_state_ = RadarManagerState::CREATE_ROS_NODE;
+            }
+
+            break;
+
+        case RadarManagerState::CREATE_ROS_NODE:
+            state_led_visualizer_.setColor(0, 255, 255); //cyan 
+            state_led_visualizer_.show();
+
+            Serial.println("CREATE_ROS_NODE");
+            if(initMicroRos())
+            {
+                current_state_ = RadarManagerState::RUNNING_ROS_NODE;
+                digitalWrite(LED_BUILTIN, HIGH);
+            }
+            else
+            {
+                current_state_ = RadarManagerState::DESTROY_ROS_NODE;
+            }
+            break;
+        
+        case RadarManagerState::RUNNING_ROS_NODE:
+            state_led_visualizer_.setColor(0, 255, 0); //green 
+            state_led_visualizer_.show();
+            Serial.println("RUNNING_ROS_NODE");
+
+            rclc_executor_spin_some(&executor_, RCL_MS_TO_NS(1000));
+
+            if(!isAgentAvialable())
+            {
+                current_state_ = RadarManagerState::DESTROY_ROS_NODE;
+            }
+            break;
+        
+        case RadarManagerState::DESTROY_ROS_NODE:
+            state_led_visualizer_.setColor(255, 0, 0); //red 
+            state_led_visualizer_.show();
+
+            Serial.println("DESTROY_ROS_NODE");
+            destroyMicroRos();
+            current_state_ = RadarManagerState::WAITING_FOR_AGENT;
+            break;
+
+        default:
+            break;
+    }
+
+}
+
+template <size_t N_RADAR_SENSORS>
+void RadarLd2410Manager<N_RADAR_SENSORS>::initCommonParts()
+{
+    target_frame_array_msg_.device_id = device_id_;
+    target_frame_array_msg_.sensors.capacity = N_RADAR_SENSORS;
+    target_frame_array_msg_.sensors.size = 0;
+    target_frame_array_msg_.sensors.data = (ld2410_interface__msg__LD2410TargetDataFrame*) allocator_.allocate(target_frame_array_msg_.sensors.capacity * sizeof(ld2410_interface__msg__LD2410TargetDataFrame), allocator_.state);
+    
+    //ld2410_interface__msg__LD2410TargetDataFrame__Sequence__init(&target_frame_array_msg_.sensors, N_RADAR_SENSORS);
+    //map class timer with class instance. This way we can execute our callback function with a lambda. ROS C API does not have binding for callback function for non-static member functions.
+    radar_manager_instance_map_[&publish_target_frame_array_timer_] = this;
+
+    state_led_visualizer_.setBrightness(10);
 }
 
 template <size_t N_RADAR_SENSORS>
@@ -237,17 +286,10 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::publishDetectedRegions()
         }
     }
 
-    rcl_ret_t status = rcl_publish(&target_frame_array_publisher_, &target_frame_array_msg_, NULL);
-   
-    if (status != RCL_RET_OK)
-    {
-        most_recent_publish_failed_ = true;
-    }
-    else
-    {
-        most_recent_publish_failed_ = false;
-    }
- 
+  
+    rcl_ret_t publish_result = rcl_publish(&target_frame_array_publisher_, &target_frame_array_msg_, NULL);
+
+    RCL_UNUSED(publish_result); //suppress warning, because we are not using the result.
 }
 
 

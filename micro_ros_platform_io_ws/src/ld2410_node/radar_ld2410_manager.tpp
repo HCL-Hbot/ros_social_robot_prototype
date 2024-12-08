@@ -30,7 +30,12 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
 , device_id_(device_id)
 , state_led_visualizer_(led_pin)
 , current_state_(RadarManagerState::WAITING_FOR_AGENT)
+, sensors_()
+, serials_()
 , allocator_(rcutils_get_default_allocator())
+, node_(rcl_get_zero_initialized_node())
+, target_frame_array_publisher_(rcl_get_zero_initialized_publisher())
+, publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
 {
     ros_serial_.reset(new HardwareSerial(ros_serial_config.uart_num_));
 
@@ -46,15 +51,7 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
     set_microros_serial_transports(*ros_serial_);
     delay(2000); //give some time to init.
 
-    target_frame_array_msg_.device_id = device_id_;
-    target_frame_array_msg_.sensors.capacity = N_RADAR_SENSORS;
-    target_frame_array_msg_.sensors.size = 0;
-    target_frame_array_msg_.sensors.data = (ld2410_interface__msg__LD2410TargetDataFrame*) allocator_.allocate(target_frame_array_msg_.sensors.capacity * sizeof(ld2410_interface__msg__LD2410TargetDataFrame), allocator_.state);
-
-    //map class timer with class instance. This way we can execute our callback function with a lambda. ROS C API does not have binding for callback function for non-static member functions.
-    radar_manager_instance_map_[&publish_target_frame_array_timer_] = this;
-    
-    state_led_visualizer_.setBrightness(10);
+    initCommonParts();
 }
 
 #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)

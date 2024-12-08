@@ -1,6 +1,0 @@
-In deze versie van de code is de loop omgeschreven naar een statemachine/switch case. 
-In de vorige versie en ook in deze kunnen we duidelijk met debugging (console en led indicator) zien dat het verwijderen van een micro_ros node lang duurt.
-
-De overgang van DESTROY_ROS_NODE node naar WAITING_FOR_AGENT duurt ongeveer 17 seconde. Dit is het geval wanneer er geen agent "online" is.
-Echter als de agent uit en gelijk aangezet wordt dan duurt het DESTROY_ROS_NODE state maar 5 seconde. Voornu lijkt het dat de node niet op de beste manier verwijderd wordt.
-Het lijkt erop onderliggend nog te wachten op een verbinding.

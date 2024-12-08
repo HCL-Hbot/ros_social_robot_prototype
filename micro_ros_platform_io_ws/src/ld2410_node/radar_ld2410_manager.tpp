@@ -152,12 +152,14 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::destroyMicroRos()
 {
     rcl_ret_t ret;
     rcl_ret_t ret_total;
+    
     //first destroy entities owned by the node.
 
-    ret = rclc_executor_fini(&executor_);
-    ret_total+=ret;
-    Serial.print("Executor fini: ");
+    rmw_context_t * rmw_context = rcl_context_get_rmw_context(&support_.context);
+    ret =  rmw_uros_set_context_entity_destroy_session_timeout(rmw_context, 0);
+    Serial.print("Set context entity destroy session timeout: ");
     Serial.println(ret);
+    
     
     ret = rcl_publisher_fini(&target_frame_array_publisher_, &node_);
     ret_total+=ret;
@@ -168,8 +170,13 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::destroyMicroRos()
     ret_total+=ret;
     Serial.print("Timer fini: ");
     Serial.println(ret);
-    //lasty destroy the node.
 
+    ret = rclc_executor_fini(&executor_);
+    ret_total+=ret;
+    Serial.print("Executor fini: ");
+    Serial.println(ret);
+    
+    //lasty destroy the node.
     ret = rcl_node_fini(&node_);
     ret_total+=ret;
     Serial.print("Node fini: ");
@@ -180,6 +187,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::destroyMicroRos()
     Serial.print("Support fini: ");
     Serial.println(ret);
 }
+
 template <size_t N_RADAR_SENSORS>
 void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
 {

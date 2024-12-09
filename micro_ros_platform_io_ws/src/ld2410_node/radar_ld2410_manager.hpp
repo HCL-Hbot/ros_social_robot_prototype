@@ -46,11 +46,13 @@ class RadarLd2410Manager
          *
          * @param node_name The name of the ROS node.
          * @param radar_publish_topic_name The name of the ROS topic to publish the radar data.
+         * @param radar_configs An array of UART configurations for the radar sensors.
          * @param ros_serial_config The UART configuration for ROS serial communication.
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const UartConfig& ros_serial_config, uint8_t device_id, uint8_t led_pin);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs, 
+                           const UartConfig& ros_serial_config, uint8_t device_id, uint8_t led_pin);
         
         #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI)
         /**
@@ -58,11 +60,13 @@ class RadarLd2410Manager
          *
          * @param node_name The name of the ROS node.
          * @param radar_publish_topic_name The name of the ROS topic to publish the radar data.
+         * @param radar_configs An array of UART configurations for the radar sensors.
          * @param wifi_config The WiFi configuration for ROS communication.
          * @param device_id The device ID. This ID is used to identify which device or manager
          *                  the sensor is attached to, allowing a receiver to know from who the radar data is coming.
          */
-        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, WifiConfig& wifi_config, uint8_t device_id, uint8_t led_pin);
+        RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs,
+                           const WifiConfig& wifi_config, uint8_t device_id, uint8_t led_pin);
         #endif
 
         /**
@@ -75,15 +79,8 @@ class RadarLd2410Manager
          *
          * @return true if the agent is available, false otherwise.
          */
-        bool isAgentAvialable();
+        bool isAgentAvailable();
 
-        /**
-         * @brief Initialize the radar sensors with the given configurations.
-         *
-         * @param radar_configs An array of UART configurations for the radar sensors.
-         */
-        void initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs);
-        
         /**
          * @brief Initialize micro-ROS node.
          *
@@ -101,7 +98,16 @@ class RadarLd2410Manager
          */
         void updateStateMachine();
 
-    private:        
+    private:    
+        /**
+         * @brief Initialize the radar sensors with the given configurations.
+         *
+         * @param radar_configs An array of UART configurations for the radar sensors.
+         * 
+         * @note Used in the constructor.
+         */
+        void initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs);
+            
         /**
          * @brief Initialize common parts of the radar manager. (There are two constructors, so this function is used to avoid code duplication.)
          * @note Used in the constructor.
@@ -109,9 +115,10 @@ class RadarLd2410Manager
         void initCommonParts();
 
         /**
-         * @brief Read data from the radar sensors and publish the detected regions.(nog naam veranderen)
+         * @brief Collect and publish radar data.
+         * @note Could even publish if no data is available. (i.e. publish empty data)
          */
-        void publishDetectedRegions();
+        void collectAndPublishRadarData();
 
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
         std::unique_ptr<HardwareSerial> ros_serial_;

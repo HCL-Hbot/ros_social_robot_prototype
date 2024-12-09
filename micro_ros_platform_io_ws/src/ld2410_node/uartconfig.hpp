@@ -1,5 +1,5 @@
-#ifndef UART_CONFIG_HPP
-#define UART_CONFIG_HPP
+#ifndef UART_CONFIG_HPP_
+#define UART_CONFIG_HPP_
 
 #include <stdint.h>
 
@@ -18,4 +18,4 @@ struct UartConfig
     uint32_t baudrate_; /**< The baud rate for the UART connection. */
 };
 
-#endif // UART_CONFIG_HPP
+#endif // UART_CONFIG_HPP_

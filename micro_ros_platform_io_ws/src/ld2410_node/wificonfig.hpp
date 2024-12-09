@@ -1,5 +1,5 @@
-#ifndef WIFI_CONFIG_HPP
-#define WIFI_CONFIG_HPP
+#ifndef WIFI_CONFIG_HPP_
+#define WIFI_CONFIG_HPP_
 
 #include <stdint.h>
 #include <string>
@@ -19,4 +19,4 @@ struct WifiConfig
     std::string password_;/**< The password for the WiFi connection. */
 };
 
-#endif // WIFI_CONFIG_HPP
+#endif // WIFI_CONFIG_HPP_

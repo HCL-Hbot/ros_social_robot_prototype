@@ -15,7 +15,7 @@
 #define NODE_NAME "ld2410_manager_node"
 #define RADAR_PUBLISH_TOPIC_NAME "ld2410_target_frames"
 #define DEVICE_ID 0
-#define PIN_LED_INDICATOR LED_BUILTIN
+#define PIN_LED_INDICATOR 48
 #define NUM_SENSORS 2
 
 std::unique_ptr<RadarLd2410Manager<NUM_SENSORS>> radar_node;

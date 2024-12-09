@@ -3,6 +3,16 @@
 
 #include "radar_ld2410_manager.hpp"
 
+#define SERIAL_INIT_DELAY_MS 2000
+#define PING_AGENT_TIMEOUT_MS 1000
+#define PING_AGENT_RETRY_COUNT 1
+#define PUBLISH_TIMER_PERIOD_MS 1000
+#define RCLC_SPIN_SOME_TIMEOUT_MS 1000
+#define STATE_LED_BRIGHTNESS 10
+#define STATE_LED_COLOR_BLUE 0, 0, 255
+#define STATE_LED_COLOR_CYAN 0, 255, 255
+#define STATE_LED_COLOR_GREEN 0, 255, 0
+#define STATE_LED_COLOR_RED 255, 0, 0
 
 #define RC_RETURN_FALSE_ON_FAIL(fn) \
         { \
@@ -44,7 +54,7 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
         ros_serial_->begin(ros_serial_config.baudrate_, SERIAL_8N1, ros_serial_config.rx_pin_, ros_serial_config.tx_pin_);
     }
     set_microros_serial_transports(*ros_serial_);
-    delay(2000); //give some time to init.
+    delay(SERIAL_INIT_DELAY_MS); //give some time to init.
 
     initializeRadars(radar_configs);
     initCommonParts();
@@ -87,7 +97,7 @@ RadarLd2410Manager<N_RADAR_SENSORS>::~RadarLd2410Manager()
 template <size_t N_RADAR_SENSORS>
 bool RadarLd2410Manager<N_RADAR_SENSORS>::isAgentAvailable()
 {
-    return rmw_uros_ping_agent(1000,1) == RMW_RET_OK;
+    return rmw_uros_ping_agent(PING_AGENT_TIMEOUT_MS, PING_AGENT_RETRY_COUNT) == RMW_RET_OK;
 };
 
 template <size_t N_RADAR_SENSORS>
@@ -122,7 +132,7 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::initMicroRos()
     RC_RETURN_FALSE_ON_FAIL(rclc_timer_init_default2(
         &publish_target_frame_array_timer_,
         &support_,
-        RCL_MS_TO_NS(1000),
+        RCL_MS_TO_NS(PUBLISH_TIMER_PERIOD_MS),
         [](rcl_timer_t* timer, int64_t last_call_time)
         {
             RCLC_UNUSED(last_call_time);
@@ -171,7 +181,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
             if(isAgentAvailable())
             {
                 current_state_ = RadarManagerState::CREATE_ROS_NODE;
-                state_led_visualizer_.setColor(0, 255, 255); //cyan 
+                state_led_visualizer_.setColor(STATE_LED_COLOR_CYAN); 
                 state_led_visualizer_.show();
             }
             break;
@@ -180,7 +190,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
             if(initMicroRos())
             {
                 current_state_ = RadarManagerState::RUNNING_ROS_NODE;
-                state_led_visualizer_.setColor(0, 255, 0); //green 
+                state_led_visualizer_.setColor(STATE_LED_COLOR_GREEN);
                 state_led_visualizer_.show();
             }
             else
@@ -190,12 +200,12 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
             break;
         
         case RadarManagerState::RUNNING_ROS_NODE:
-            rclc_executor_spin_some(&executor_, RCL_MS_TO_NS(1000));
+            rclc_executor_spin_some(&executor_, RCL_MS_TO_NS(RCLC_SPIN_SOME_TIMEOUT_MS));
 
             if(!isAgentAvailable())
             {
                 current_state_ = RadarManagerState::DESTROY_ROS_NODE;
-                state_led_visualizer_.setColor(255, 0, 0); //red 
+                state_led_visualizer_.setColor(STATE_LED_COLOR_RED);
                 state_led_visualizer_.show();
             }
             break;
@@ -203,7 +213,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
         case RadarManagerState::DESTROY_ROS_NODE:
             destroyMicroRos();
             current_state_ = RadarManagerState::WAITING_FOR_AGENT;
-            state_led_visualizer_.setColor(0, 0, 255); //blue 
+            state_led_visualizer_.setColor(STATE_LED_COLOR_BLUE);
             state_led_visualizer_.show();
             break;
 
@@ -223,8 +233,8 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::initCommonParts()
     //map class timer with class instance. This way we can execute our callback function with a lambda. ROS C API does not have binding for callback function for non-static member functions.
     radar_manager_instance_map_[&publish_target_frame_array_timer_] = this;
 
-    state_led_visualizer_.setBrightness(10);
-    state_led_visualizer_.setColor(0, 0, 255); //blue 
+    state_led_visualizer_.setBrightness(STATE_LED_BRIGHTNESS);
+    state_led_visualizer_.setColor(STATE_LED_COLOR_BLUE);
     state_led_visualizer_.show();
 }
 

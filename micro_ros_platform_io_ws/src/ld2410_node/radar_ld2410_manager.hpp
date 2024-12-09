@@ -94,6 +94,15 @@ class RadarLd2410Manager
         void destroyMicroRos();
 
         /**
+         * @brief Spin the micro-ROS node one iteration with a timeout.
+         *
+         * @param timeout_ms The timeout in milliseconds. The function will return after the timeout, when no data is available to handle. Otherwise it will return directly after a 'handle'.
+         * 
+         * @return true if the node was spun successfully, false otherwise.
+         */
+        bool spinSome(uint32_t timeout_ms);
+
+        /**
          * @brief Update the state machine. Run one iteration of the state machine.
          */
         void updateStateMachine();

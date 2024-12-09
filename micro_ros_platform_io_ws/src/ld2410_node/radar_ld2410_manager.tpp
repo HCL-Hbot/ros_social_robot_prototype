@@ -173,6 +173,13 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::destroyMicroRos()
 }
 
 template <size_t N_RADAR_SENSORS>
+bool RadarLd2410Manager<N_RADAR_SENSORS>::spinSome(uint32_t timeout_ms)
+{
+    rcl_ret_t result = rclc_executor_spin_some(&executor_, RCL_MS_TO_NS(timeout_ms));
+    return result == RCL_RET_OK || result == RCL_RET_TIMEOUT;
+}
+
+template <size_t N_RADAR_SENSORS>
 void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
 {
     switch (current_state_)
@@ -200,9 +207,8 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
             break;
         
         case RadarManagerState::RUNNING_ROS_NODE:
-            rclc_executor_spin_some(&executor_, RCL_MS_TO_NS(RCLC_SPIN_SOME_TIMEOUT_MS));
-
-            if(!isAgentAvailable())
+        
+            if(!spinSome(RCLC_SPIN_SOME_TIMEOUT_MS) || !isAgentAvailable())
             {
                 current_state_ = RadarManagerState::DESTROY_ROS_NODE;
                 state_led_visualizer_.setColor(STATE_LED_COLOR_RED);

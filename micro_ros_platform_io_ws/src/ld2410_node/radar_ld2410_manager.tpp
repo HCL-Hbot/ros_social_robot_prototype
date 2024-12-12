@@ -251,31 +251,34 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::collectAndPublishRadarData()
 
     for (size_t i = 0; i < N_RADAR_SENSORS; i++)
     {
-        ld2410_interface__msg__LD2410TargetDataFrame temp_target_frame;
         Ld2410Radar& sensor = sensors_[i];
-
 
         if (sensor.read())
         {
             const TargetFrameData& fd = sensor.getCurrentTargetFrame();
-            temp_target_frame.rader_id = i;
-            temp_target_frame.target_state = fd.target_state_;
-            temp_target_frame.movement_distance = fd.movement_distance_;
-            temp_target_frame.movement_energy = fd.movement_energy_;
-            temp_target_frame.stationaty_distance = fd.stationaty_distance_;
-            temp_target_frame.stationaty_energy = fd.stationaty_energy_;
-            temp_target_frame.detection_distance = fd.detection_distance_;
-            
-            target_frame_array_msg_.sensors.data[target_frame_array_msg_.sensors.size] = temp_target_frame;
-            target_frame_array_msg_.sensors.size++;
+            addTargetFrameDataToArray(fd, i);
         }
     }
 
-  
     rcl_ret_t publish_result = rcl_publish(&target_frame_array_publisher_, &target_frame_array_msg_, NULL);
 
     RCL_UNUSED(publish_result); //suppress warning, because we are not using the result.
 }
 
+template <size_t N_RADAR_SENSORS>
+void RadarLd2410Manager<N_RADAR_SENSORS>::addTargetFrameDataToArray(const TargetFrameData& fd, size_t radar_id)
+{
+    ld2410_interface__msg__LD2410TargetDataFrame temp_target_frame;
+    temp_target_frame.rader_id = radar_id;
+    temp_target_frame.target_state = fd.target_state_;
+    temp_target_frame.movement_distance = fd.movement_distance_;
+    temp_target_frame.movement_energy = fd.movement_energy_;
+    temp_target_frame.stationaty_distance = fd.stationaty_distance_;
+    temp_target_frame.stationaty_energy = fd.stationaty_energy_;
+    temp_target_frame.detection_distance = fd.detection_distance_;
+    
+    target_frame_array_msg_.sensors.data[target_frame_array_msg_.sensors.size] = temp_target_frame;
+    target_frame_array_msg_.sensors.size++;
+}
 
 #endif // RADAR_LD2410_MANAGER_TPP

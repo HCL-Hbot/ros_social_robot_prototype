@@ -128,6 +128,14 @@ class RadarLd2410Manager
          * @note Could even publish if no data is available. (i.e. publish empty data)
          */
         void collectAndPublishRadarData();
+        
+        /**
+         * @brief Add target frame data to the target frame array message (target_frame_array_msg_).
+         *
+         * @param fd The target frame data to add.
+         * @param radar_id The ID of the radar sensor.
+         */
+        void addTargetFrameDataToArray(const TargetFrameData& fd, size_t radar_id);
 
         #ifdef MICRO_ROS_TRANSPORT_ARDUINO_SERIAL
         std::unique_ptr<HardwareSerial> ros_serial_;

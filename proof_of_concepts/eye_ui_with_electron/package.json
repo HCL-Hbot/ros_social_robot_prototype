@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "sass": "sass styles.scss styles.css",
+    "sass-watch": "sass --watch styles.scss styles.css",
+    "start": "npm run sass && electron .",
+    "dev": "concurrently \"npm run sass-watch\" \"electron .\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +14,9 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "electron": "^33.2.1"
+    "concurrently": "^9.1.2",
+    "electron": "^33.2.1",
+    "sass": "^1.83.1"
   },
   "dependencies": {
     "websocket": "^1.0.35",

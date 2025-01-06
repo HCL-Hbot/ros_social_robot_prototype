@@ -1,46 +1,45 @@
-const WebSocket = require('websocket').w3cwebsocket; // Todo maybe replace with 'ws'??
+const WebSocket = require('websocket').w3cwebsocket;
 
 // Create a WebSocket connection to the server
-const ws = new WebSocket('ws://localhost:9002'); // Adjust this URL if needed
+const ws = new WebSocket('ws://localhost:9002');
 
-// Select the eyes in the DOM
-const leftEye = document.getElementById('left-eye');
-const rightEye = document.getElementById('right-eye');
+// Select the eye elements
+const leftEye = document.querySelector('.eye.left');
+const rightEye = document.querySelector('.eye.right');
 
-// Process messages from the WebSocket server
+// Set default state to blinking
+setState('blink');
+
+// Handle incoming WebSocket messages
 ws.onmessage = (message) => {
   const data = JSON.parse(message.data);
 
-  // Handle state updates (AWAKE, SLEEP, SLEEPY)
-  if (data.type === 'state') {
-    if (data.value === 'AWAKE') {
-      leftEye.classList.remove('closed');
-      rightEye.classList.remove('closed');
-    } else if (data.value === 'SLEEP' || data.value === 'SLEEPY') {
-      leftEye.classList.add('closed');
-      rightEye.classList.add('closed');
-    }
-  }
-
-  // Handle position updates for the pupils
-  if (data.type === 'position') {
-    const pupilX = data.x;
-    const pupilY = data.y;
-
-    leftEye.querySelector('.pupil').style.transform = `translate(${pupilX}px, ${pupilY}px)`;
-    rightEye.querySelector('.pupil').style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+  if (data.type === 'emotion') {
+    setState(data.value); // Update the state based on received emotion
   }
 };
 
-// Log WebSocket status
-ws.onopen = () => {
-  console.log('WebSocket connected');
-};
+// Set the state of the eyes
+function setState(state) {
+  const allStates = ['blink', 'double-blink', 'grin', 'sad', 'up', 'down'];
 
-ws.onerror = (error) => {
-  console.error('WebSocket error:', error);
-};
+  // Remove all states from the eyes
+  allStates.forEach((s) => {
+    leftEye.classList.remove(s);
+    rightEye.classList.remove(s);
+  });
 
-ws.onclose = () => {
-  console.log('WebSocket connection closed');
-};
+  // Add the new state
+  if (allStates.includes(state)) {
+    leftEye.classList.add(state);
+    rightEye.classList.add(state);
+  } else {
+    // Default to blinking if an invalid state is received
+    leftEye.classList.add('blink');
+    rightEye.classList.add('blink');
+  }
+}
+
+// Log WebSocket connection status
+ws.onopen = () => console.log('WebSocket connected');
+ws.onclose = () => console.log('WebSocket disconnected');

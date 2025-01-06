@@ -1,48 +1,174 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Disable scrolling */
+}
+
 body {
-    margin: 0;
-    background-color: black;
-    display: flex;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #EAE0CE;
+}
+@media only screen and (min-width: 1180px) {
+  body {
+    flex-direction: row;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
-    gap: 50px;
   }
-  
-  .eye {
-    width: 100px;
-    height: 100px;
-    background-color: white;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
+}
+
+.wrap {
+  position: relative;
+  width: 100px;
+  height: 40px;
+  margin: 0 2rem;
+  color: rgb(218.7, 201.4142857143, 170.3);
+  line-height: 40px;
+  font-size: 2rem;
+  text-align: center;
+  font-weight: 400;
+  padding-top: 5.5rem;
+  margin-bottom: 0;
+}
+.wrap .eye {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  background: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-block;
+  overflow: hidden;
+}
+.wrap .eye:before {
+  content: "";
+  position: absolute;
+  margin: auto;
+  width: 10px;
+  height: 10px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: rgb(20, 20, 20);
+}
+.wrap .eye.grin:after, .wrap .eye.sad:after {
+  content: "";
+  position: absolute;
+  width: calc(100% + 20px);
+  height: 0;
+  border-radius: 50%;
+  background: #EAE0CE;
+  left: -10px;
+}
+.wrap .eye.grin:after {
+  bottom: -10px;
+}
+.wrap .eye.sad:after {
+  top: -10px;
+}
+.wrap .eye:first-child {
+  left: 0;
+}
+.wrap .eye:last-child {
+  right: 0;
+}
+.wrap .eye.blink {
+  animation: blink 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.double-blink {
+  animation: double-blink 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.grin:before {
+  animation: grinb 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.grin:after {
+  animation: grina 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.sad:before {
+  animation: sadb 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.sad:after {
+  animation: grina 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.up:before {
+  animation: grinb 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.down:before {
+  animation: sadb 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+.wrap .eye.d1 {
+  animation-delay: 0.1s;
+}
+
+/* Blink */
+@keyframes blink {
+  0%, 8% {
+    height: 40px;
   }
-  
-  .pupil {
-    width: 30px;
-    height: 30px;
-    background-color: black;
-    border-radius: 50%;
-    position: absolute;
-    top: 35px;
-    left: 35px;
-    transition: transform 0.1s ease-in-out;
+  10%, 12% {
+    height: 5px;
   }
-  
-  /* Optional: Closed eye state */
-  .eye.closed::before {
-    content: '';
-    width: 100%;
+  14%, 100% {
+    height: 40px;
+  }
+}
+/* Double Blink */
+@keyframes double-blink {
+  0%, 8% {
+    height: 40px;
+  }
+  10%, 12% {
+    height: 10px;
+  }
+  13% {
+    height: 40px;
+  }
+  14%, 16% {
+    height: 0;
+  }
+  18%, 100% {
+    height: 40px;
+  }
+}
+/* Grin */
+@keyframes grinb {
+  0%, 10% {
+    bottom: 0;
+  }
+  20%, 40% {
+    bottom: 50%;
+  }
+  50%, 100% {
+    bottom: 0;
+  }
+}
+@keyframes grina {
+  0%, 10% {
+    height: 0;
+  }
+  20%, 40% {
     height: 100%;
-    background-color: black;
-    position: absolute;
+  }
+  50%, 100% {
+    height: 0;
+  }
+}
+/* Sad */
+@keyframes sadb {
+  0%, 10% {
     top: 0;
-    left: 0;
-    transform-origin: top;
-    transform: scaleY(0);
-    transition: transform 0.3s ease-in-out;
   }
-  
-  .eye.closed::before {
-    transform: scaleY(1);
+  20%, 40% {
+    top: 50%;
   }
-  
+  50%, 100% {
+    top: 0;
+  }
+}
+
+/*# sourceMappingURL=styles.css.map */

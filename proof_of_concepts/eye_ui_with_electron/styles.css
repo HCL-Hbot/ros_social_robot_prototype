@@ -1,0 +1,48 @@
+body {
+    margin: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    gap: 50px;
+  }
+  
+  .eye {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pupil {
+    width: 30px;
+    height: 30px;
+    background-color: black;
+    border-radius: 50%;
+    position: absolute;
+    top: 35px;
+    left: 35px;
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  /* Optional: Closed eye state */
+  .eye.closed::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top;
+    transform: scaleY(0);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .eye.closed::before {
+    transform: scaleY(1);
+  }
+  

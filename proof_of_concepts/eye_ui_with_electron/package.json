@@ -12,5 +12,9 @@
   "description": "",
   "devDependencies": {
     "electron": "^33.2.1"
+  },
+  "dependencies": {
+    "websocket": "^1.0.35",
+    "ws": "^8.18.0"
   }
 }

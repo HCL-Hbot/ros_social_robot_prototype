@@ -15,5 +15,5 @@ npm install concurrently --save-dev #Using to run multiple commands in one line 
 
 
 ## Possible future improvements
-When touch functionality will integrated in another project. Don't forget disable zoom in and scrolling with javascript (for touch device)! Because zooming in a eye is prorabably not a desired functionalty.
+When touch functionality will be integrated in another project. Don't forget to disable zoom in and scrolling with javascript (for touch device)! Because zooming in a eye is prorabably not a desired functionalty.
 No code is written for enabling/disabling touch. I don't know what the default is. This was not in my scope. Just reminding some logic needed to be added for this.

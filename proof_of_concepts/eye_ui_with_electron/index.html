@@ -3,13 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eye Animations</title>
+  <title>Eyes Display</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="wrap">
-    <div class="eye left blink"></div>
-    <div class="eye right blink"></div>
+  <div id="app">
+    <!-- Left eye container -->
+    <div class="wrap" id="left-eye">
+      <div class="eye"></div>
+    </div>
+
+    <!-- Right eye container -->
+    <div class="wrap" id="right-eye">
+      <div class="eye"></div>
+    </div>
   </div>
   <script src="renderer.js"></script>
 </body>

@@ -1,5 +1,6 @@
 $bg: #EAE0CE; /* Background color */
-$eye-size: 40vmin; /* Maximum size of the eyes */
+$eye-size: 40vmin; /* Define the size of the eye */
+$cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Animation timing */
 
 html, body {
   margin: 0;
@@ -10,43 +11,178 @@ html, body {
 }
 
 body {
-  background: $bg;
+  box-sizing: border-box; //misschien niet nodig..
+  display: flex; /* Flexbox for central alignment */ //misschien niet nodig..
+  justify-content: center; /* Center horizontally */ //misschien niet nodig..
+  align-items: center; /* Center vertically */ //misschien niet nodig..
+  background: $bg; /* Set background color */
 }
 
 #app {
-  display: flex;
-  flex-direction: row; /* Horizontal layout by default */
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
+  display: flex; /* Flex container for both eyes */
+  width: 100%; /* Full width of the screen */
+  height: 100%; /* Full height of the screen */
 }
 
 .wrap {
-  flex: 1; /* Each section takes 50% of the screen */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: $bg;
+  flex: 1; /* Each wrap takes up half the screen width (flex 1 = devide every wrap equally, with two wraps this is 50% of screen)*/
+  display: flex; /* Flex container for centering the eye */
+  justify-content: center; /* Center horizontally within its half */
+  align-items: center; /* Center vertically */
 
   .eye {
-    background: white;
-    border-radius: 50%; /* Keep the eyes perfectly round */
-    overflow: hidden;
-    width: $eye-size; /* Width of the eye */
-    height: $eye-size; /* Height of the eye to maintain roundness */
-    position: relative;
+    position: absolute;
+    margin: auto;
+		top: 0;
+		bottom: 0;
+    background: white; /* Eye background color */
+    border-radius: 50%; /* Keep the eye perfectly round */
+    overflow: hidden; /* Hide overflowing content */
+    width: $eye-size; /* Use variable for eye width */
+    height: $eye-size; /* Maintain circular shape */
+    display: inline-block;
+    //overflow: hidden;
+    //position: relative; /* For positioning child elements */
 
     &:before {
+      /* Pupil inside the eye */
       content: '';
       position: absolute;
-      background: black;
-      border-radius: 50%;
-      width: 30%; /* Pupil size relative to the eye */
-      height: 30%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      margin: auto;
+      left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+      width: calc($eye-size / 4); /* Pupil size relative to the eye */
+      height: calc($eye-size / 4);
+      background: black; /* Pupil color */
+      border-radius: 50%; /* Keep the pupil round */
+
+
+      //top: 50%; /* Center vertically */
+      //left: 50%; /* Center horizontally */
+      //transform: translate(-50%, -50%); /* Correct centering */
     }
+
+    /* Animations for different expressions */
+    &.grin:after,
+    &.sad:after {
+      content: '';
+      position: absolute;
+      width: calc(100% + calc($eye-size/2)); /* Extend beyond the eye's width */
+      height: 0; /* Initially no height */
+      border-radius: 50%; /* Rounded shape for expressions */
+      background: $bg; /* Match the background color */
+      left: calc($eye-size / -4);//-10px; /* Position slightly outside */
+    }
+    &.grin:after {
+      bottom: calc($eye-size / -4);//-10px; /* Position grin curve at the bottom */
+    }
+    &.sad:after {
+      top: calc($eye-size / -4); /* Position sad curve at the top */
+    }
+
+    &.blink {
+      animation: blink 4s $cubic infinite; /* Blink animation */
+    }
+
+    &.double-blink {
+      animation: double-blink 4s $cubic infinite; /* Double blink animation */
+    }
+
+    &.grin:before {
+      animation: grinb 4s $cubic infinite; /* Animation for a happy grin */
+    }
+    &.grin:after {
+      animation: grina 4s $cubic infinite; /* Animation for grin curve */
+    }
+    &.sad:before {
+      animation: sadb 4s $cubic infinite; /* Animation for sad expression */
+    }
+    &.sad:after {
+      animation: grina 4s $cubic infinite; /* Animation for sad curve */
+    }
+    &.up:before {
+			animation: grinb 4s $cubic infinite;
+		}
+		&.down:before {
+			animation: sadb 4s $cubic infinite;
+		}
+
+    //Currently using for async blinking. Eyes won't then blink asynchronously. (Cool behavior)
+    &.d1 {
+      animation-delay: .1s; /* Delay for animation*/
+    }
+  }
+}
+
+/* Animations for various expressions */
+
+/* Blink animation */
+@keyframes blink {
+  0%, 8% {
+    height: $eye-size; /* Full eye height */
+  }
+  10%, 12% {
+    height: calc($eye-size / 8); /* Compressed eye during blink */
+  }
+  14%, 100% {
+    height: $eye-size; /* Back to full size */
+  }
+}
+
+/* Double Blink animation */
+@keyframes double-blink {
+  0%, 8% {
+    height: $eye-size; /* Full eye height */
+  }
+  10%, 12% {
+    height: calc($eye-size / 4); /* Compressed eye */
+  }
+  13% {
+    height: $eye-size; /* Back to full size briefly */
+  }
+  14%, 16% {
+    height: 0; /* Compressed eye again */
+  }
+  18%, 100% {
+    height: $eye-size; /* Back to full size */
+  }
+}
+
+/* Grin animation (happy expression) */
+@keyframes grinb {
+  0%, 10% {
+    bottom: 0; /* Normal position */
+  }
+  20%, 40% {
+    bottom: 50%; /* Raise for grin */
+  }
+  50%, 100% {
+    bottom: 0; /* Back to normal */
+  }
+}
+@keyframes grina {
+  0%, 10% {
+    height: 0; /* Start with no curve */
+  }
+  20%, 40% {
+    height: 100%; /* Full curve */
+  }
+  50%, 100% {
+    height: 0; /* Reset to no curve */
+  }
+}
+
+/* Sad animation (sad expression) */
+@keyframes sadb {
+  0%, 10% {
+    top: 0; /* Normal position */
+  }
+  20%, 40% {
+    top: 50%; /* Lower for sad look */
+  }
+  50%, 100% {
+    top: 0; /* Back to normal */
   }
 }

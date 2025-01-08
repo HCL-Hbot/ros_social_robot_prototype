@@ -1,5 +1,10 @@
 $bg: #EAE0CE; /* Background color */
-$eye-size: 40vmin; /* Define the size of the eye */
+/*
+For the eye size we use percentages with vmax (viewport maximum). Another option could be vmin (viewport minimum).
+vmin is a unit based on the smaller of the viewport's height or width. 1vmin is equal to 1% of the smaller dimension. So if height is smaller than width, 1vmin is 1% of the height.
+vmax is a unit based on the larger of the viewport's height or width. 1vmax is equal to 1% of the larger dimension. So if height is smaller than width, 1vmax is 1% of the width.
+*/
+$eye-size: 40vmax; /* Define the size of the eye*/ //(vmax seems appropriate for our HDMI screens)
 $cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Animation timing */
 
 html, body {
@@ -11,10 +16,6 @@ html, body {
 }
 
 body {
-  box-sizing: border-box; //misschien niet nodig..
-  display: flex; /* Flexbox for central alignment */ //misschien niet nodig..
-  justify-content: center; /* Center horizontally */ //misschien niet nodig..
-  align-items: center; /* Center vertically */ //misschien niet nodig..
   background: $bg; /* Set background color */
 }
 
@@ -37,12 +38,9 @@ body {
 		bottom: 0;
     background: white; /* Eye background color */
     border-radius: 50%; /* Keep the eye perfectly round */
-    overflow: hidden; /* Hide overflowing content */
+    overflow: hidden; /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
     width: $eye-size; /* Use variable for eye width */
     height: $eye-size; /* Maintain circular shape */
-    display: inline-block;
-    //overflow: hidden;
-    //position: relative; /* For positioning child elements */
 
     &:before {
       /* Pupil inside the eye */
@@ -57,11 +55,6 @@ body {
       height: calc($eye-size / 4);
       background: black; /* Pupil color */
       border-radius: 50%; /* Keep the pupil round */
-
-
-      //top: 50%; /* Center vertically */
-      //left: 50%; /* Center horizontally */
-      //transform: translate(-50%, -50%); /* Correct centering */
     }
 
     /* Animations for different expressions */
@@ -73,10 +66,10 @@ body {
       height: 0; /* Initially no height */
       border-radius: 50%; /* Rounded shape for expressions */
       background: $bg; /* Match the background color */
-      left: calc($eye-size / -4);//-10px; /* Position slightly outside */
+      left: calc($eye-size / -4); /* Position slightly outside */
     }
     &.grin:after {
-      bottom: calc($eye-size / -4);//-10px; /* Position grin curve at the bottom */
+      bottom: calc($eye-size / -4); /* Position grin curve at the bottom */
     }
     &.sad:after {
       top: calc($eye-size / -4); /* Position sad curve at the top */

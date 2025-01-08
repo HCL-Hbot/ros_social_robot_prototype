@@ -10,10 +10,6 @@ html, body {
 }
 
 body {
-  box-sizing: border-box;
-  display: flex; /* Flexbox for central alignment */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
   background: #EAE0CE; /* Set background color */
 }
 
@@ -36,10 +32,9 @@ body {
   bottom: 0;
   background: white; /* Eye background color */
   border-radius: 50%; /* Keep the eye perfectly round */
-  overflow: hidden; /* Hide overflowing content */
-  width: 40vmin; /* Use variable for eye width */
-  height: 40vmin; /* Maintain circular shape */
-  display: inline-block;
+  overflow: hidden; /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
+  width: 50vmin; /* Use variable for eye width */
+  height: 50vmin; /* Maintain circular shape */
   /* Animations for different expressions */
 }
 .wrap .eye:before {
@@ -51,25 +46,25 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 10vmin; /* Pupil size relative to the eye */
-  height: 10vmin;
+  width: 12.5vmin; /* Pupil size relative to the eye */
+  height: 12.5vmin;
   background: black; /* Pupil color */
   border-radius: 50%; /* Keep the pupil round */
 }
 .wrap .eye.grin:after, .wrap .eye.sad:after {
   content: "";
   position: absolute;
-  width: calc(100% + 20vmin); /* Extend beyond the eye's width */
+  width: calc(100% + 25vmin); /* Extend beyond the eye's width */
   height: 0; /* Initially no height */
   border-radius: 50%; /* Rounded shape for expressions */
   background: #EAE0CE; /* Match the background color */
-  left: -10vmin;
+  left: -12.5vmin;
 }
 .wrap .eye.grin:after {
-  bottom: -10vmin;
+  bottom: -12.5vmin;
 }
 .wrap .eye.sad:after {
-  top: -10vmin; /* Position sad curve at the top */
+  top: -12.5vmin; /* Position sad curve at the top */
 }
 .wrap .eye.blink {
   animation: blink 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite; /* Blink animation */
@@ -103,31 +98,31 @@ body {
 /* Blink animation */
 @keyframes blink {
   0%, 8% {
-    height: 40vmin; /* Full eye height */
+    height: 50vmin; /* Full eye height */
   }
   10%, 12% {
-    height: 5vmin; /* Compressed eye during blink */
+    height: 6.25vmin; /* Compressed eye during blink */
   }
   14%, 100% {
-    height: 40vmin; /* Back to full size */
+    height: 50vmin; /* Back to full size */
   }
 }
 /* Double Blink animation */
 @keyframes double-blink {
   0%, 8% {
-    height: 40vmin; /* Full eye height */
+    height: 50vmin; /* Full eye height */
   }
   10%, 12% {
-    height: 10vmin; /* Compressed eye */
+    height: 12.5vmin; /* Compressed eye */
   }
   13% {
-    height: 40vmin; /* Back to full size briefly */
+    height: 50vmin; /* Back to full size briefly */
   }
   14%, 16% {
     height: 0; /* Compressed eye again */
   }
   18%, 100% {
-    height: 40vmin; /* Back to full size */
+    height: 50vmin; /* Back to full size */
   }
 }
 /* Grin animation (happy expression) */

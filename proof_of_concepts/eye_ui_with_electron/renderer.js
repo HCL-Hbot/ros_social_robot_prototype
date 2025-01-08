@@ -13,7 +13,7 @@ window.onload = () => {
 
   // List of expressions
   const expressions = ['blink', 'double-blink', 'grin', 'sad'];
-  //const expressions = ['grin'];
+  //const expressions = ['blink'];
 
   let currentExpressionIndex = 0;
 

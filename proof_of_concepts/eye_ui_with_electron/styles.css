@@ -1,5 +1,10 @@
 /* Background color */
-/* Define the size of the eye */
+/*
+For the eye size we use percentages with vmax (viewport maximum). Another option could be vmin (viewport minimum).
+vmin is a unit based on the smaller of the viewport's height or width. 1vmin is equal to 1% of the smaller dimension. So if height is smaller than width, 1vmin is 1% of the height.
+vmax is a unit based on the larger of the viewport's height or width. 1vmax is equal to 1% of the larger dimension. So if height is smaller than width, 1vmax is 1% of the width.
+*/
+/* Define the size of the eye*/
 /* Animation timing */
 html, body {
   margin: 0;
@@ -33,8 +38,8 @@ body {
   background: white; /* Eye background color */
   border-radius: 50%; /* Keep the eye perfectly round */
   overflow: hidden; /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
-  width: 50vmin; /* Use variable for eye width */
-  height: 50vmin; /* Maintain circular shape */
+  width: 40vmax; /* Use variable for eye width */
+  height: 40vmax; /* Maintain circular shape */
   /* Animations for different expressions */
 }
 .wrap .eye:before {
@@ -46,25 +51,25 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 12.5vmin; /* Pupil size relative to the eye */
-  height: 12.5vmin;
+  width: 10vmax; /* Pupil size relative to the eye */
+  height: 10vmax;
   background: black; /* Pupil color */
   border-radius: 50%; /* Keep the pupil round */
 }
 .wrap .eye.grin:after, .wrap .eye.sad:after {
   content: "";
   position: absolute;
-  width: calc(100% + 25vmin); /* Extend beyond the eye's width */
+  width: calc(100% + 20vmax); /* Extend beyond the eye's width */
   height: 0; /* Initially no height */
   border-radius: 50%; /* Rounded shape for expressions */
   background: #EAE0CE; /* Match the background color */
-  left: -12.5vmin;
+  left: -10vmax; /* Position slightly outside */
 }
 .wrap .eye.grin:after {
-  bottom: -12.5vmin;
+  bottom: -10vmax; /* Position grin curve at the bottom */
 }
 .wrap .eye.sad:after {
-  top: -12.5vmin; /* Position sad curve at the top */
+  top: -10vmax; /* Position sad curve at the top */
 }
 .wrap .eye.blink {
   animation: blink 4s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite; /* Blink animation */
@@ -98,31 +103,31 @@ body {
 /* Blink animation */
 @keyframes blink {
   0%, 8% {
-    height: 50vmin; /* Full eye height */
+    height: 40vmax; /* Full eye height */
   }
   10%, 12% {
-    height: 6.25vmin; /* Compressed eye during blink */
+    height: 5vmax; /* Compressed eye during blink */
   }
   14%, 100% {
-    height: 50vmin; /* Back to full size */
+    height: 40vmax; /* Back to full size */
   }
 }
 /* Double Blink animation */
 @keyframes double-blink {
   0%, 8% {
-    height: 50vmin; /* Full eye height */
+    height: 40vmax; /* Full eye height */
   }
   10%, 12% {
-    height: 12.5vmin; /* Compressed eye */
+    height: 10vmax; /* Compressed eye */
   }
   13% {
-    height: 50vmin; /* Back to full size briefly */
+    height: 40vmax; /* Back to full size briefly */
   }
   14%, 16% {
     height: 0; /* Compressed eye again */
   }
   18%, 100% {
-    height: 50vmin; /* Back to full size */
+    height: 40vmax; /* Back to full size */
   }
 }
 /* Grin animation (happy expression) */

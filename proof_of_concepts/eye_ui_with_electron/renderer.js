@@ -1,6 +1,8 @@
+const { ipcRenderer } = require('electron');
+
 window.onload = () => {
   const queryParams = new URLSearchParams(window.location.search);
-  const eye = queryParams.get('eye'); // Determine if it's left or right eye
+  const eye = queryParams.get('eye'); // Determine if it's left or right eye or both
 
   const leftEye = document.getElementById('left-eye');
   const rightEye = document.getElementById('right-eye');
@@ -11,22 +13,18 @@ window.onload = () => {
     leftEye.style.display = 'none';
   }
 
-  // List of expressions
-  const expressions = ['blink', 'double-blink', 'grin', 'sad'];
-  //const expressions = ['blink'];
+  ipcRenderer.on('play-animation', (event, { animation, duration, repeat }) => {
+    console.log(`Playing animation: ${animation}, Duration: ${duration}s, Repeat: ${repeat}`);
+    playAnimation(animation, duration, repeat);
+  });
 
-  let currentExpressionIndex = 0;
-
-  function changeExpression() {
+  function playAnimation(animation, duration, repeat) {
     const allEyes = document.querySelectorAll('.eye');
     allEyes.forEach((eyeElement) => {
-      eyeElement.className = 'eye'; // Reset all classes
-      eyeElement.classList.add(expressions[currentExpressionIndex]); // Add new expression
+      eyeElement.className = 'eye';
+      eyeElement.style.animationDuration = `${duration}s`;
+      eyeElement.style.animationIterationCount = repeat;
+      eyeElement.classList.add(animation);
     });
-
-    currentExpressionIndex = (currentExpressionIndex + 1) % expressions.length; // Cycle through expressions
   }
-  // Change expression every 5 seconds
-  setInterval(changeExpression, 5000);
-  changeExpression(); // Initialize with the first expression
 };

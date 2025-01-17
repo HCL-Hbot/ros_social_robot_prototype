@@ -4,21 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eyes Display</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
   <div id="app">
-    <!-- Left eye container -->
-    <div class="wrap" id="left-eye">
-      <div class="eye"></div>
+    <!-- Right eye container (robot perspectief)-->
+    <div class="wrap" id="right-eye">
+      <div class="eye-label">Right Eye</div>
+
+      <div class="eye">
+        <div class="iris">
+          <div class="pupil"></div>
+        </div>
+        <div class="eyelid top" id="top-right"></div>
+        <div class="eyelid bottom" id="bottem-right"></div>
+      </div>
     </div>
   
-    <!-- Right eye container -->
-    <div class="wrap" id="right-eye">
-      <div class="eye"></div>
+    <!-- Legt eye container (robot perspectief)-->
+    <div class="wrap" id="left-eye">
+      <div class="eye-label">Left Eye</div>
+      <div class="eye">
+        <div class="iris">
+          <div class="pupil"></div>
+        </div>
+      <div class="eyelid top" id="top-left"></div>
+      <div class="eyelid bottom" id="bottom-right"></div>
+      </div>
     </div>
   </div>
-  
-  <script src="renderer.js"></script>
+
+<script src="renderer.js"></script>
 </body>
 </html>

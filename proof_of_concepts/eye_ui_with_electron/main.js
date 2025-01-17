@@ -4,6 +4,11 @@ const path = require('path');
 
 const windows = {}; // Object om vensters op te slaan (left, right, both)
 
+// Listen for log messages from the renderer process
+ipcMain.on('log-message', (event, message) => {
+  console.log('Renderer Log:', message);
+});
+
 // Function to create a BrowserWindow for a specific screen
 function createWindowForScreen(display, eye) {
   const window = new BrowserWindow({
@@ -11,13 +16,13 @@ function createWindowForScreen(display, eye) {
     y: display.bounds.y, //(For good practice we do this always explicitly, but when we use fullscreen it will be done implecitly)
     width: display.bounds.width,
     height: display.bounds.height,
-    frame: false, // Remove title bar and window frame
-    fullscreen: true, // Fullscreen mode
-    autoHideMenuBar: true,   // Hide the menu bar
+    frame: true, // Remove title bar and window frame
+    fullscreen: false, // Fullscreen mode
+    autoHideMenuBar: false,   // Hide the menu bar
     alwaysOnTop: false,    // Ensure the window stays on top, for now on false. But might be useful to set it to true for production!!!!
     webPreferences: {
       preload: path.join(__dirname, 'renderer.js'), // Optional preload script
-      nodeIntegration: true,
+      nodeIntegration: true
     },
   })
   window.loadURL(`file://${__dirname}/index.html?eye=${eye}`);
@@ -28,7 +33,7 @@ function createWindowForScreen(display, eye) {
 
 // Function to start the WebSocket server
 function startWebSocketServer() {
-  const wss = new WebSocket.Server({ port: 8020 });
+  const wss = new WebSocket.Server({ port: 8080 });
 
   wss.on('connection', (ws) => {
     console.log('Controller connected');
@@ -37,21 +42,26 @@ function startWebSocketServer() {
       console.log('Received:', message);
 
       try {
-        const data = JSON.parse(message);
-        const { animation, duration, repeat, target } = data;
+        const command = JSON.parse(message);
+        console.log('Command:', command);
+        //const data = JSON.parse(message);
+        //const { animation, duration, repeat, target } = data;
 
         // Stuur het commando naar specifieke vensters of alle vensters
-        if (target === 'left' && windows.left) {
-          windows.left.webContents.send('play-animation', { animation, duration, repeat });
-        } else if (target === 'right' && windows.right) {
-          windows.right.webContents.send('play-animation', { animation, duration, repeat });
-        } else if (target === 'both') {
-          console.log("BOTH!");
-          windows.both.webContents.send('play-animation', { animation, duration, repeat });
-        }
+        // if (target === 'left' && windows.left) {
+        //   //windows.left.webContents.send('play-animation', { animation, duration, repeat });
+        // } else if (target === 'right' && windows.right) {
+        //   //windows.right.webContents.send('play-animation', { animation, duration, repeat });
+        // } else if (target === 'both') {
+        //   console.log("BOTH!");
+        //   windows.both.webContents.send('websocket-message', command);
 
+        //   // windows.both.webContents.send('play-animation', { animation, duration, repeat });
+        // }
+
+        windows.both.webContents.send('websocket-message', command);
         // Bevestiging terugsturen naar de controller
-        ws.send(JSON.stringify({ status: 'success', message: 'Animation started' }));
+        //ws.send(JSON.stringify({ status: 'success', message: 'Animation started' }));
       } catch (error) {
         console.error('Invalid message format', error);
         ws.send(JSON.stringify({ status: 'error', message: 'Invalid format' }));
@@ -63,7 +73,7 @@ function startWebSocketServer() {
     });
   });
 
-  console.log('WebSocket server is running on ws://localhost:8020');
+  console.log('WebSocket server is running on ws://localhost:8080');
 }
 
 function setupScreens() {
@@ -121,4 +131,21 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+
+// Serve a simple UI for testing
+const { createServer } = require('http');
+const fs = require('fs');
+
+createServer((req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    fs.createReadStream(`${__dirname}/control-panel.html`).pipe(res);
+  } else {
+    res.writeHead(404);
+    res.end('Not Found');
+  }
+}).listen(8081, () => {
+  console.log('Control Panel running at http://localhost:8081');
 });

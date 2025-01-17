@@ -1,181 +1,322 @@
-$bg: #EAE0CE; /* Background color */
+@use 'sass:math';
+
+$bg: #EAE0CE;
+/* Background color */
 /*
 For the eye size we use percentages with vmax (viewport maximum). Another option could be vmin (viewport minimum).
 vmin is a unit based on the smaller of the viewport's height or width. 1vmin is equal to 1% of the smaller dimension. So if height is smaller than width, 1vmin is 1% of the height.
 vmax is a unit based on the larger of the viewport's height or width. 1vmax is equal to 1% of the larger dimension. So if height is smaller than width, 1vmax is 1% of the width.
 */
-$eye-size: 40vmax; /* Define the size of the eye*/ //(vmax seems appropriate for our HDMI screens)
-$cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Animation timing */
+$eye-size: 40vmax;
+/* Define the size of the eye*/
+//(vmax seems appropriate for our HDMI screens)
+$cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+/* Animation timing */
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Disable scrolling */
+  overflow: hidden;
+  /* Disable scrolling */
 }
 
 body {
-  background: $bg; /* Set background color */
+  background: #EAE0CE;
+  /* Set background color */
 }
 
 #app {
-  display: flex; /* Flex container for both eyes */
-  width: 100%; /* Full width of the screen */
-  height: 100%; /* Full height of the screen */
+  display: flex;
+  width: 100%;
+  /* Full width of the screen */
+  height: 100%;
+  /* Full height of the screen */
 }
 
 .wrap {
-  flex: 1; /* Each wrap takes up half the screen width (flex 1 = devide every wrap equally, with two wraps this is 50% of screen)*/
-  display: flex; /* Flex container for centering the eye */
-  justify-content: center; /* Center horizontally within its half */
-  align-items: center; /* Center vertically */
-
-  .eye {
-    position: absolute;
-    margin: auto;
-		top: 0;
-		bottom: 0;
-    background: white; /* Eye background color */
-    border-radius: 50%; /* Keep the eye perfectly round */
-    overflow: hidden; /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
-    width: $eye-size; /* Use variable for eye width */
-    height: $eye-size; /* Maintain circular shape */
-
-    &:before {
-      /* Pupil inside the eye */
-      content: '';
-      position: absolute;
-      margin: auto;
-      left: 0;
-			right: 0;
-			top: 0;
-			bottom: 0;
-      width: calc($eye-size / 4); /* Pupil size relative to the eye */
-      height: calc($eye-size / 4);
-      background: black; /* Pupil color */
-      border-radius: 50%; /* Keep the pupil round */
-    }
-
-    /* Animations for different expressions */
-    &.grin:after,
-    &.sad:after {
-      content: '';
-      position: absolute;
-      width: calc(100% + calc($eye-size/2)); /* Extend beyond the eye's width */
-      height: 0; /* Initially no height */
-      border-radius: 50%; /* Rounded shape for expressions */
-      background: $bg; /* Match the background color */
-      left: calc($eye-size / -4); /* Position slightly outside */
-    }
-    &.grin:after {
-      bottom: calc($eye-size / -4); /* Position grin curve at the bottom */
-    }
-    &.sad:after {
-      top: calc($eye-size / -4); /* Position sad curve at the top */
-    }
-
-    &.blink {
-      animation: blink 4s $cubic infinite; /* Blink animation */
-    }
-
-    &.double-blink {
-      animation: double-blink 4s $cubic infinite; /* Double blink animation */
-    }
-
-    &.grin:before {
-      animation: grinb 4s $cubic infinite; /* Animation for a happy grin */
-    }
-    &.grin:after {
-      animation: grina 4s $cubic infinite; /* Animation for grin curve */
-    }
-    &.sad:before {
-      animation: sadb 4s $cubic infinite; /* Animation for sad expression */
-    }
-    &.sad:after {
-      animation: grina 4s $cubic infinite; /* Animation for sad curve */
-    }
-    &.up:before {
-			animation: grinb 4s $cubic infinite;
-		}
-		&.down:before {
-			animation: sadb 4s $cubic infinite;
-		}
-
-    //Currently using for async blinking. Eyes won't then blink asynchronously. (Cool behavior)
-    &.d1 {
-      animation-delay: .1s; /* Delay for animation*/
-    }
-  }
+  flex: 1;
+  /* Each wrap takes up half the screen width (flex 1 = devide every wrap equally, with two wraps this is 50% of screen)*/
+  display: flex;
+  /* Flex container for centering the eye */
+  justify-content: center;
+  /* Center horizontally within its half */
+  //align-items: center; /* Center vertically */
 }
 
-/* Animations for various expressions */
+.eye-label {
+  text-align: center;
+  /* Centreer de tekst */
+  font-size: 16px;
+  /* Pas de lettergrootte aan naar wens */
+  font-weight: bold;
+  /* Maak de tekst vetgedrukt */
+  margin-bottom: 10px;
+  /* Voeg ruimte toe tussen de tekst en het oog */
+}
 
-/* Blink animation */
+.eye {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  background: white;
+  /* Eye background color */
+  border: 3px solid #000;
+  border-radius: 50%;
+  /* Keep the eye perfectly round */
+  overflow: hidden;
+  /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
+  width: $eye-size;
+  /* Use variable for eye width */
+  height: $eye-size;
+  /* Maintain circular shape */
+}
+
+.iris {
+  position: absolute;
+  top: 50%;
+  /* Center the iris vertically */
+  left: 50%;
+  /* Center the iris horizontally */
+  width: calc($eye-size * 0.5);
+  /* Iris size relative to the eye */
+  height: calc($eye-size * 0.5);
+  /* Iris size relative to the eye */
+  background: #00f;
+  /* Iris color */
+  border-radius: 50%;
+  /* Keep the iris round */
+  transform: translate(-50%, -50%);
+  /* Center the iris */
+}
+
+.pupil {
+  position: absolute;
+  top: 50%;
+  /* Center the pupil vertically */
+  left: 50%;
+  /* Center the pupil horizontally */
+  width: calc($eye-size * 0.25);
+  /* Pupil size relative to the eye */
+  height: calc($eye-size * 0.25);
+  /* Pupil size relative to the eye */
+  background: #000;
+  /* Pupil color */
+  border-radius: 50%;
+  /* Keep the pupil round */
+  transform: translate(-50%, -50%);
+  /* Center the pupil */
+}
+
+.eyelid {
+  position: absolute;
+  width: 100%;
+  /* Full width of the eye */
+
+  /*both lids can be controlled with this value simultaneously*/
+  height: 0%; //50%; /* Half the height of the eye  = closed (default eyes are closed)*/
+
+  background: #EAE0CE;
+  /* Eyelid color */
+  transition: height 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+  //transition: all 0.3s; /* Smooth transition */
+}
+
+.eyelid.top {
+  top: 0;
+  /* Top eyelid (control) */
+  border-bottom: 2px solid #000;
+  // transition: height 0.2s ease-in-out;
+  /* Optionele transitie bij handmatige controle */
+
+}
+
+.eyelid.bottom {
+  bottom: 0;
+  /* Bottom eyelid (control) */
+  border-top: 2px solid #000;
+  // transition: height 0.2s ease-in-out;
+  /* Optionele transitie bij handmatige controle */
+
+}
+
+
+/*Configurations for expresions*/
+
 @keyframes blink {
-  0%, 8% {
-    height: $eye-size; /* Full eye height */
+
+  0%,
+  100% {
+    height: 0%;
+    /* Oogleden helemaal open */
   }
-  10%, 12% {
-    height: calc($eye-size / 8); /* Compressed eye during blink */
-  }
-  14%, 100% {
-    height: $eye-size; /* Back to full size */
+
+  50% {
+    height: 50%;
+    /* Oogleden sluiten in het midden */
   }
 }
 
-/* Double Blink animation */
-@keyframes double-blink {
-  0%, 8% {
-    height: $eye-size; /* Full eye height */
-  }
-  10%, 12% {
-    height: calc($eye-size / 4); /* Compressed eye */
-  }
-  13% {
-    height: $eye-size; /* Back to full size briefly */
-  }
-  14%, 16% {
-    height: 0; /* Compressed eye again */
-  }
-  18%, 100% {
-    height: $eye-size; /* Back to full size */
-  }
-}
-
-/* Grin animation (happy expression) */
-@keyframes grinb {
-  0%, 10% {
-    bottom: 0; /* Normal position */
-  }
-  20%, 40% {
-    bottom: 50%; /* Raise for grin */
-  }
-  50%, 100% {
-    bottom: 0; /* Back to normal */
-  }
-}
-@keyframes grina {
-  0%, 10% {
-    height: 0; /* Start with no curve */
-  }
-  20%, 40% {
-    height: 100%; /* Full curve */
-  }
-  50%, 100% {
-    height: 0; /* Reset to no curve */
-  }
+.blink-active .eyelid {
+  animation: blink 0.5s ease-in-out 1;
+  /* Blink gebeurt één keer */
 }
 
 /* Sad animation (sad expression) */
-@keyframes sadb {
-  0%, 10% {
-    top: 0; /* Normal position */
+@keyframes sad_eyelid {
+
+  0%,
+  10% {
+    height: 0;
+    /* Normal position */
   }
-  20%, 40% {
-    top: 50%; /* Lower for sad look */
+
+  20%,
+  40% {
+    height: 70%;
+    /* Lower for sad look */
   }
-  50%, 100% {
-    top: 0; /* Back to normal */
+
+  50%,
+  100% {
+    height: 0;
+    /* Back to normal */
   }
+}
+
+@keyframes sad_iris {
+
+  0%,
+  10% {
+    top: 50%;
+    /* Normal position */
+  }
+
+  20%,
+  40% {
+    top: 70%;
+    /* Lower for sad look */
+  }
+
+  50%,
+  100% {
+    top: 50%;
+    /* Back to normal */
+  }
+}
+
+/* Sad expressie */
+.sad .eyelid.top {
+  border-radius: 50%; //create round eye lid for animation
+  animation: sad_eyelid 4s $cubic 1;
+}
+
+.sad .iris {
+  animation: sad_iris 4s $cubic 1;
+}
+
+@keyframes grin_eyelid {
+
+  0%,
+  10% {
+    height: 0;
+    /* Normal position */
+  }
+
+  20%,
+  40% {
+    height: 70%;
+  }
+
+  50%,
+  100% {
+    height: 0;
+    /* Back to normal */
+  }
+}
+
+@keyframes grin_iris {
+
+  0%,
+  10% {
+    top: 50%;
+    /* Normal position */
+  }
+
+  20%,
+  40% {
+    top: 30%;
+    /* Raise for grin */
+  }
+
+  50%,
+  100% {
+    top: 50%;
+    /* Back to normal */
+  }
+}
+
+.grin .eyelid.bottom {
+  border-radius: 50%; //create round eye lid for animation
+  animation: grin_eyelid 4s $cubic 1;
+}
+
+.grin .iris {
+  animation: grin_iris 4s $cubic 1;
+}
+
+/* Look up */
+
+@keyframes look_up_iris {
+
+  0%,
+  100% {
+    top: 50%;
+    /* Normal position */
+  }
+
+  50% {
+    top: 30%;
+    /* Raise for look up */
+  }
+}
+
+.look-up .iris {
+  animation: look_up_iris 2s $cubic 1;
+}
+
+
+@keyframes random_iris {
+  0% {
+    top: 50%;
+    left: 50%;
+  }
+
+  25% {
+    top: math.percentage(math.random());
+    left: math.percentage(math.random());
+  }
+
+  50% {
+    top: math.percentage(math.random());
+    left: math.percentage(math.random());
+  }
+
+  75% {
+    top: math.percentage(math.random());
+    left: math.percentage(math.random());
+  }
+
+  100% {
+    top: 50%;
+    left: 50%;
+  }
+}
+
+.look-random .iris {
+  animation: random_iris 5s 1;
 }

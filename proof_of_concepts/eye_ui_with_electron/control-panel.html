@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel</title>
+</head>
+<body>
+  <h1>Control Panel</h1>
+  <div>
+    <label for="command">Command:</label>
+    <select id="command">
+      <option value="moveEye">Move Eye</option>
+      <option value="moveLid">Move Lid</option>
+      <option value="startAnimation">Start Animation</option>
+      <option value="reset">Reset</option>
+    </select>
+  </div>
+  <div id="parameters">
+    <!-- Parameters will be dynamically added here -->
+  </div>
+  <button onclick="sendCommand()">Send Command</button>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => console.log('WebSocket connected');
+    ws.onclose = () => console.log('WebSocket disconnected');
+    ws.onerror = (error) => console.error('WebSocket error:', error);
+
+    const commandInput = document.getElementById('command');
+    const parametersDiv = document.getElementById('parameters');
+
+    commandInput.addEventListener('change', updateParameters);
+
+    function updateParameters() {
+      const command = commandInput.value;
+      parametersDiv.innerHTML = ''; // Clear existing parameters
+
+      if (command === 'moveEye') {
+        parametersDiv.innerHTML = `
+          <label for="eye">Eye:</label>
+          <select id="eye">
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="both">Both</option>
+          </select>
+          <label for="x">X:</label>
+          <input id="x" type="number" />
+          <label for="y">Y:</label>
+          <input id="y" type="number" />
+        `;
+      } else if (command === 'moveLid') {
+        parametersDiv.innerHTML = `
+          <label for="lid">Lid:</label>
+          <select id="lid">
+            <option value="top-left">Top Left</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="top-right">Top Right</option>
+            <option value="bottom-right">Bottom Right</option>
+            <option value="all">All</option>
+          </select>
+          <label for="position">Position:</label>
+          <input id="position" type="number" />
+        `;
+      } else if (command === 'startAnimation') {
+        parametersDiv.innerHTML = `
+          <label for="animation">Animation:</label>
+          <select id="animation">
+            <option value="blink-active">Blink</option>
+            <option value="sad">Sad</option>
+            <option value="grin">Grin</option>
+            <option value="look-random">Look Random</option>
+          </select>
+        `;
+      }
+    }
+
+    function sendCommand() {
+      const command = commandInput.value;
+      const parameters = {};
+
+      if (command === 'moveEye') {
+        parameters.eye = document.getElementById('eye').value;
+        parameters.x = parseInt(document.getElementById('x').value, 10);
+        parameters.y = parseInt(document.getElementById('y').value, 10);
+      } else if (command === 'moveLid') {
+        parameters.lid = document.getElementById('lid').value;
+        parameters.position = parseInt(document.getElementById('position').value, 10);
+      } else if (command === 'startAnimation') {
+        parameters.animation = document.getElementById('animation').value;
+      }
+
+      ws.send(JSON.stringify({ command, ...parameters }));
+    }
+
+    updateParameters(); // Initialize parameters on page load
+  </script>
+</body>
+</html>

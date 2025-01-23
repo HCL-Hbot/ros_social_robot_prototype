@@ -1,8 +1,20 @@
 // renderer.js
 const { ipcRenderer } = require('electron');
 
-
 window.onload = () => {
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const eyeParameter = queryParams.get('eye'); // Determine if it's left or right eye or both
+
+  const leftEye = document.getElementById('left-eye');
+  const rightEye = document.getElementById('right-eye');
+
+  if (eyeParameter === 'left') {
+    rightEye.remove();
+  } else if (eyeParameter === 'right') {
+    leftEye.remove();
+  }
+
   const eyes = document.querySelectorAll('.eye');
   const irises = document.querySelectorAll('.iris');
   const topLids = document.querySelectorAll('.eyelid.top');
@@ -42,7 +54,7 @@ window.onload = () => {
     }, 200);
   }
 
-  setInterval(() => {
+  let blinkInterval = setInterval(() => {
     if (!isAnimationActive) blink();
   }, 2000);
 
@@ -55,7 +67,9 @@ window.onload = () => {
       moveLid(command.lid, command.position);
     } else if (command.command === 'startAnimation') {
       startAnimation(command.animation);
-    }else if (command.command === 'reset') {
+    } else if (command.command === 'autoBlink') {
+      setAutoBlink(command.value);
+    } else if (command.command === 'reset') {
       reset();
     } else {
       console.error('Unknown command:', command);
@@ -75,7 +89,6 @@ window.onload = () => {
       console.log("Lets move both iris");
       irises.forEach((iris) => {
         console.log('Setting eye position:', x, y);
-        //const iris = eyeElement.querySelector('.iris');
         iris.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
       });
     }
@@ -102,7 +115,6 @@ window.onload = () => {
 
       if (lidElement) {
         console.log('Setting lid position:', position);
-        console.log(lidElement);
         lidElement.style.height = `${position}%`;
       }
       else
@@ -133,13 +145,30 @@ window.onload = () => {
         void eye.offsetWidth; // Trigger reflow
         eye.classList.add(`${animation}`);
 
-          // Verwijder de klasse zodra de animatie is voltooid
+        // Remove the class once the animation is completed
         eye.addEventListener('animationend', (event) => {
           eye.classList.remove(`${animation}`);
-          console.log(`Animatie '${event.animationName}' is voltooid`);
+          console.log(`Animatie '${event.animationName}' is done`);
           isAnimationActive = false;
-        }, { once: true }); // `once: true` zorgt ervoor dat de event listener zichzelf verwijdert
+        }, { once: true }); // `once: true` removes the event listener after it has been triggered
       });
+    }
+  }
+
+  function setAutoBlink(blinkValue) {
+    if(blinkInterval === null && blinkValue !==null && blinkValue === true) // Start the interval
+    {
+      console.log("Auto blink enabled");
+      blinkInterval = setInterval(() => {
+        if (!isAnimationActive) blink();
+      }, 2000);
+    }
+    else if(blinkInterval !== null && blinkValue === false) // Stop the interval
+    {
+      clearInterval(blinkInterval);
+      blinkInterval = null;
+      reset();
+      console.log("Auto blink disabled");
     }
   }
   
@@ -158,60 +187,3 @@ window.onload = () => {
     bottomLids.forEach(lid => lid.style.height = '0%');
   }
 }
-
-
-
-
-
-
-// const { ipcRenderer } = require('electron');
-
-// window.onload = () => {
-//   const queryParams = new URLSearchParams(window.location.search);
-//   const eye = queryParams.get('eye'); // Determine if it's left or right eye or both
-
-//   const leftEye = document.getElementById('left-eye');
-//   const rightEye = document.getElementById('right-eye');
-
-//   if (eye === 'left') {
-//     rightEye.style.display = 'none';
-//   } else if (eye === 'right') {
-//     leftEye.style.display = 'none';
-//   }
-
-//   ipcRenderer.on('play-animation', (event, { animation, duration, repeat }) => {
-//     ipcRenderer.send('log-message', `Playing animation: ${animation}, Duration: ${duration}s, Repeat: ${repeat}`);
-
-//     //console.log(`Playing animation: ${animation}, Duration: ${duration}s, Repeat: ${repeat}`);
-//     playAnimation(animation, duration, repeat);
-//   });
-
-//   function playAnimation(animation, duration, repeat) {
-//     const allEyes = document.querySelectorAll('.iris');
-//     allEyes.forEach((eyeElement) => {
-//       eyeElement.className = 'iris';
-//       //eyeElement.classList.remove(animation);
-      
-//       eyeElement.style.animationDuration = `${duration}s`;
-//       eyeElement.style.animationTimingFunction = 'ease-in-out';
-//       eyeElement.style.animationIterationCount = repeat;
-//       eyeElement.classList.add(animation);
-//     });
-//   }
-//   // function playAnimation(animation, duration, repeat) {
-//   //   const allEyes = document.querySelectorAll('.eye');
-//   //   const animation_timing_function = 'ease-in-out';
-//   //   allEyes.forEach((eyeElement) => {
-//   //     // Reset de animatie
-//   //     eyeElement.style.animation = 'none';
-  
-//   //     // Dwing de browser een herberekening te maken (geen hacks nodig)
-//   //     requestAnimationFrame(() => {
-//   //       // Stel de nieuwe animatie in
-        
-//   //       eyeElement.style.animation = `${animation} ${duration}s ${animation_timing_function} ${repeat}`;
-//   //     });
-//   //   });
-//   // }
-  
-// };

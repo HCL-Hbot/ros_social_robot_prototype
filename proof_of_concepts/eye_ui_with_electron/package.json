@@ -5,8 +5,8 @@
   "scripts": {
     "sass": "sass styles.scss styles.css",
     "sass-watch": "sass --watch styles.scss styles.css",
-    "start": "npm run sass && electron .",
-    "dev": "concurrently \"npm run sass-watch\" \"electron .\"",
+    "start": "NODE_ENV=production npm run sass && electron .",
+    "dev": "NODE_ENV=development concurrently \"npm run sass-watch\" \"electron .\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,6 +19,7 @@
     "sass": "^1.83.1"
   },
   "dependencies": {
+    "electron-reload": "^2.0.0-alpha.1",
     "websocket": "^1.0.35",
     "ws": "^8.18.0"
   }

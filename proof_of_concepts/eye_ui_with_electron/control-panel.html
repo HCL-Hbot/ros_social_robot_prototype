@@ -20,6 +20,8 @@
     <!-- Parameters will be dynamically added here -->
   </div>
   <button onclick="sendCommand()">Send Command</button>
+  <button onclick="turnAutoBlinkOn()">Turn Auto Blink On</button>
+  <button onclick="turnAutoBlinkOff()">Turn Auto Blink Off</button>
 
   <script>
     const ws = new WebSocket('ws://localhost:8080');
@@ -92,6 +94,14 @@
       }
 
       ws.send(JSON.stringify({ command, ...parameters }));
+    }
+
+    function turnAutoBlinkOn() {
+      ws.send(JSON.stringify({ command: 'autoBlink', value: true }));
+    }
+
+    function turnAutoBlinkOff() {
+      ws.send(JSON.stringify({ command: 'autoBlink', value: false }));
     }
 
     updateParameters(); // Initialize parameters on page load

@@ -1,17 +1,15 @@
 @use 'sass:math';
 
-$bg: #EAE0CE;
 /* Background color */
+$bg: #EAE0CE;
 /*
 For the eye size we use percentages with vmax (viewport maximum). Another option could be vmin (viewport minimum).
 vmin is a unit based on the smaller of the viewport's height or width. 1vmin is equal to 1% of the smaller dimension. So if height is smaller than width, 1vmin is 1% of the height.
 vmax is a unit based on the larger of the viewport's height or width. 1vmax is equal to 1% of the larger dimension. So if height is smaller than width, 1vmax is 1% of the width.
 */
-$eye-size: 40vmax;
-/* Define the size of the eye*/
-//(vmax seems appropriate for our HDMI screens)
-$cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86);
-/* Animation timing */
+$eye-size: 40vmax; /* Define the size of the eye*/ //(vmax seems appropriate for our HDMI screens)
+
+$cubic: cubic-bezier(0.785, 0.135, 0.15, 0.86); /* Animation timing */
 
 html,
 body {
@@ -19,42 +17,32 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  /* Disable scrolling */
+  overflow: hidden; /* Disable scrolling */
+
 }
 
 body {
-  background: #EAE0CE;
-  /* Set background color */
+  background: $bg;   /* Set background color */
 }
 
 #app {
   display: flex;
-  width: 100%;
-  /* Full width of the screen */
-  height: 100%;
-  /* Full height of the screen */
+  width: 100%;   /* Full width of the screen */
+  height: 100%;  /* Full height of the screen */
 }
 
 .wrap {
-  flex: 1;
-  /* Each wrap takes up half the screen width (flex 1 = devide every wrap equally, with two wraps this is 50% of screen)*/
-  display: flex;
-  /* Flex container for centering the eye */
-  justify-content: center;
-  /* Center horizontally within its half */
-  //align-items: center; /* Center vertically */
+  flex: 1;   /* Each wrap takes up half the screen width (flex 1 = devide every wrap equally, with two wraps this is 50% of screen)*/
+  display: flex;  /* Flex container for centering the eye */
+  justify-content: center;  /* Center horizontally within its half */
 }
 
 .eye-label {
-  text-align: center;
-  /* Centreer de tekst */
-  font-size: 16px;
-  /* Pas de lettergrootte aan naar wens */
-  font-weight: bold;
-  /* Maak de tekst vetgedrukt */
-  margin-bottom: 10px;
-  /* Voeg ruimte toe tussen de tekst en het oog */
+  text-align: center; /* Centreer de tekst */
+  font-size: 16px;  /* Pas de lettergrootte aan naar wens */
+  font-weight: bold;  /* Maak de tekst vetgedrukt */
+  margin-bottom: 10px;  /* Voeg ruimte toe tussen de tekst en het oog */
+
 }
 
 .eye {
@@ -62,86 +50,59 @@ body {
   margin: auto;
   top: 0;
   bottom: 0;
-  background: white;
-  /* Eye background color */
+  background: white; /* Eye background color */
   border: 3px solid #000;
-  border-radius: 50%;
-  /* Keep the eye perfectly round */
-  overflow: hidden;
-  /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
-  width: $eye-size;
-  /* Use variable for eye width */
-  height: $eye-size;
-  /* Maintain circular shape */
+  border-radius: 50%; /* Keep the eye perfectly round */
+  overflow: hidden; /* Hide overflowing content (When eye closes everything inside the eye will be hidden)*/
+  width: $eye-size; /* Use variable for eye width */
+  height: $eye-size;  /* Maintain circular shape */
+
 }
 
 .iris {
   position: absolute;
-  top: 50%;
-  /* Center the iris vertically */
-  left: 50%;
-  /* Center the iris horizontally */
-  width: calc($eye-size * 0.5);
-  /* Iris size relative to the eye */
-  height: calc($eye-size * 0.5);
-  /* Iris size relative to the eye */
-  background: #00f;
-  /* Iris color */
-  border-radius: 50%;
-  /* Keep the iris round */
-  transform: translate(-50%, -50%);
-  /* Center the iris */
+  top: 50%; /* Center the iris vertically */
+  left: 50%; /* Center the iris horizontally */
+  width: calc($eye-size * 0.5); /* Iris size relative to the eye */
+  height: calc($eye-size * 0.5); /* Iris size relative to the eye */
+  background: #00f; /* Iris color */
+  border-radius: 50%; /* Keep the iris round */
+  transform: translate(-50%, -50%); /* Center the iris */
 }
 
 .pupil {
   position: absolute;
-  top: 50%;
-  /* Center the pupil vertically */
-  left: 50%;
-  /* Center the pupil horizontally */
-  width: calc($eye-size * 0.25);
-  /* Pupil size relative to the eye */
-  height: calc($eye-size * 0.25);
-  /* Pupil size relative to the eye */
-  background: #000;
-  /* Pupil color */
-  border-radius: 50%;
-  /* Keep the pupil round */
-  transform: translate(-50%, -50%);
-  /* Center the pupil */
+  top: 50%; /* Center the pupil vertically */
+  left: 50%; /* Center the pupil horizontally */
+  width: calc($eye-size * 0.25); /* Pupil size relative to the eye */
+  height: calc($eye-size * 0.25); /* Pupil size relative to the eye */
+  background: #000;  /* Pupil color */
+  border-radius: 50%; /* Keep the pupil round */
+  transform: translate(-50%, -50%); /* Center the pupil */
 }
 
 .eyelid {
   position: absolute;
-  width: 100%;
-  /* Full width of the eye */
-
+  width: 100%;  /* Full width of the eye */
+ 
   /*both lids can be controlled with this value simultaneously*/
   height: 0%; //50%; /* Half the height of the eye  = closed (default eyes are closed)*/
 
-  background: #EAE0CE;
-  /* Eyelid color */
+  background: $bg; /* Eyelid color */
   transition: height 0.2s ease-in-out, transform 0.2s ease-in-out;
-
   //transition: all 0.3s; /* Smooth transition */
 }
 
 .eyelid.top {
-  top: 0;
-  /* Top eyelid (control) */
+  top: 0;  /* Top eyelid (control) */
   border-bottom: 2px solid #000;
-  // transition: height 0.2s ease-in-out;
-  /* Optionele transitie bij handmatige controle */
-
+  // transition: height 0.2s ease-in-out;  /* Optionele transitie bij handmatige controle */
 }
 
 .eyelid.bottom {
-  bottom: 0;
-  /* Bottom eyelid (control) */
+  bottom: 0; /* Bottom eyelid (control) */
   border-top: 2px solid #000;
-  // transition: height 0.2s ease-in-out;
-  /* Optionele transitie bij handmatige controle */
-
+  // transition: height 0.2s ease-in-out;  /* Optionele transitie bij handmatige controle */
 }
 
 
@@ -151,19 +112,17 @@ body {
 
   0%,
   100% {
-    height: 0%;
-    /* Oogleden helemaal open */
+    height: 0%; /* Oogleden helemaal open */
   }
 
   50% {
-    height: 50%;
-    /* Oogleden sluiten in het midden */
+    height: 50%; /* Oogleden sluiten in het midden */
+
   }
 }
 
 .blink-active .eyelid {
-  animation: blink 0.5s ease-in-out 1;
-  /* Blink gebeurt één keer */
+  animation: blink 0.5s ease-in-out 1;  /* Blink once */
 }
 
 /* Sad animation (sad expression) */
@@ -171,20 +130,17 @@ body {
 
   0%,
   10% {
-    height: 0;
-    /* Normal position */
+    height: 0; /* Normal position */
   }
 
   20%,
   40% {
-    height: 70%;
-    /* Lower for sad look */
+    height: 70%; /* Lower for sad look */
   }
 
   50%,
   100% {
-    height: 0;
-    /* Back to normal */
+    height: 0; /* Back to normal */
   }
 }
 
@@ -192,20 +148,17 @@ body {
 
   0%,
   10% {
-    top: 50%;
-    /* Normal position */
+    top: 50%; /* Normal position */
   }
 
   20%,
   40% {
-    top: 70%;
-    /* Lower for sad look */
+    top: 70%; /* Lower for sad look */
   }
 
   50%,
   100% {
-    top: 50%;
-    /* Back to normal */
+    top: 50%; /* Back to normal */
   }
 }
 
@@ -223,8 +176,8 @@ body {
 
   0%,
   10% {
-    height: 0;
-    /* Normal position */
+    height: 0; /* Normal position */
+
   }
 
   20%,
@@ -234,8 +187,8 @@ body {
 
   50%,
   100% {
-    height: 0;
-    /* Back to normal */
+    height: 0; /* Back to normal */
+
   }
 }
 
@@ -243,20 +196,20 @@ body {
 
   0%,
   10% {
-    top: 50%;
-    /* Normal position */
+    top: 50%; /* Normal position */
+
   }
 
   20%,
   40% {
-    top: 30%;
-    /* Raise for grin */
+    top: 30%; /* Raise for grin */
+
   }
 
   50%,
   100% {
-    top: 50%;
-    /* Back to normal */
+    top: 50%; /* Back to normal */
+
   }
 }
 
@@ -275,13 +228,13 @@ body {
 
   0%,
   100% {
-    top: 50%;
-    /* Normal position */
+    top: 50%; /* Normal position */
+
   }
 
   50% {
-    top: 30%;
-    /* Raise for look up */
+    top: 30%; /* Raise for look up */
+
   }
 }
 

@@ -66,6 +66,8 @@ sudo apt install curl -y # Install curl
 ```bash
 # Download and install nvm:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+#Re-read bashrc OR restart terminal
+source ~/.bashrc 
 # Download and install Node.js:
 nvm install 22
 # Verify the Node.js version:

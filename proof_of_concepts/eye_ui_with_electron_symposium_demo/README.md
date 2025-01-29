@@ -52,7 +52,7 @@ User=hcl
 Environment=DISPLAY=:0
 Environment=MAIN_ROTATION=left
 Environment=SECOND_ROTATION=right
-ExecStart=~/ros_social_robot_prototype/proof_of_concepts/eye_ui_with_electron_symposium_demo/configure_screens.sh
+ExecStart=/home/hcl/ros_social_robot_prototype/proof_of_concepts/eye_ui_with_electron_symposium_demo/configure_screens.sh
 Restart=always
 RestartSec=5
 

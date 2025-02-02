@@ -70,6 +70,8 @@ sudo systemctl daemon-reload #reload
 sudo systemctl enable configure-screens.service #add to reboot
 sudo systemctl start configure-screens.service #(optional start now)
 sudo systemctl status configure-screens.service #(optional check if it is running)
+sudo systemctl stop configure-screens.service #A command to stop te service if we want to manually change screen rotation
+
 ```
 
 When you configure screen from bash (manually) 

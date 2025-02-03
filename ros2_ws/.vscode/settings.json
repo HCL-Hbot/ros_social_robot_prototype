@@ -82,6 +82,11 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "strstream": "cpp",
+        "cfenv": "cpp",
+        "source_location": "cpp",
+        "stdfloat": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

@@ -1,9 +1,9 @@
-#include "eyes_hld.hpp"
+#include "eye_display_hld.hpp"
 
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<EyesHLD>();
+    auto node = std::make_shared<EyeDisplayHLD>();
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;

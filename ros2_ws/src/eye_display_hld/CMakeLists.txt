@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
-project(eyes_hld)
+project(eye_display_hld)
+
+#Build this package always with c++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -8,20 +12,38 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
-add_executable(eyes_hld_node src/main.cpp src/eyes_hld.cpp)
 
-target_include_directories(eyes_hld_node PUBLIC
+set(msg_files
+  "msg/EyeControl.msg"
+  "msg/ScreenExpression.msg"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+add_executable(eye_display_hld_node src/main.cpp src/eye_display_hld.cpp)
+
+target_include_directories(eye_display_hld_node PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
-ament_target_dependencies(eyes_hld_node rclcpp)
-target_compile_features(eyes_hld_node PUBLIC cxx_std_17)  # Require C++17
+ament_target_dependencies(eye_display_hld_node rclcpp)
+target_compile_features(eye_display_hld_node PUBLIC cxx_std_17)  # Require C++17
 
 install(TARGETS
-  eyes_hld_node
+  eye_display_hld_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+rosidl_get_typesupport_target(cpp_typesupport_target
+${PROJECT_NAME} rosidl_typesupport_cpp)
+
+target_link_libraries(eye_display_hld_node "${cpp_typesupport_target}")
 
 
 if(BUILD_TESTING)

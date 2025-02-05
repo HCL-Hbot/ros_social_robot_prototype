@@ -32,6 +32,17 @@ public:
         BOTH
     };
 
+    // enum class Expression : uint8_t
+    // {
+    //     NONE,
+    //     STARING,
+    //     TRACKING,
+    //     GRIN,
+    //     SAD,
+    //     LOOK_RANDOM,
+    //     NEUTRAL
+    // };
+
     EyeDisplayHLD();
     
     virtual ~EyeDisplayHLD();

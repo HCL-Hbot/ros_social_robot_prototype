@@ -1,13 +1,16 @@
 #include "eye_display_hld.hpp"
 
 constexpr const char* DEFAULT_NODE_NAME = "eyes_hld_node";
-constexpr const char* DEFAULT_TOPIC_NAME_SUB_LEFT_EYE = "left_eye";
-constexpr const char* DEFAULT_TOPIC_NAME_SUB_RIGHT_EYE = "right_eye";
-constexpr const char* DEFAULT_TOPIC_NAME_SUB_BOTH_EYE = "both_eye";
+constexpr const char* DEFAULT_TOPIC_NAME_SUB_LEFT_EYE = "left_eye_hld";
+constexpr const char* DEFAULT_TOPIC_NAME_SUB_RIGHT_EYE = "right_eye_hld";
+constexpr const char* DEFAULT_TOPIC_NAME_SUB_BOTH_EYE = "both_eye_hld";
 
+constexpr const char* DEFAULT_TOPIC_NAME_PUB_LEFT_EYE = "left_eye_lld";
+constexpr const char* DEFAULT_TOPIC_NAME_PUB_RIGHT_EYE = "right_eye_lld";
 
 EyeDisplayHLD::EyeDisplayHLD() : 
     rclcpp::Node(DEFAULT_NODE_NAME),
+    //current_expression_(eye_display_hld::msg::ScreenExpression::EYE_SLEEP),            
     left_eye_subscriber_(create_subscription<eye_display_hld::msg::EyeControl>(
             DEFAULT_TOPIC_NAME_SUB_LEFT_EYE, 10, std::bind(&EyeDisplayHLD::leftEyeCallback, this, std::placeholders::_1))),
     right_eye_subscriber_(create_subscription<eye_display_hld::msg::EyeControl>(
@@ -26,6 +29,9 @@ EyeDisplayHLD::~EyeDisplayHLD()
 
 void EyeDisplayHLD::setExpression(const eye_display_hld::msg::ScreenExpression::SharedPtr expression)
 {
+     eye_display_hld::msg::ScreenExpression new_expression;
+     new_expression.action = eye_display_hld::msg::ScreenExpression::EYE_SLEEP;
+//   eye_display_hld::msg::ScreenExpression::SharedPtr new_expression = eye_display_hld::msg::ScreenExpression::EYE_AWAKE;
 }
 
 void EyeDisplayHLD::leftEyeCallback(const eye_display_hld::msg::EyeControl::SharedPtr msg)

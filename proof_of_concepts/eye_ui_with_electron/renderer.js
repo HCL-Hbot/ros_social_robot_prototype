@@ -54,9 +54,9 @@ window.onload = () => {
     }, 200);
   }
 
-  let blinkInterval = setInterval(() => {
-    if (!isAnimationActive) blink();
-  }, 2000);
+  // let blinkInterval = setInterval(() => {
+  //   if (!isAnimationActive) blink();
+  // }, 2000);
 
   ipcRenderer.on('websocket-message', (event, command) => {
     console.log('Command received:', command);

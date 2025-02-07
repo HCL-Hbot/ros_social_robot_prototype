@@ -86,7 +86,8 @@
         "strstream": "cpp",
         "cfenv": "cpp",
         "source_location": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "csetjmp": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

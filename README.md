@@ -85,6 +85,10 @@ An example with camera_hld package
 ```
 Building the project this way will include unittest and cppcheck.
 
+```bash
+colcon build --packages-select camera_hdl #build one package
+colcon build --event-handlers console_direct+ --packages-select camera_hld #build one package with verbose output
+```
 ## Run tests
 
 step 1 run tests:

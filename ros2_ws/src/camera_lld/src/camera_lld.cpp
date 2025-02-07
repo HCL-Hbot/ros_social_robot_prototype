@@ -34,13 +34,14 @@ void CameraLLD::captureAndPublish()
       RCLCPP_ERROR(this->get_logger(), "Failed to open camera.");
       rclcpp::shutdown();
     }
-
+    
     std_msgs::msg::Header header;
     
     while (rclcpp::ok()) 
     {
       cv::Mat frame;
       cap >> frame; //read frame
+
       if (!frame.empty())
       {
         header.stamp = this->get_clock()->now();

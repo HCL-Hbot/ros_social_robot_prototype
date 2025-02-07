@@ -116,7 +116,7 @@ float CameraHLD::getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &ey
 
   for (const cv::Rect &eye_roi : eye_rois)
   {
-    if(is_roi_within_bounds(eye_roi, eye_roi_frame))
+    if(is_roi_within_bounds(eye_roi, eye_roi_frame)) //is this correct?
     {
       /* Crop the eye_roi region from the camera frame */
       iris_roi_frame = eye_roi_frame(eye_roi);

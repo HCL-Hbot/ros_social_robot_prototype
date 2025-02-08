@@ -7,6 +7,7 @@
     "sass-watch": "sass --watch styles.scss styles.css",
     "start": "NODE_ENV=production npm run sass && electron .",
     "dev": "NODE_ENV=development concurrently \"npm run sass-watch\" \"electron .\"",
+    "rebuild": "./node_modules/.bin/electron-rebuild",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,13 +15,14 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
     "concurrently": "^9.1.2",
-    "electron": "^33.2.1",
+    "electron": "^32.0.0",
+    "electron-reload": "^2.0.0-alpha.1",
     "sass": "^1.83.1"
   },
   "dependencies": {
-    "electron-reload": "^2.0.0-alpha.1",
-    "rclnodejs": "^0.28.1",
+    "rclnodejs": "0.29.0",
     "websocket": "^1.0.35",
     "ws": "^8.18.0"
   }

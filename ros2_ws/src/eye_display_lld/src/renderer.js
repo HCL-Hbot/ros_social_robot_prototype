@@ -3,6 +3,12 @@ const { ipcRenderer } = require('electron');
 
 window.onload = () => {
 
+  ipcRenderer.on('pupil-control', (event, msg) => {
+    console.log(`Received PupilControl message in renderer: ${msg.dilation_percentage}`);
+    // Hier kun je de logica toevoegen om de pupil dilatatie te verwerken
+    //updatePupilDilation(msg.dilation_percentage);
+  });
+
   const queryParams = new URLSearchParams(window.location.search);
   const eyeParameter = queryParams.get('eye'); // Determine if it's left or right eye or both
 
@@ -21,26 +27,26 @@ window.onload = () => {
   const bottomLids = document.querySelectorAll('.eyelid.bottom');
   let isAnimationActive = false;
 
-  window.addEventListener('mousemove', (e) => {
-    if (isAnimationActive) return;
+  // window.addEventListener('mousemove', (e) => {
+  //   if (isAnimationActive) return;
 
-    const { clientX, clientY } = e;
-    const { innerWidth, innerHeight } = window;
+  //   const { clientX, clientY } = e;
+  //   const { innerWidth, innerHeight } = window;
 
-    irises.forEach((eye) => {
-      const rect = eye.getBoundingClientRect();
-      const eyeX = rect.left + rect.width / 2;
-      const eyeY = rect.top + rect.height / 2;
-      const deltaX = clientX - eyeX;
-      const deltaY = clientY - eyeY;
-      const angle = Math.atan2(deltaY, deltaX);
-      const distance = Math.min(rect.width / 4, Math.hypot(deltaX, deltaY));
-      const x = distance * Math.cos(angle);
-      const y = distance * Math.sin(angle);
+  //   irises.forEach((eye) => {
+  //     const rect = eye.getBoundingClientRect();
+  //     const eyeX = rect.left + rect.width / 2;
+  //     const eyeY = rect.top + rect.height / 2;
+  //     const deltaX = clientX - eyeX;
+  //     const deltaY = clientY - eyeY;
+  //     const angle = Math.atan2(deltaY, deltaX);
+  //     const distance = Math.min(rect.width / 4, Math.hypot(deltaX, deltaY));
+  //     const x = distance * Math.cos(angle);
+  //     const y = distance * Math.sin(angle);
 
-      eye.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
-    });
-  });
+  //     eye.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+  //   });
+  // });
 
   function blink() {
     topLids.forEach(lid => lid.style.height = '50%');

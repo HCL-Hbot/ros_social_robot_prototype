@@ -1,6 +1,7 @@
 const { app, screen, BrowserWindow, ipcMain } = require('electron');
 const WebSocket = require('ws');
 const path = require('path');
+let rclnodejs = require("rclnodejs");
 
 // Check if the app is running in development mode (for hot reloading)
 if (process.env.NODE_ENV === 'development') {
@@ -42,7 +43,7 @@ function createWindowForScreen(display, eye) {
 
 // Function to start the WebSocket server
 function startWebSocketServer() {
-  const wss = new WebSocket.Server({ port: 8080 });
+  const wss = new WebSocket.Server({ host: '0.0.0.0', port: 8080 });
 
   wss.on('connection', (ws) => {
     console.log('Controller connected');
@@ -54,12 +55,12 @@ function startWebSocketServer() {
         const command = JSON.parse(message);
         console.log('Command:', command);
         
-        if(windows.left && windows.right) {
-          windows.left.webContents.send('websocket-message', command);
-          windows.right.webContents.send('websocket-message', command);  
-        } else if(windows.both) {
-          windows.both.webContents.send('websocket-message', command);
-        }        
+        for (const eye_window in windows) {
+          if (windows[eye_window]) {
+            windows[eye_window].webContents.send('websocket-message', command);
+          }
+        }
+          
       } catch (error) {
         console.error('Invalid message format', error);
         ws.send(JSON.stringify({ status: 'error', message: 'Invalid format' }));
@@ -71,27 +72,102 @@ function startWebSocketServer() {
     });
   });
 
-  console.log('WebSocket server is running on ws://localhost:8080');
+  console.log('WebSocket server is running on ws://0.0.0.0:8080');
 }
 
 function setupScreens() {
   const displays = screen.getAllDisplays();
+  const options = parseArguments();
+  const argumentCount = Object.keys(options).length;
+  console.log('Arguments:', argumentCount);
+  let leftEyeScreenIndex = null;
+  let rightEyeScreenIndex = null;
 
-  if (displays.length > 1) {
-      createWindowForScreen(displays[0], 'right');
-      createWindowForScreen(displays[1], 'left');
-  } else if (displays.length === 1) {
-      createWindowForScreen(displays[0], 'both');
-  } else {
-      console.error('No screens detected. Exiting.');
-      app.quit();
+  if(displays.length === 0)
+  {
+    console.error('No screens detected. Exiting.');
+    process.exit(1); // Beëindig de applicatie onmiddellijk met een foutcode
   }
+
+  if (options.leftEye === undefined && options.rightEye === undefined) {
+    console.log("No arguments provided, go with default settings");
+    createWindowForScreen(displays[0], 'both');
+    console.log('Windows object:', windows); // Debugging
+    return;
+  }
+  if (options.leftEye !== undefined) {
+    const leftDisplay = displays[options.leftEye];
+    if (leftDisplay) {
+      createWindowForScreen(leftDisplay, 'left');
+    } else {
+      console.error(`Invalid leftEye display index: ${options.leftEye}`);
+    }
+  }
+
+  if (options.rightEye !== undefined) {
+    const rightDisplay = displays[options.rightEye];
+    if (rightDisplay) {
+      createWindowForScreen(rightDisplay, 'right');
+    } else {
+      console.error(`Invalid rightEye display index: ${options.rightEye}`);
+    }
+  }
+
   console.log('Windows object:', windows); // Debugging
+}
+
+
+// Parse command-line arguments
+function parseArguments() {
+  const args = process.argv.slice(2);
+  const options = {};
+
+  args.forEach(arg => {
+    if (arg.startsWith('--left-eye=')) {
+      const value = parseInt(arg.split('=')[1], 10);
+      if (isNaN(value) || value < 0 || value >= screen.getAllDisplays().length) {
+        console.error(`Invalid value for --left-eye: ${value}. Must be a valid display index.`);
+        app.quit();
+      }
+      options.leftEye = value;
+    } else if (arg.startsWith('--right-eye=')) {
+      const value = parseInt(arg.split('=')[1], 10);
+      if (isNaN(value) || value < 0 || value >= screen.getAllDisplays().length) {
+        console.error(`Invalid value for --right-eye: ${value}. Must be a valid display index.`);
+        app.quit();
+      }
+      options.rightEye = value;
+    }
+  });
+
+  return options;
+}
+
+function startRclNodejs() {
+  // Initialize ROS2 node
+  // rclnodejs.init().then(() => {
+  //   const node = new rclnodejs.Node('eye_display_lld');
+  //   const pupilControlSub = node.createSubscription(
+  //     'eye_display_lld/msg/PupilControl',
+  //     'pupil_control',
+  //     (msg) => {
+  //       console.log(`Received PupilControl message: ${msg.dilation_percentage}`);
+  //       // Send the message to the renderer process
+  //       for (const eye_window in windows) {
+  //         if (windows[eye_window]) {
+  //           windows[eye_window].webContents.send('pupil-control', msg);
+  //         }
+  //       }
+  //     }
+  //   );
+  //   rclnodejs.spin(node);
+  // });
 }
 
 app.whenReady().then(() => {
   setupScreens();
-  startWebSocketServer();
+  //startWebSocketServer();
+  //startRclNodejs();
 });
 
 app.on('window-all-closed', () => {
@@ -103,6 +179,7 @@ app.on('window-all-closed', () => {
 // Serve a simple UI for testing
 const { createServer } = require('http');
 const fs = require('fs');
+const { start } = require('repl');
 
 createServer((req, res) => {
   if (req.url === '/') {
@@ -112,6 +189,6 @@ createServer((req, res) => {
     res.writeHead(404);
     res.end('Not Found');
   }
-}).listen(8081, () => {
-  console.log('Control Panel running at http://localhost:8081');
+}).listen(8081, '0.0.0.0', () => {
+  console.log('Control Panel running at http://0.0.0.0:8081');
 });

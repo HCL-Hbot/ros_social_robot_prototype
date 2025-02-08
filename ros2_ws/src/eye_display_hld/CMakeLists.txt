@@ -13,7 +13,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-
+find_package(eye_display_lld REQUIRED)
 
 set(msg_files
   "msg/EyeControl.msg"
@@ -32,7 +32,7 @@ target_include_directories(eye_display_hld_node PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
-ament_target_dependencies(eye_display_hld_node rclcpp)
+ament_target_dependencies(eye_display_hld_node rclcpp eye_display_lld)
 target_compile_features(eye_display_hld_node PUBLIC cxx_std_17)  # Require C++17
 
 install(TARGETS

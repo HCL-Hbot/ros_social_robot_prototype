@@ -18,9 +18,7 @@ Some npm packages are choosen with a specifically with a version number.
     "sass": "^1.83.1"
   },
   "dependencies": {
-    "rclnodejs": "0.29.0", //Lets stick to only this version, don't accept higher version.  
-    "websocket": "^1.0.35",
-    "ws": "^8.18.0"
+    "rclnodejs": "0.29.0" //Lets stick to only this version, don't accept higher version.  
   }
 ```
 

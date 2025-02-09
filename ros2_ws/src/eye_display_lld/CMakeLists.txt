@@ -22,12 +22,6 @@ ament_export_dependencies(rosidl_default_runtime)
 rosidl_get_typesupport_target(cpp_typesupport_target
 ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-# Install the msg files
-install(DIRECTORY msg
-  DESTINATION share/${PROJECT_NAME}
-)
-
-
 # Ensure Node.js and npm are available
 find_program(NPM_EXECUTABLE npm)
 if(NOT NPM_EXECUTABLE)
@@ -68,9 +62,16 @@ else()
   message(STATUS "electron-rebuild succeeded: ${electron_rebuild_output}")
 endif()
 
+
+# Install the msg files
+install(DIRECTORY msg
+  DESTINATION share/${PROJECT_NAME}
+)
+
 # Install launch files
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
+
 
 ament_package()

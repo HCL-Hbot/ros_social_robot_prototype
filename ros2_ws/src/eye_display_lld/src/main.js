@@ -1,5 +1,4 @@
 const { app, screen, BrowserWindow, ipcMain } = require('electron');
-const WebSocket = require('ws');
 const path = require('path');
 let rclnodejs = require("rclnodejs");
 
@@ -143,52 +142,48 @@ function parseArguments() {
   return options;
 }
 
-function startRclNodejs() {
-  // Initialize ROS2 node
-  // rclnodejs.init().then(() => {
-  //   const node = new rclnodejs.Node('eye_display_lld');
-  //   const pupilControlSub = node.createSubscription(
-  //     'eye_display_lld/msg/PupilControl',
-  //     'pupil_control',
-  //     (msg) => {
-  //       console.log(`Received PupilControl message: ${msg.dilation_percentage}`);
-  //       // Send the message to the renderer process
-  //       for (const eye_window in windows) {
-  //         if (windows[eye_window]) {
-  //           windows[eye_window].webContents.send('pupil-control', msg);
-  //         }
-  //       }
-  //     }
-  //   );
-  //   rclnodejs.spin(node);
-  // });
-}
+// function startRclNodejs1() {
+//   //Initialize ROS2 node
+//   rclnodejs.init().then(() => {
+//     //const node = new rclnodejs.Node('eye_display_lld');
+//     const node = rclnodejs.createNode('eye_display_lld');
+//     node.createSubscription(
+//       'eye_display_lld/msg/PupilControl',
+//       'pupil_control',
+//       (msg) => {
+//         console.log(`Received PupilControl message: ${msg.dilation_percentage}`);
+//         // Send the message to the renderer process
+//         // for (const eye_window in windows) {
+//         //   if (windows[eye_window]) {
+//         //     windows[eye_window].webContents.send('pupil-control', msg);
+//         //   }
+//         // }
+//       }
+//     );
+//     rclnodejs.spin(node);
+//   });
+// }
 
+function startRclNodejs() {
+  rclnodejs.init().then(() => {
+    const node = rclnodejs.createNode('eye_display_lld');
+
+    node.createSubscription('eye_display_lld/msg/PupilControl', 'pupil_control', (msg) => {
+      console.log(`Received message: ${msg.dilation_percentage}`);
+    });
+
+    rclnodejs.spin(node);
+  });
+}
 app.whenReady().then(() => {
-  setupScreens();
+  //setupScreens();
   //startWebSocketServer();
-  //startRclNodejs();
+  startRclNodejs();
+  //startRclNodejs1();
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-});
-
-// Serve a simple UI for testing
-const { createServer } = require('http');
-const fs = require('fs');
-const { start } = require('repl');
-
-createServer((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    fs.createReadStream(`${__dirname}/control-panel.html`).pipe(res);
-  } else {
-    res.writeHead(404);
-    res.end('Not Found');
-  }
-}).listen(8081, '0.0.0.0', () => {
-  console.log('Control Panel running at http://0.0.0.0:8081');
 });

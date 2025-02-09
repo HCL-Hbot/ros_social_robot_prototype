@@ -22,8 +22,6 @@
     "sass": "^1.83.1"
   },
   "dependencies": {
-    "rclnodejs": "0.29.0",
-    "websocket": "^1.0.35",
-    "ws": "^8.18.0"
+    "rclnodejs": "0.29.0"
   }
 }

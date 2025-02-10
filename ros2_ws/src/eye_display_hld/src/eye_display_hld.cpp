@@ -3,7 +3,7 @@
 constexpr const char* DEFAULT_NODE_NAME = "eyes_hld_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB_BOTH_EYE = "eye_control";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB_PUPIL_CONTROL = "pupil_control";
-constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYES_DIRECTION = "eyes_direction";
+constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYES_DIRECTION = "eyes_direction_control";
 //constexpr const char* DEFAULT_TOPIC_NAME_PUB_LEFT_EYE = "left_eye_lld";
 //constexpr const char* DEFAULT_TOPIC_NAME_PUB_RIGHT_EYE = "right_eye_lld";
 

@@ -164,19 +164,35 @@ function parseArguments() {
 //   });
 // }
 
+// Function to send a message to the renderer process
+function sendToRenderer(event_name, msg) {
+  for (const eye_window in windows) {
+    if (windows[eye_window]) {
+      windows[eye_window].webContents.send(event_name, msg);
+    }
+  }
+}
+
 function startRclNodejs() {
   rclnodejs.init().then(() => {
     const node = rclnodejs.createNode('eye_display_lld');
 
     node.createSubscription('eye_display_lld/msg/PupilControl', 'pupil_control', (msg) => {
-      console.log(`Received message: ${msg.dilation_percentage}`);
+      //console.log(`Received message: ${msg.dilation_percentage}`);
+      sendToRenderer('pupil-control', msg);
     });
+    
+    node.createSubscription('eye_display_lld/msg/EyesDirection', 'eyes_direction_control', (msg) => {
+      //console.log(`Received message: ${msg.yaw} and ${msg.pitch}`);
+      sendToRenderer('eyes_direction_control', msg);
+    });
+
 
     rclnodejs.spin(node);
   });
 }
 app.whenReady().then(() => {
-  //setupScreens();
+  setupScreens();
   //startWebSocketServer();
   startRclNodejs();
   //startRclNodejs1();

@@ -13,6 +13,7 @@
         "${workspaceFolder}/install/camera_hld/include/**",
         "${workspaceFolder}/install/eye_display_hld/include/**",
         "${workspaceFolder}/install/eye_display_lld/include/**",
+        "${workspaceFolder}/install/radar_presence_hld/include/**",
         "${workspaceFolder}/build/**"
       ],
       "name": "ROS",

@@ -3,13 +3,21 @@
 constexpr const char* DEFAULT_NODE_NAME = "interaction_controller_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB_FACE = "face_info";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYE_CONTROL = "eye_control";
+constexpr const char* DEFAULT_TOPIC_NAME_SUB_RADAR_PRESENCE_HL = "radar_presence";
+constexpr const char* DEFAULT_TOPIC_NAME_PUB_SCREEN_EXPRESSION = "screen_expression";
 
 InteractionController::InteractionController() :
     rclcpp::Node(DEFAULT_NODE_NAME),
     face_position_(create_subscription<geometry_msgs::msg::PointStamped>(
         DEFAULT_TOPIC_NAME_SUB_FACE, 10, std::bind(&InteractionController::facePositionCallback, this, std::placeholders::_1))),
-    eye_control_pub_(create_publisher<eye_display_hld::msg::EyeControl>(DEFAULT_TOPIC_NAME_PUB_EYE_CONTROL, 10))
+    eye_control_pub_(create_publisher<eye_display_hld::msg::EyeControl>(DEFAULT_TOPIC_NAME_PUB_EYE_CONTROL, 10)),
+    radar_presence_subscriber_(create_subscription<radar_presence_hld::msg::PresenceDetection>(
+        DEFAULT_TOPIC_NAME_SUB_RADAR_PRESENCE_HL, 10, std::bind(&InteractionController::radarPresenceCallback, this, std::placeholders::_1))),
+    screen_expression_pub_(this->create_publisher<eye_display_hld::msg::ScreenExpression>(DEFAULT_TOPIC_NAME_PUB_SCREEN_EXPRESSION, 10)),
+    last_precence_msg_()
 {
+    last_precence_msg_.presence_state = radar_presence_hld::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
+    last_precence_msg_.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_STANDING;
 }
 
 InteractionController::~InteractionController()
@@ -50,4 +58,24 @@ eye_display_hld::msg::EyeControl InteractionController::convertFacePositionToEye
     //------------------------------------------------------------------------------------------------
 
     return eye_control_msg;
+}
+
+void InteractionController::radarPresenceCallback(const radar_presence_hld::msg::PresenceDetection::SharedPtr msg)
+{
+    if(last_precence_msg_.presence_state == msg->presence_state)
+    {
+        return; //do nothing
+    }
+
+    eye_display_hld::msg::ScreenExpression screen_expression_msg;
+    if(msg->presence_state == radar_presence_hld::msg::PresenceDetection::TARGET_IN_RANGE)
+    {
+        screen_expression_msg.action = eye_display_hld::msg::ScreenExpression::EYE_AWAKE;
+    }
+    else if(msg->presence_state == radar_presence_hld::msg::PresenceDetection::TARGET_OUT_OF_RANGE)
+    {
+        screen_expression_msg.action = eye_display_hld::msg::ScreenExpression::EYE_SLEEP;
+    }
+    screen_expression_pub_->publish(screen_expression_msg);
+    last_precence_msg_ = *msg;
 }

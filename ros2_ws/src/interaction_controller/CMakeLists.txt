@@ -15,6 +15,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(camera_hld REQUIRED)
 find_package(eye_display_hld REQUIRED)
+find_package(radar_presence_hld REQUIRED)
 
 add_executable(interaction_controller_node src/main.cpp src/interaction_controller.cpp)
 
@@ -30,6 +31,7 @@ ament_target_dependencies(
   "geometry_msgs"
   "camera_hld"
   "eye_display_hld"
+  "radar_presence_hld"
 )
 
 install(TARGETS interaction_controller_node

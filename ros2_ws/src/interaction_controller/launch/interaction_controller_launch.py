@@ -27,8 +27,16 @@ def generate_launch_description():
         output='screen'
     )
 
+    radar_presence_hld_node = Node(
+        package='radar_presence_hld',
+        executable='radar_presence_hld_node',
+        name='radar_presence_hld',
+        output='screen'
+    )
+
     return LaunchDescription([
         camera_launch,
         interaction_controller_node,
-        eye_display_hld_node
+        eye_display_hld_node,
+        radar_presence_hld_node
     ])

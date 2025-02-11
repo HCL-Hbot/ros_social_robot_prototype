@@ -37,9 +37,9 @@ window.onload = () => {
     }, 200);
   }
 
-  let blinkInterval = setInterval(() => {
-    if (!isAnimationActive) blink();
-  }, 2000);
+  // let blinkInterval = setInterval(() => {
+  //   if (!isAnimationActive) blink();
+  // }, 2000);
 
   ipcRenderer.on('pupil-control', (event, msg) => {
     //console.log(`Received PupilControl message in renderer: ${msg.dilation_percentage}`);
@@ -57,6 +57,15 @@ window.onload = () => {
       pupil.style.height = `${dilationPercentage}%`;
     });
   }
+
+  ipcRenderer.on('eye_lid_control', (event, eye_lid_control_msg) => {
+    //for now only support one value for both eyes
+    if(eye_lid_control_msg.eye_id===2)
+    {
+      moveLid('all', eye_lid_control_msg.top_lid_position); //TODO each eye lid seperatly. For now everything is the same
+    }
+    //TODO each eye seperatly
+  });
 
   ipcRenderer.on('eyes_direction_control', (event, eyes_direction) => {
     console.log('Eyes direction yaw:', eyes_direction.yaw);

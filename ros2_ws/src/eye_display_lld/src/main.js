@@ -175,7 +175,8 @@ function sendToRenderer(event_name, msg) {
 
 function startRclNodejs() {
   rclnodejs.init().then(() => {
-    const node = rclnodejs.createNode('eye_display_lld');
+
+    const node = new rclnodejs.Node('eye_display_lld');
 
     node.createSubscription('eye_display_lld/msg/PupilControl', 'pupil_control', (msg) => {
       //console.log(`Received message: ${msg.dilation_percentage}`);
@@ -187,8 +188,13 @@ function startRclNodejs() {
       sendToRenderer('eyes_direction_control', msg);
     });
 
+    node.createSubscription('eye_display_lld/msg/EyeLidControl', 'eye_lid_control', (msg) => {
+      //console.log(`Received message: ${msg.left_lid} and ${msg.right_lid}`);
+      console.log(`Received message with eye_id: ${msg.eye_id}`);
+      sendToRenderer('eye_lid_control', msg);
+    });
 
-    rclnodejs.spin(node);
+    node.spin();
   });
 }
 app.whenReady().then(() => {

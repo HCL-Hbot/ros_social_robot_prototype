@@ -4,6 +4,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "eye_display_hld/msg/eye_control.hpp"
+#include "radar_presence_hld/msg/presence_detection.hpp"
+#include "eye_display_hld/msg/screen_expression.hpp"
 
 class InteractionController : public rclcpp::Node
 {
@@ -14,10 +16,13 @@ private:
     void facePositionCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
 
     eye_display_hld::msg::EyeControl convertFacePositionToEyeControl(const geometry_msgs::msg::PointStamped::SharedPtr& face_position);
-    
+
+    void radarPresenceCallback(const radar_presence_hld::msg::PresenceDetection::SharedPtr msg);  
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_;
     rclcpp::Publisher<eye_display_hld::msg::EyeControl>::SharedPtr eye_control_pub_;
-
+    rclcpp::Subscription<radar_presence_hld::msg::PresenceDetection>::SharedPtr radar_presence_subscriber_;
+    rclcpp::Publisher<eye_display_hld::msg::ScreenExpression>::SharedPtr screen_expression_pub_;
+    radar_presence_hld::msg::PresenceDetection last_precence_msg_;
 };
 
 

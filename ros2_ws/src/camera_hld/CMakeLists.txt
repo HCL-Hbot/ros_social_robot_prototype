@@ -54,6 +54,16 @@ FetchContent_MakeAvailable(iris_mesh.cpp)
 
 #ament_export_dependencies(rosidl_default_runtime)
 
+# Voeg het pad naar de TensorFlow Lite bibliotheek toe
+set(TENSORFLOW_LITE_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/Face_Detector.Cpp/external/tensorflow/lib")
+# Voeg TensorFlow Lite toe
+find_library(TENSORFLOW_LITE_LIBRARY tensorflowlite HINTS ${TENSORFLOW_LITE_LIB_PATH})
+
+if(NOT TENSORFLOW_LITE_LIBRARY)
+  message(FATAL_ERROR "TensorFlow Lite library not found")
+endif()
+
+
 add_executable(camera_hld_node src/main.cpp src/camera_hld.cpp)
 
 target_include_directories(camera_hld_node PUBLIC
@@ -61,6 +71,8 @@ $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
 ament_target_dependencies(camera_hld_node rclcpp sensor_msgs cv_bridge OpenCV)
+target_link_libraries(camera_hld_node ${TENSORFLOW_LITE_LIBRARY} CLFML::face_detector CLFML::iris_mesh)
+
 target_compile_features(camera_hld_node PUBLIC cxx_std_17)  # Require C++17
 
 install(TARGETS 
@@ -68,22 +80,37 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
   )
 
-#Place the shared library face decetor in the lib folder so it can be found by the camera_hld_node
+# Installeer de TensorFlow Lite bibliotheek
 install(
-    FILES ${CMAKE_BINARY_DIR}/_deps/face_detector-build/libface_detector.so
-    DESTINATION lib
+  FILES ${TENSORFLOW_LITE_LIB_PATH}/libtensorflowlite.so
+  DESTINATION lib
 )
+#install(FILES bindings/ros2/set_ld_path.sh DESTINATION lib/${PROJECT_NAME})
 
-install(
-    FILES ${CMAKE_BINARY_DIR}/_deps/iris_mesh.cpp-build/libiris_mesh.so
-    DESTINATION lib
-)
+
   
 # rosidl_get_typesupport_target(cpp_typesupport_target
 # ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 #target_link_libraries(camera_hld_node "${cpp_typesupport_target}" CLFML::face_detector)
-target_link_libraries(camera_hld_node CLFML::face_detector CLFML::iris_mesh)
+
+
+#Place the shared library face decetor in the lib folder so it can be found by the camera_hld_node
+# install(
+#     FILES ${CMAKE_BINARY_DIR}/_deps/face_detector-build/libface_detector.so
+#     DESTINATION lib
+# )
+
+# install(
+#     FILES ${CMAKE_BINARY_DIR}/_deps/iris_mesh.cpp-build/libiris_mesh.so
+#     DESTINATION lib
+# )
+
+# Install shared library libtensorflowlite.so
+# install(
+#     FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib/Face_Detector.Cpp/external/tensorflow/lib/libtensorflowlite.so
+#     DESTINATION lib/${PROJECT_NAME}
+# )
 
 # Install launch files
 install(DIRECTORY launch

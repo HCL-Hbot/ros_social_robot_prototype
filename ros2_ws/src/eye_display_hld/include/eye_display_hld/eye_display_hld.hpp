@@ -39,11 +39,17 @@ public:
     virtual ~EyeDisplayHLD();
 
 private:
-    void bothEyesCallback(const eye_display_hld::msg::EyeControl::SharedPtr msg);
-    void sendToLowLevelDriver(Eye eye, const eye_display_hld::msg::EyeControl::SharedPtr msg);
-    void screenExpressionCallback(const eye_display_hld::msg::ScreenExpression::SharedPtr msg);
+    void bothEyesCallback(const eye_display_hld::msg::EyeControl::SharedPtr eye_control_msg);
+    
+    void sendToLowLevelDriver(Eye eye, const eye_display_hld::msg::EyeControl::SharedPtr& eye_control_msg);
+
+    float getPupilDialation(uint16_t target_distance_cm);
+
+    eye_display_lld::msg::EyesDirection getEyeDirectionMsg(float yaw, float pitch);
+    
+    void screenExpressionCallback(const eye_display_hld::msg::ScreenExpression::SharedPtr screen_expression_msg);
     rclcpp::Subscription<eye_display_hld::msg::EyeControl>::SharedPtr both_eyes_subscriber_;
-    rclcpp::Subscription<eye_display_hld::msg::ScreenExpression>::SharedPtr screen_expression_;
+    rclcpp::Subscription<eye_display_hld::msg::ScreenExpression>::SharedPtr screen_expression_subscriber_;
     rclcpp::Publisher<eye_display_lld::msg::PupilControl>::SharedPtr pupil_control_publisher_; //also for both eyes
     rclcpp::Publisher<eye_display_lld::msg::EyesDirection>::SharedPtr eyes_direction_publisher_;
     rclcpp::Publisher<eye_display_lld::msg::EyeLidControl>::SharedPtr eye_lid_publisher_;

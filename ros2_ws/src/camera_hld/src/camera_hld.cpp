@@ -33,11 +33,11 @@ CameraHLD::CameraHLD() :
 {
 }
 
-void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
-{
+void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr image_msg)
+{  
   // Convert the ROS 2 image message to an OpenCV image
-  cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image; //Maybe change to toCVCopy. Let's see when we do real image processing..
- 
+  cv::Mat frame = convertImageMsgToCvMat(image_msg);
+  
   if(frame.empty()) return; // no need to to processing on empty image.
 
   face_detector_.load_image(frame);
@@ -46,7 +46,6 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   if(face_detected)
   {
     //RCLCPP_INFO(this->get_logger(), "Image width @ %d, height @ %d", frame.size().width, frame.size().height);
-
     publishFacePosition(frame);
   }
   else
@@ -55,49 +54,100 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
   }  
 }
 
-void CameraHLD::publishFacePosition(const cv::Mat &frame)
+cv::Mat CameraHLD::convertImageMsgToCvMat(const sensor_msgs::msg::Image::SharedPtr image_msg)
 {
-  /* Get the face landmarks for eye-roi calculation */
-  std::array<cv::Point, CLFML::FaceDetection::NUM_OF_FACE_DETECTOR_LANDMARKS> face_keypoints = face_detector_.get_face_landmarks();
+  return cv_bridge::toCvShare(image_msg, "bgr8")->image;
+}
 
-  cv::Point left_eye_landmark = face_keypoints[0];
-  cv::Point right_eye_landmark = face_keypoints[1];
+void CameraHLD::publishFacePosition(const cv::Mat& frame)
+{
+   std::array<cv::Point, CLFML::FaceDetection::NUM_OF_FACE_DETECTOR_LANDMARKS> face_keypoints = face_detector_.get_face_landmarks();
+   cv::Rect face_roi = face_detector_.get_face_roi(); // get the face region of interest (a rectangle)
+   cv::Point center_of_face = getCenterOfFace(face_roi);
 
-  /* Calculate the Eye-regions of interest on the face using the facial keypoints */
-  std::array<cv::Rect, 2> eye_rois = calculate_eye_roi(left_eye_landmark, right_eye_landmark);
-  
-  /*option 1 */
-  // float iris_diameter_pixel = getBiggestIrisDiameterInPixel(eye_rois);
+   cv::Rect eye_roi = getEyeRoi(face_keypoints[0], face_keypoints[1]); //mockup for now, needed for distance calculation
+   float distance_to_face = getDistanceToFace(face_roi, eye_roi, frame.size().width); //mockup for now, needed for distance calculation
+   auto face_position_msg = createFacePositionMsg(center_of_face, distance_to_face);
 
-  // float distance_to_iris = getDistanceFromIrisToCamera(iris_diameter_pixel);
-  //------------------------------------------------------------------------------------------------
-  
-  /*option 2 */
-  // int frame_width = 680;
-  // cv::Rect biggest_roi = getBiggestIrisRoi(eye_rois);
-  // float distance_to_iris = calculateCameraDistance(biggest_roi, frame_width);
-  //------------------------------------------------------------------------------------------------
+  face_position_pub_->publish(face_position_msg);
+}
 
-  /*option 3 HARDCODED VALUE FOR NOW*/
-  float distance_to_iris = 80.0f; //CM 
-  //------------------------------------------------------------------------------------------------
-  cv::Rect face_roi = face_detector_.get_face_roi(); // get the face region of interest (a rectangle)
-  int center_face_x = face_roi.x + face_roi.width/2;
-  int center_face_y = face_roi.y + face_roi.height/2;
-  
-  RCLCPP_INFO(this->get_logger(), "Face detected at x: %d, y: %d, z: %f, width: %d, height: %d", center_face_x, center_face_y, distance_to_iris, face_roi.width, face_roi.height);
-  
+cv::Point CameraHLD::getCenterOfFace(const cv::Rect& face_roi)
+{
+  return cv::Point(face_roi.x + face_roi.width/2, face_roi.y + face_roi.height/2);
+}
+
+cv::Rect CameraHLD::getEyeRoi(const cv::Point& left_eye_landmark, const cv::Point& right_eye_landmark)
+{
+  return cv::Rect();
+}
+
+float CameraHLD::getDistanceToFace(const cv::Rect &face_roi, const cv::Rect &eye_roi, uint32_t image_width)
+{
+  return 80.0f; //CM
+}
+
+geometry_msgs::msg::PointStamped CameraHLD::createFacePositionMsg(const cv::Point center_of_face, float distance_to_face)
+{
   geometry_msgs::msg::PointStamped face_position_msg = geometry_msgs::msg::PointStamped();
   face_position_msg.header.stamp = this->get_clock()->now();
   face_position_msg.header.frame_id = tf_frame_id_;
 
   // Convert OpenCV coordinates to ROS Right-Hand Rule
-  face_position_msg.point.x = distance_to_iris;  // X = forward (distance to camera)
-  face_position_msg.point.y = center_face_x; // Y =  left/right
-  face_position_msg.point.z = center_face_y; // Z = up/down
+  face_position_msg.point.x = distance_to_face;  // X = forward (distance to camera)
+  face_position_msg.point.y = center_of_face.x; // Y =  left/right
+  face_position_msg.point.z = center_of_face.y; // Z = up/down
 
-  face_position_pub_->publish(face_position_msg);
+  return face_position_msg;
 }
+
+//--------------TODO---------------------
+// FUNCTIONS HERE BELOW ARE NOT IMPLEMENTED OR USED YET. NEED TO REVIEW IF THESE ARE NEEDED OR NOT. 
+// THE GOALS WAS TO USE THESE TO CALCULATE THE POSITION OF THE FACE IN THE CAMERA FRAME AND DEPTH OF FACE BY USING THE IRIS AS A REFERENCE POINT. 
+
+// void CameraHLD::publishFacePosition(const cv::Mat &frame)
+// {
+//   /* Get the face landmarks for eye-roi calculation */
+//   std::array<cv::Point, CLFML::FaceDetection::NUM_OF_FACE_DETECTOR_LANDMARKS> face_keypoints = face_detector_.get_face_landmarks();
+
+//   cv::Point left_eye_landmark = face_keypoints[0];
+//   cv::Point right_eye_landmark = face_keypoints[1];
+
+//   /* Calculate the Eye-regions of interest on the face using the facial keypoints */
+//   std::array<cv::Rect, 2> eye_rois = calculate_eye_roi(left_eye_landmark, right_eye_landmark);
+  
+//   /*option 1 */
+//   // float iris_diameter_pixel = getBiggestIrisDiameterInPixel(eye_rois);
+
+//   // float distance_to_iris = getDistanceFromIrisToCamera(iris_diameter_pixel);
+//   //------------------------------------------------------------------------------------------------
+  
+//   /*option 2 */
+//   // int frame_width = 680;
+//   // cv::Rect biggest_roi = getBiggestIrisRoi(eye_rois);
+//   // float distance_to_iris = calculateCameraDistance(biggest_roi, frame_width);
+//   //------------------------------------------------------------------------------------------------
+
+//   /*option 3 HARDCODED VALUE FOR NOW*/
+//   float distance_to_iris = 80.0f; //CM 
+//   //------------------------------------------------------------------------------------------------
+//   cv::Rect face_roi = face_detector_.get_face_roi(); // get the face region of interest (a rectangle)
+//   int center_face_x = face_roi.x + face_roi.width/2;
+//   int center_face_y = face_roi.y + face_roi.height/2;
+  
+//   RCLCPP_INFO(this->get_logger(), "Face detected at x: %d, y: %d, z: %f, width: %d, height: %d", center_face_x, center_face_y, distance_to_iris, face_roi.width, face_roi.height);
+  
+//   geometry_msgs::msg::PointStamped face_position_msg = geometry_msgs::msg::PointStamped();
+//   face_position_msg.header.stamp = this->get_clock()->now();
+//   face_position_msg.header.frame_id = tf_frame_id_;
+
+//   // Convert OpenCV coordinates to ROS Right-Hand Rule
+//   face_position_msg.point.x = distance_to_iris;  // X = forward (distance to camera)
+//   face_position_msg.point.y = center_face_x; // Y =  left/right
+//   face_position_msg.point.z = center_face_y; // Z = up/down
+
+//   face_position_pub_->publish(face_position_msg);
+// }
 
 const std::array<cv::Rect, 2> CameraHLD::calculate_eye_roi(const cv::Point &left_eye_landmark, const cv::Point &right_eye_landmark)
 {
@@ -239,3 +289,5 @@ cv::Rect CameraHLD::getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois)
     
 //     return cv::Rect(cx - w/2, cy - h/2, w, h);
 // }
+
+//--------------END TODO---------------------

@@ -26,10 +26,9 @@
  * 
  * The following parameters are configurable via 
  * @param node_name The name for this node, default value is "camera_hld"
- * @param frame_id The frame id name for this publishing node (ex. "camera_vooraanzicht_linker_oog")
  * 
  * @example The following example shows how to 
- *          "ros2 run camera_hld camera_hld_node --ros-args --remap __node:=new_node_name -p frame_id:=camera_link"
+ *          "ros2 run camera_hld camera_hld_node --ros-args --remap __node:=new_node_name"
  * 
  * @see See the SDD documentation how to configure the above parameters (via "/parameters_events")
  */
@@ -47,10 +46,24 @@ public:
   virtual ~CameraHLD();
 
 private:
-  void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
+  
+  void imageCallback(const sensor_msgs::msg::Image::SharedPtr image_msg);
 
-  void publishFacePosition(const cv::Mat &frame);
+  cv::Mat convertImageMsgToCvMat(const sensor_msgs::msg::Image::SharedPtr image_msg);
 
+  void publishFacePosition(const cv::Mat& frame);
+  
+  cv::Point getCenterOfFace(const cv::Rect& face_roi);
+
+  //mocked return value for now
+  cv::Rect getEyeRoi(const cv::Point& left_eye_landmark, const cv::Point& right_eye_landmark);
+
+  //mocked return value for now
+  float getDistanceToFace(const cv::Rect& face_roi, const cv::Rect& eye_roi, uint32_t image_width);
+  
+  geometry_msgs::msg::PointStamped createFacePositionMsg(const cv::Point center_of_face, float distance_to_face);
+
+  //*********** METHODS BELOW ARE NOT USED (YET) NEEDS A REVIEW: DO WE NEED OR HOW TO GET DEPTH OF FACE! */
   /**
    * @brief Calculate the eye regions on the face by using two 2D-facial landmarks of the eye_center.
    *        It uses the distance between the eye's as reference for how big the regions should be.
@@ -70,8 +83,6 @@ private:
    */
   bool is_roi_within_bounds(const cv::Rect &roi, const cv::Mat &image);
 
-  
-
   //implementation 1
   float getDistanceFromIrisToCamera(float iris_diameter);
 
@@ -82,12 +93,12 @@ private:
 
   //maybe better version for caluclating the eye roi??
   //cv::Rect calculateIrisRoi(cv::Point left_most, cv::Point rightMost) const;
-  
+  /************************END OF NOT USED METHOD********************************/
+
   CLFML::FaceDetection::FaceDetector face_detector_;
   CLFML::IrisMesh::IrisMesh iris_mesh_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr face_position_pub_;
-  //rclcpp::Publisher<camera_hld::msg::FaceInfo>::SharedPtr face_info_pub_;
   std::string tf_frame_id_;
 };
 

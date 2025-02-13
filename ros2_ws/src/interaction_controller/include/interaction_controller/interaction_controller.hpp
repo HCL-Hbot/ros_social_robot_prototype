@@ -13,14 +13,21 @@ public:
   InteractionController();
   virtual ~InteractionController();
 private:
-    void facePositionCallback(const geometry_msgs::msg::PointStamped::SharedPtr msg);
+    void facePositionCallback(const geometry_msgs::msg::PointStamped::SharedPtr face_position);
 
     eye_display_hld::msg::EyeControl convertFacePositionToEyeControl(const geometry_msgs::msg::PointStamped::SharedPtr& face_position);
 
-    void radarPresenceCallback(const radar_presence_hld::msg::PresenceDetection::SharedPtr msg);  
-    rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_;
+    void radarPresenceCallback(const radar_presence_hld::msg::PresenceDetection::SharedPtr presence_msg);  
+    
+    bool isPresenceStateChanged(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+
+    eye_display_hld::msg::ScreenExpression::SharedPtr convertPresenceDetectionToScreenExpression(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+
+    void updateLastPresenceDetection(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+    
+    rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_sub_;
     rclcpp::Publisher<eye_display_hld::msg::EyeControl>::SharedPtr eye_control_pub_;
-    rclcpp::Subscription<radar_presence_hld::msg::PresenceDetection>::SharedPtr radar_presence_subscriber_;
+    rclcpp::Subscription<radar_presence_hld::msg::PresenceDetection>::SharedPtr radar_presence_sub_;
     rclcpp::Publisher<eye_display_hld::msg::ScreenExpression>::SharedPtr screen_expression_pub_;
     radar_presence_hld::msg::PresenceDetection last_precence_msg_;
 };

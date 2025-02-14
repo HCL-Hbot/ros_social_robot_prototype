@@ -40,40 +40,6 @@ function createWindowForScreen(display, eye) {
   return window;
 }
 
-// Function to start the WebSocket server
-function startWebSocketServer() {
-  const wss = new WebSocket.Server({ host: '0.0.0.0', port: 8080 });
-
-  wss.on('connection', (ws) => {
-    console.log('Controller connected');
-
-    ws.on('message', (message) => {
-      console.log('Received:', message);
-
-      try {
-        const command = JSON.parse(message);
-        console.log('Command:', command);
-        
-        for (const eye_window in windows) {
-          if (windows[eye_window]) {
-            windows[eye_window].webContents.send('websocket-message', command);
-          }
-        }
-          
-      } catch (error) {
-        console.error('Invalid message format', error);
-        ws.send(JSON.stringify({ status: 'error', message: 'Invalid format' }));
-      }
-    });
-
-    ws.on('close', () => {
-      console.log('Controller disconnected');
-    });
-  });
-
-  console.log('WebSocket server is running on ws://0.0.0.0:8080');
-}
-
 function setupScreens() {
   const displays = screen.getAllDisplays();
   const options = parseArguments();
@@ -142,28 +108,6 @@ function parseArguments() {
   return options;
 }
 
-// function startRclNodejs1() {
-//   //Initialize ROS2 node
-//   rclnodejs.init().then(() => {
-//     //const node = new rclnodejs.Node('eye_display_lld');
-//     const node = rclnodejs.createNode('eye_display_lld');
-//     node.createSubscription(
-//       'eye_display_lld/msg/PupilControl',
-//       'pupil_control',
-//       (msg) => {
-//         console.log(`Received PupilControl message: ${msg.dilation_percentage}`);
-//         // Send the message to the renderer process
-//         // for (const eye_window in windows) {
-//         //   if (windows[eye_window]) {
-//         //     windows[eye_window].webContents.send('pupil-control', msg);
-//         //   }
-//         // }
-//       }
-//     );
-//     rclnodejs.spin(node);
-//   });
-// }
-
 // Function to send a message to the renderer process
 function sendToRenderer(event_name, msg) {
   for (const eye_window in windows) {
@@ -199,9 +143,7 @@ function startRclNodejs() {
 }
 app.whenReady().then(() => {
   setupScreens();
-  //startWebSocketServer();
   startRclNodejs();
-  //startRclNodejs1();
 });
 
 app.on('window-all-closed', () => {

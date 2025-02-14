@@ -73,7 +73,7 @@ void InteractionController::radarPresenceCallback(const radar_presence_hld::msg:
         }
         else
         {
-            RCLCPP_INFO(this->get_logger(), "Unknown presence state, no action will be taken.");
+            RCLCPP_INFO(this->get_logger(), "Unknown screen expression state, no action will be taken.");
         }
     }
 }

@@ -1,5 +1,7 @@
 #include "rgb_led.hpp"
 
+namespace radar_lld {
+
 RGBLed::RGBLed(uint8_t pin)
 : strip(1, pin, NEO_GRB + NEO_KHZ800)
 {
@@ -22,3 +24,5 @@ void RGBLed::show()
 {
     strip.show();
 }
+
+} // namespace radar_lld

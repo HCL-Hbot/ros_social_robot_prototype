@@ -1,5 +1,6 @@
 #include "ld2410_radar.hpp"
 
+namespace radar_lld {
 
 Ld2410Radar::Ld2410Radar():target_frame_({0,0,0,0,0,0})
 {
@@ -23,8 +24,7 @@ const TargetFrameData &Ld2410Radar::getCurrentTargetFrame()
 {
     const FrameData& fd = radar_sensor_.getFrameData();
 
-    if(fd.data)
-    {
+    if(fd.data) {
         target_frame_.target_state_ = fd.data[8];
         target_frame_.movement_distance_ = fd.data[9] | (fd.data[10] << 8);
         target_frame_.movement_energy_ = fd.data[11];
@@ -34,3 +34,5 @@ const TargetFrameData &Ld2410Radar::getCurrentTargetFrame()
     }
     return target_frame_;
 }
+
+} // namespace radar_lld

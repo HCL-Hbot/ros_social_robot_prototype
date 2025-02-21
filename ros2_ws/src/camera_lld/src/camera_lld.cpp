@@ -22,8 +22,7 @@ CameraLLD::CameraLLD()
 }
 
 /*virtual*/ CameraLLD::~CameraLLD() {
-  if (camera_thread_.joinable())
-  {
+  if (camera_thread_.joinable()) {
     camera_thread_.join();
   }
 }

@@ -15,11 +15,14 @@
 #ifndef CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_
 #define CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_
 
+#include "geometry_msgs/msg/point_stamped.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <face_detection.hpp>
 #include <iris_mesh.hpp>
-#include "geometry_msgs/msg/point_stamped.hpp"
+
+namespace camera_hld {
 /**
  * @brief High level driver for a camera
  * This class will detect a face from a image and publish it coordintes to a topic.
@@ -32,8 +35,7 @@
  * 
  * @see See the SDD documentation how to configure the above parameters (via "/parameters_events")
  */
-class CameraHLD : public rclcpp::Node
-{
+class CameraHLD : public rclcpp::Node {
 public:
   /**
    * @brief Construct a new Camera HLD object
@@ -101,5 +103,7 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr face_position_pub_;
   std::string tf_frame_id_;
 };
+
+}  // namespace camera_hld
 
 #endif // CAMERA_HLD_INCLUDE_CAMERA_HLD_CAMERA_HLD_HPP_

@@ -89,5 +89,6 @@
         "stdfloat": "cpp",
         "csetjmp": "cpp"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "cmake.ignoreCMakeListsMissing": true
 }

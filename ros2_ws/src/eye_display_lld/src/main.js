@@ -25,8 +25,8 @@ function createWindowForScreen(display, eye) {
     y: display.bounds.y, //(For good practice we do this always explicitly, but when we use fullscreen it will be done implecitly)
     width: display.bounds.width,
     height: display.bounds.height,
-    frame: true, // (False = Remove title bar and window frame)
-    fullscreen: false, // (True = Fullscreen mode)
+    frame: false, // (False = Remove title bar and window frame)
+    fullscreen: true, // (True = Fullscreen mode)
     autoHideMenuBar: true,   // Hide the menu bar
     alwaysOnTop: false,    // Ensure the window stays on top, for now on false. But might be useful to set it to true for production!!!!
     webPreferences: {
@@ -56,7 +56,15 @@ function setupScreens() {
 
   if (options.leftEye === undefined && options.rightEye === undefined) {
     console.log("No arguments provided, go with default settings");
-    createWindowForScreen(displays[0], 'both');
+    if(displays.length > 1)
+    {
+      createWindowForScreen(displays[0], 'left');
+      createWindowForScreen(displays[1], 'right');
+    }
+    else
+    {
+      createWindowForScreen(displays[0], 'both');
+    }
     console.log('Windows object:', windows); // Debugging
     return;
   }

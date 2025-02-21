@@ -70,7 +70,6 @@ window.onload = () => {
   ipcRenderer.on('eyes_direction_control', (event, eyes_direction) => {
     console.log('Eyes direction yaw:', eyes_direction.yaw);
     console.log('Eyes direction pitch:', eyes_direction.pitch);
-    //moveEye(eyes_direction.eye, eyes_direction.x, eyes_direction.y);
     moveEyes(eyes_direction.yaw, eyes_direction.pitch);
   });
 

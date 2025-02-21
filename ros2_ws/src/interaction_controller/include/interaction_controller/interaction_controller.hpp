@@ -1,12 +1,15 @@
 #ifndef INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_
 #define INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_
 
-#include <rclcpp/rclcpp.hpp>
-#include "geometry_msgs/msg/point_stamped.hpp"
 #include "eye_display_hld/msg/eye_control.hpp"
 #include "interaction_controller/msg/presence_detection.hpp"
 #include "eye_display_hld/msg/screen_expression.hpp"
+#include "geometry_msgs/msg/point_stamped.hpp"
 
+#include <rclcpp/rclcpp.hpp>
+
+namespace interaction_controller {
+    
 class InteractionController : public rclcpp::Node
 {
 public:
@@ -32,5 +35,6 @@ private:
     interaction_controller::msg::PresenceDetection last_precence_msg_;
 };
 
+}  // namespace interaction_controller
 
 #endif // INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_

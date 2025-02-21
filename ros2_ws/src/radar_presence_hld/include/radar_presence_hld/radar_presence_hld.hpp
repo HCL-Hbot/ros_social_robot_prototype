@@ -1,9 +1,12 @@
 #ifndef RADAR_PRESENCE_HLD_INCLUDE_RADAR_PRESENCE_HLD_HPP_
 #define RADAR_PRESENCE_HLD_INCLUDE_RADAR_PRESENCE_HLD_HPP_
 
-#include <rclcpp/rclcpp.hpp>
 #include "ld2410_interface/msg/ld2410_target_data_frame_array.hpp"
 #include "interaction_controller/msg/presence_detection.hpp"
+
+#include <rclcpp/rclcpp.hpp>
+
+namespace radar_hld {
 
 class RadarPresenceHLD : public rclcpp::Node
 {
@@ -29,6 +32,7 @@ private:
     interaction_controller::msg::PresenceDetection current_radar_presence_msg_;
 };
 
+}  // namespace radar_hld
 
 
 

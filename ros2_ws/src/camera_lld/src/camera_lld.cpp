@@ -28,7 +28,8 @@ CameraLLD::CameraLLD()
   }
 }
 
-void CameraLLD::captureAndPublish() {
+void CameraLLD::captureAndPublish() 
+{
   cv::VideoCapture cap(camera_device_location_);
 
   if (!cap.isOpened()) {

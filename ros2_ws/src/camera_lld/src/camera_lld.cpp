@@ -12,16 +12,17 @@ constexpr const char* CAMERA_PARAMETER = "camera_device_location";
 namespace camera_lld {
 
 CameraLLD::CameraLLD() 
-  : rclcpp::Node(DEFAULT_NODE_NAME),
+: rclcpp::Node(DEFAULT_NODE_NAME),
   raw_image_pub_(this->create_publisher<sensor_msgs::msg::Image>(DEFAULT_TOPIC_NAME_SUB, 10)),
-  camera_device_location_(DEFAULT_CAMERA) {
-
+  camera_device_location_(DEFAULT_CAMERA)
+{
   camera_device_location_ = this->declare_parameter<std::string>(CAMERA_PARAMETER, DEFAULT_CAMERA);
   RCLCPP_INFO(this->get_logger(), "Node '%s' will use camera '%s' ",this->get_name(),camera_device_location_.c_str());
   camera_thread_= std::thread(std::bind(&CameraLLD::captureAndPublish,this));
 }
 
-/*virtual*/ CameraLLD::~CameraLLD() {
+/*virtual*/ CameraLLD::~CameraLLD() 
+{
   if (camera_thread_.joinable()) {
     camera_thread_.join();
   }

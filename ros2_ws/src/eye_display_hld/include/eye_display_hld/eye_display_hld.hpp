@@ -17,12 +17,16 @@
 #ifndef EYE_DISPLAY_HLD_INCLUDE_EYE_DISPLAY_HLD_EYE_DISPLAY_HLD_HPP_
 #define EYE_DISPLAY_HLD_INCLUDE_EYE_DISPLAY_HLD_EYE_DISPLAY_HLD_HPP_
 
-#include <rclcpp/rclcpp.hpp>
 #include "eye_display_hld/msg/eye_control.hpp"
 #include "eye_display_hld/msg/screen_expression.hpp"
 #include "eye_display_lld/msg/pupil_control.hpp"
 #include "eye_display_lld/msg/eyes_direction.hpp"
 #include "eye_display_lld/msg/eye_lid_control.hpp"
+
+#include <rclcpp/rclcpp.hpp>
+
+namespace eye_display_hld {
+ 
 class EyeDisplayHLD : public rclcpp::Node
 {
 public:
@@ -55,5 +59,7 @@ private:
     rclcpp::Publisher<eye_display_lld::msg::EyeLidControl>::SharedPtr eye_lid_publisher_;
 
 };
+
+}  // namespace eye_display_hld
 
 #endif // EYE_DISPLAY_HLD_INCLUDE_EYE_DISPLAY_HLD_EYE_DISPLAY_HLD_HPP_

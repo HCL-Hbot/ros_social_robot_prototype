@@ -10,11 +10,11 @@ RadarPresenceHLD::RadarPresenceHLD() :
 rclcpp::Node(DEFAULT_NODE_NAME),
 radar_lld_sub_(create_subscription<ld2410_interface::msg::LD2410TargetDataFrameArray>(
         DEFAULT_TOPIC_NAME_SUB_RADAR_PRESENCE_LL, 10, std::bind(&RadarPresenceHLD::radarPresenceCallback, this, std::placeholders::_1))),
-radar_presence_pub_(this->create_publisher<radar_presence_hld::msg::PresenceDetection>(DEFAULT_TOPIC_NAME_PUB_RADAR_PRESENCE_HL, 10)),
+radar_presence_pub_(this->create_publisher<interaction_controller::msg::PresenceDetection>(DEFAULT_TOPIC_NAME_PUB_RADAR_PRESENCE_HL, 10)),
 current_radar_presence_msg_()
 {
-   current_radar_presence_msg_.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_STANDING;
-   current_radar_presence_msg_.presence_state = radar_presence_hld::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
+   current_radar_presence_msg_.target_state = interaction_controller::msg::PresenceDetection::TARGET_STANDING;
+   current_radar_presence_msg_.presence_state = interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
 }
 
 RadarPresenceHLD::~RadarPresenceHLD()
@@ -82,9 +82,9 @@ uint16_t RadarPresenceHLD::getDistanceFromSensor(const ld2410_interface::msg::LD
     return target_distance_cm;
 }
 
-radar_presence_hld::msg::PresenceDetection RadarPresenceHLD::translateToPresenceDetection(const ld2410_interface::msg::LD2410TargetDataFrame& radar_sensor)
+interaction_controller::msg::PresenceDetection RadarPresenceHLD::translateToPresenceDetection(const ld2410_interface::msg::LD2410TargetDataFrame& radar_sensor)
 {
-    radar_presence_hld::msg::PresenceDetection new_radar_presence_msg;
+    interaction_controller::msg::PresenceDetection new_radar_presence_msg;
 
     //This case should not be possible, because normally we filter this out before calling this function.
     //But for good practice we check for this scenario. PresenceDetecion should stay the same in this case.
@@ -99,28 +99,28 @@ radar_presence_hld::msg::PresenceDetection RadarPresenceHLD::translateToPresence
 
         if (target_distance_cm <= DISTANCE_TRESHOLD_CM)
         {
-            new_radar_presence_msg.presence_state = radar_presence_hld::msg::PresenceDetection::TARGET_IN_RANGE;
+            new_radar_presence_msg.presence_state = interaction_controller::msg::PresenceDetection::TARGET_IN_RANGE;
 
             if (radar_sensor.target_state == ld2410_interface::msg::LD2410TargetDataFrame::STATIONARY_ONLY)
             {
-                new_radar_presence_msg.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_STANDING;
+                new_radar_presence_msg.target_state = interaction_controller::msg::PresenceDetection::TARGET_STANDING;
             }
             else
             {
-                new_radar_presence_msg.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_MOVING;
+                new_radar_presence_msg.target_state = interaction_controller::msg::PresenceDetection::TARGET_MOVING;
             }
         }
         else
         {
-            new_radar_presence_msg.presence_state = radar_presence_hld::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
+            new_radar_presence_msg.presence_state = interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
 
             if (radar_sensor.target_state == ld2410_interface::msg::LD2410TargetDataFrame::STATIONARY_ONLY)
             {
-                new_radar_presence_msg.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_STANDING;
+                new_radar_presence_msg.target_state = interaction_controller::msg::PresenceDetection::TARGET_STANDING;
             }
             else
             {
-                new_radar_presence_msg.target_state = radar_presence_hld::msg::PresenceDetection::TARGET_MOVING;
+                new_radar_presence_msg.target_state = interaction_controller::msg::PresenceDetection::TARGET_MOVING;
             }
         }
     }
@@ -128,13 +128,13 @@ radar_presence_hld::msg::PresenceDetection RadarPresenceHLD::translateToPresence
     return new_radar_presence_msg;
 }
 
-bool RadarPresenceHLD::isPresenceDetectionChanged(const radar_presence_hld::msg::PresenceDetection& new_radar_presence_msg)
+bool RadarPresenceHLD::isPresenceDetectionChanged(const interaction_controller::msg::PresenceDetection& new_radar_presence_msg)
 {
     return current_radar_presence_msg_.presence_state != new_radar_presence_msg.presence_state ||
            current_radar_presence_msg_.target_state != new_radar_presence_msg.target_state;
 }
 
-void RadarPresenceHLD::updateAndPublishPresenceDetection(const radar_presence_hld::msg::PresenceDetection& new_radar_presence_msg)
+void RadarPresenceHLD::updateAndPublishPresenceDetection(const interaction_controller::msg::PresenceDetection& new_radar_presence_msg)
 {
     current_radar_presence_msg_.target_state = new_radar_presence_msg.target_state;
     current_radar_presence_msg_.presence_state = new_radar_presence_msg.presence_state;

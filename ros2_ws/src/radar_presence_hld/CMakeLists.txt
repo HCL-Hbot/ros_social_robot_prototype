@@ -12,18 +12,8 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
 find_package(ld2410_interface REQUIRED)
-
-set(msg_files
-  "msg/PresenceDetection.msg"
-)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  ${msg_files}
-)
-
-ament_export_dependencies(rosidl_default_runtime)
+find_package(interaction_controller REQUIRED)
 
 add_executable(radar_presence_hld_node src/main.cpp src/radar_presence_hld.cpp)
 
@@ -31,18 +21,13 @@ target_include_directories(radar_presence_hld_node PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
-ament_target_dependencies(radar_presence_hld_node rclcpp ld2410_interface)
+ament_target_dependencies(radar_presence_hld_node rclcpp ld2410_interface interaction_controller)
 target_compile_features(radar_presence_hld_node PUBLIC cxx_std_17)  # Require C++17
 
 install(TARGETS
 radar_presence_hld_node
   DESTINATION lib/${PROJECT_NAME}
 )
-
-rosidl_get_typesupport_target(cpp_typesupport_target
-${PROJECT_NAME} rosidl_typesupport_cpp)
-
-target_link_libraries(radar_presence_hld_node "${cpp_typesupport_target}")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

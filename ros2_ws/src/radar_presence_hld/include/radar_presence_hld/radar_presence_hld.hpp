@@ -3,7 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include "ld2410_interface/msg/ld2410_target_data_frame_array.hpp"
-#include "radar_presence_hld/msg/presence_detection.hpp"
+#include "interaction_controller/msg/presence_detection.hpp"
 
 class RadarPresenceHLD : public rclcpp::Node
 {
@@ -18,15 +18,15 @@ private:
 
     uint16_t getDistanceFromSensor(const ld2410_interface::msg::LD2410TargetDataFrame& sensor);
 
-    radar_presence_hld::msg::PresenceDetection translateToPresenceDetection(const ld2410_interface::msg::LD2410TargetDataFrame& radar_sensor);
+    interaction_controller::msg::PresenceDetection translateToPresenceDetection(const ld2410_interface::msg::LD2410TargetDataFrame& radar_sensor);
 
-    bool isPresenceDetectionChanged(const radar_presence_hld::msg::PresenceDetection& new_radar_presence_msg);
+    bool isPresenceDetectionChanged(const interaction_controller::msg::PresenceDetection& new_radar_presence_msg);
 
-    void updateAndPublishPresenceDetection(const radar_presence_hld::msg::PresenceDetection& new_radar_presence_msg);
+    void updateAndPublishPresenceDetection(const interaction_controller::msg::PresenceDetection& new_radar_presence_msg);
 
     rclcpp::Subscription<ld2410_interface::msg::LD2410TargetDataFrameArray>::SharedPtr radar_lld_sub_;
-    rclcpp::Publisher<radar_presence_hld::msg::PresenceDetection>::SharedPtr radar_presence_pub_;
-    radar_presence_hld::msg::PresenceDetection current_radar_presence_msg_;
+    rclcpp::Publisher<interaction_controller::msg::PresenceDetection>::SharedPtr radar_presence_pub_;
+    interaction_controller::msg::PresenceDetection current_radar_presence_msg_;
 };
 
 

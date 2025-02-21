@@ -15,9 +15,10 @@ constexpr float IRIS_DIAMETER_CM = IRIS_DIAMETER_MM / 10.0f;
 namespace camera_hld {
 
 CameraHLD::CameraHLD() 
-  : rclcpp::Node(DEFAULT_NODE_NAME),
+: rclcpp::Node(DEFAULT_NODE_NAME),
   raw_image_sub_(create_subscription<sensor_msgs::msg::Image>(
-            DEFAULT_TOPIC_NAME_SUB, 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1))) {
+            DEFAULT_TOPIC_NAME_SUB, 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
+{
 
   tf_frame_id_ = this->declare_parameter<std::string>(TF_CAMERA_FRAME_ID_PARAMETER, DEFAULT_TF_CAMERA_FRAME_ID);
   if(tf_frame_id_== DEFAULT_TF_CAMERA_FRAME_ID) {

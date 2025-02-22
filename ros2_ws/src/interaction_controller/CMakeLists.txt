@@ -12,10 +12,20 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(camera_hld REQUIRED)
-find_package(eye_display_hld REQUIRED)
-find_package(radar_presence_hld REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED) #Contains message to receive the position of the detected person
+find_package(camera_hld REQUIRED) # Contains message to communciate with camera_hld
+find_package(eye_display_hld REQUIRED) #Contains message to communicate with eye_display_hld
+
+set(msg_files
+  "msg/PresenceDetection.msg"
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(interaction_controller_node src/main.cpp src/interaction_controller.cpp)
 
@@ -31,11 +41,16 @@ ament_target_dependencies(
   "geometry_msgs"
   "camera_hld"
   "eye_display_hld"
-  "radar_presence_hld"
 )
 
 install(TARGETS interaction_controller_node
   DESTINATION lib/${PROJECT_NAME})
+
+rosidl_get_typesupport_target(cpp_typesupport_target
+${PROJECT_NAME} rosidl_typesupport_cpp)
+
+target_link_libraries(interaction_controller_node "${cpp_typesupport_target}")
+
 
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}

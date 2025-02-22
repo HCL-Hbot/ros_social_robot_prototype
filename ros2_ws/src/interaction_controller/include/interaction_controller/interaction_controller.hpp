@@ -1,12 +1,15 @@
 #ifndef INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_
 #define INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_
 
-#include <rclcpp/rclcpp.hpp>
-#include "geometry_msgs/msg/point_stamped.hpp"
 #include "eye_display_hld/msg/eye_control.hpp"
-#include "radar_presence_hld/msg/presence_detection.hpp"
+#include "interaction_controller/msg/presence_detection.hpp"
 #include "eye_display_hld/msg/screen_expression.hpp"
+#include "geometry_msgs/msg/point_stamped.hpp"
 
+#include <rclcpp/rclcpp.hpp>
+
+namespace interaction_controller {
+    
 class InteractionController : public rclcpp::Node
 {
 public:
@@ -17,20 +20,21 @@ private:
 
     eye_display_hld::msg::EyeControl convertFacePositionToEyeControl(const geometry_msgs::msg::PointStamped::SharedPtr& face_position);
 
-    void radarPresenceCallback(const radar_presence_hld::msg::PresenceDetection::SharedPtr presence_msg);  
+    void radarPresenceCallback(const interaction_controller::msg::PresenceDetection::SharedPtr presence_msg);  
     
-    bool isPresenceStateChanged(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+    bool isPresenceStateChanged(const interaction_controller::msg::PresenceDetection::SharedPtr& presence_msg);
 
-    eye_display_hld::msg::ScreenExpression::SharedPtr convertPresenceDetectionToScreenExpression(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+    eye_display_hld::msg::ScreenExpression::SharedPtr convertPresenceDetectionToScreenExpression(const interaction_controller::msg::PresenceDetection::SharedPtr& presence_msg);
 
-    void updateLastPresenceDetection(const radar_presence_hld::msg::PresenceDetection::SharedPtr& presence_msg);
+    void updateLastPresenceDetection(const interaction_controller::msg::PresenceDetection::SharedPtr& presence_msg);
     
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_sub_;
     rclcpp::Publisher<eye_display_hld::msg::EyeControl>::SharedPtr eye_control_pub_;
-    rclcpp::Subscription<radar_presence_hld::msg::PresenceDetection>::SharedPtr radar_presence_sub_;
+    rclcpp::Subscription<interaction_controller::msg::PresenceDetection>::SharedPtr radar_presence_sub_;
     rclcpp::Publisher<eye_display_hld::msg::ScreenExpression>::SharedPtr screen_expression_pub_;
-    radar_presence_hld::msg::PresenceDetection last_precence_msg_;
+    interaction_controller::msg::PresenceDetection last_precence_msg_;
 };
 
+}  // namespace interaction_controller
 
 #endif // INTERACTION_CONTROLLER_INCLUDE_INTERACTION_CONTROLLER_INTERACTION_CONTROLLER_HPP_

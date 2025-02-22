@@ -1,6 +1,8 @@
+#include "camera_hld.hpp"
+
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.hpp>
-#include "camera_hld.hpp"
+
 constexpr const char* DEFAULT_NODE_NAME = "camera_hld_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB = "raw_image";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB = "face_info";
@@ -10,14 +12,16 @@ constexpr const char* DEFAULT_TF_CAMERA_FRAME_ID = "camera";
 constexpr float IRIS_DIAMETER_MM = 11.7f;
 constexpr float IRIS_DIAMETER_CM = IRIS_DIAMETER_MM / 10.0f;
 
-CameraHLD::CameraHLD() : 
-  rclcpp::Node(DEFAULT_NODE_NAME),
+namespace camera_hld {
+
+CameraHLD::CameraHLD() 
+: rclcpp::Node(DEFAULT_NODE_NAME),
   raw_image_sub_(create_subscription<sensor_msgs::msg::Image>(
             DEFAULT_TOPIC_NAME_SUB, 10, std::bind(&CameraHLD::imageCallback, this, std::placeholders::_1)))
 {
+
   tf_frame_id_ = this->declare_parameter<std::string>(TF_CAMERA_FRAME_ID_PARAMETER, DEFAULT_TF_CAMERA_FRAME_ID);
-  if(tf_frame_id_== DEFAULT_TF_CAMERA_FRAME_ID)
-  {
+  if(tf_frame_id_== DEFAULT_TF_CAMERA_FRAME_ID) {
     RCLCPP_INFO(this->get_logger(), "Default value for the parameter '%s' will be used for node '%s'",TF_CAMERA_FRAME_ID_PARAMETER, this->get_name());
   }
 
@@ -43,13 +47,11 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr image_msg
   face_detector_.load_image(frame);
 
   bool face_detected = face_detector_.detected() + 1; // +1 because detector returns -1 for no face and 0 for face detected!
-  if(face_detected)
-  {
+  if(face_detected) {
     //RCLCPP_INFO(this->get_logger(), "Image width @ %d, height @ %d", frame.size().width, frame.size().height);
     publishFacePosition(frame);
   }
-  else
-  {
+  else {
     RCLCPP_INFO(this->get_logger(), "No face detected");
   }  
 }
@@ -59,20 +61,20 @@ cv::Mat CameraHLD::convertImageMsgToCvMat(const sensor_msgs::msg::Image::SharedP
   return cv_bridge::toCvShare(image_msg, "bgr8")->image;
 }
 
-void CameraHLD::publishFacePosition(const cv::Mat& frame)
+void CameraHLD::publishFacePosition(const cv::Mat& frame) 
 {
-   std::array<cv::Point, CLFML::FaceDetection::NUM_OF_FACE_DETECTOR_LANDMARKS> face_keypoints = face_detector_.get_face_landmarks();
-   cv::Rect face_roi = face_detector_.get_face_roi(); // get the face region of interest (a rectangle)
-   cv::Point center_of_face = getCenterOfFace(face_roi);
+  std::array<cv::Point, CLFML::FaceDetection::NUM_OF_FACE_DETECTOR_LANDMARKS> face_keypoints = face_detector_.get_face_landmarks();
+  cv::Rect face_roi = face_detector_.get_face_roi(); // get the face region of interest (a rectangle)
+  cv::Point center_of_face = getCenterOfFace(face_roi);
 
-   cv::Rect eye_roi = getEyeRoi(face_keypoints[0], face_keypoints[1]); //mockup for now, needed for distance calculation
-   float distance_to_face = getDistanceToFace(face_roi, eye_roi, frame.size().width); //mockup for now, needed for distance calculation
-   auto face_position_msg = createFacePositionMsg(center_of_face, distance_to_face);
+  cv::Rect eye_roi = getEyeRoi(face_keypoints[0], face_keypoints[1]); //mockup for now, needed for distance calculation
+  float distance_to_face = getDistanceToFace(face_roi, eye_roi, frame.size().width); //mockup for now, needed for distance calculation
+  auto face_position_msg = createFacePositionMsg(center_of_face, distance_to_face);
 
   face_position_pub_->publish(face_position_msg);
 }
 
-cv::Point CameraHLD::getCenterOfFace(const cv::Rect& face_roi)
+cv::Point CameraHLD::getCenterOfFace(const cv::Rect& face_roi) 
 {
   return cv::Point(face_roi.x + face_roi.width/2, face_roi.y + face_roi.height/2);
 }
@@ -82,7 +84,7 @@ cv::Rect CameraHLD::getEyeRoi(const cv::Point& left_eye_landmark, const cv::Poin
   return cv::Rect();
 }
 
-float CameraHLD::getDistanceToFace(const cv::Rect &face_roi, const cv::Rect &eye_roi, uint32_t image_width)
+float CameraHLD::getDistanceToFace(const cv::Rect &face_roi, const cv::Rect &eye_roi, uint32_t image_width) 
 {
   return 80.0f; //CM
 }
@@ -158,16 +160,14 @@ const std::array<cv::Rect, 2> CameraHLD::calculate_eye_roi(const cv::Point &left
     return ret;
 }
 
-float CameraHLD::getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois)
+float CameraHLD::getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois) 
 {
   cv::Mat eye_roi_frame; 
   cv::Mat iris_roi_frame;
   float biggest_iris_diameter = 0.0f;
 
-  for (const cv::Rect &eye_roi : eye_rois)
-  {
-    if(is_roi_within_bounds(eye_roi, eye_roi_frame)) //is this correct?
-    {
+  for (const cv::Rect &eye_roi : eye_rois) {
+    if(is_roi_within_bounds(eye_roi, eye_roi_frame)) { //is this correct?
       /* Crop the eye_roi region from the camera frame */
       iris_roi_frame = eye_roi_frame(eye_roi);
       
@@ -207,7 +207,7 @@ bool CameraHLD::is_roi_within_bounds(const cv::Rect &roi, const cv::Mat &image)
           roi.y + roi.height <= image.rows);
 }
 
-float CameraHLD::getDistanceFromIrisToCamera(float iris_diameter_in_pixel)
+float CameraHLD::getDistanceFromIrisToCamera(float iris_diameter_in_pixel) 
 {
      // Focal length of the camera in pixels (this needs to be calibrated)
     const float focal_length_px = 500.0f; // Example value, you need to calibrate this
@@ -218,7 +218,7 @@ float CameraHLD::getDistanceFromIrisToCamera(float iris_diameter_in_pixel)
     return distance;
 }
 
-float CameraHLD::calculateCameraDistance(const cv::Rect &eye_roi, uint32_t image_width)
+float CameraHLD::calculateCameraDistance(const cv::Rect &eye_roi, uint32_t image_width) 
 {
     // Average size of human iris in mm
     const float known_iris_diameter_mm = 11.7f;
@@ -247,17 +247,16 @@ float CameraHLD::calculateCameraDistance(const cv::Rect &eye_roi, uint32_t image
 }
 
 
-cv::Rect CameraHLD::getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois)
+cv::Rect CameraHLD::getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois) 
 {
     cv::Mat eye_roi_frame; 
     cv::Mat iris_roi_frame;
     cv::Rect biggest_iris_roi;
     float max_iris_diameter = 0.0f;
 
-    for (const cv::Rect &eye_roi : eye_rois)
-    {
-        if (is_roi_within_bounds(eye_roi, eye_roi_frame)) //is this correct?
-        {
+    for (const cv::Rect &eye_roi : eye_rois) {
+        if (is_roi_within_bounds(eye_roi, eye_roi_frame)) { //is this correct?
+        
           /* Crop the eye_roi region from the camera frame */
           iris_roi_frame = eye_roi_frame(eye_roi);
           
@@ -268,8 +267,7 @@ cv::Rect CameraHLD::getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois)
           std::array<cv::Point3f, CLFML::IrisMesh::NUM_OF_IRIS_MESH_POINTS> iris_mesh_keypoints = iris_mesh_.get_iris_mesh_points();
 
           float iris_diameter = getIrisDiameterInPixel(iris_mesh_keypoints);
-          if (iris_diameter > max_iris_diameter)
-          {
+          if (iris_diameter > max_iris_diameter) {
               max_iris_diameter = iris_diameter;
               biggest_iris_roi = eye_roi;
           }
@@ -291,3 +289,5 @@ cv::Rect CameraHLD::getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois)
 // }
 
 //--------------END TODO---------------------
+
+}  // namespace camera_hld

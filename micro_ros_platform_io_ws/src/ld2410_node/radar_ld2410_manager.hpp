@@ -16,6 +16,8 @@
 #include "wificonfig.hpp"
 #include "rgb_led.hpp"
 
+namespace radar_lld {
+
 /**
  * @brief The state of the radar manager.
  */
@@ -164,6 +166,8 @@ class RadarLd2410Manager
 
         static std::map<rcl_timer_t*, RadarLd2410Manager*> radar_manager_instance_map_;
 };
+
+} // namespace radar_lld
 
 #include "radar_ld2410_manager.tpp"
 

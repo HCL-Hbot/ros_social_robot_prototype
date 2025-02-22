@@ -22,7 +22,9 @@
                 return false; \
             } \
         };
-    
+
+namespace radar_lld {
+        
 template <unsigned int N_RADAR_SENSORS>
 std::map<rcl_timer_t*, RadarLd2410Manager<N_RADAR_SENSORS>*> RadarLd2410Manager<N_RADAR_SENSORS>::radar_manager_instance_map_;
 
@@ -30,27 +32,25 @@ std::map<rcl_timer_t*, RadarLd2410Manager<N_RADAR_SENSORS>*> RadarLd2410Manager<
 template <size_t N_RADAR_SENSORS>
 RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs,
                                                         const UartConfig& ros_serial_config, uint8_t device_id, uint8_t led_pin)
-: node_name_(node_name)
-, radar_publish_topic_name_(radar_publish_topic_name)
-, device_id_(device_id)
-, state_led_visualizer_(led_pin)
-, current_state_(RadarManagerState::WAITING_FOR_AGENT)
-, sensors_()
-, serials_()
-, allocator_(rcutils_get_default_allocator())
-, node_(rcl_get_zero_initialized_node())
-, target_frame_array_publisher_(rcl_get_zero_initialized_publisher())
-, publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
+: node_name_(node_name),
+  radar_publish_topic_name_(radar_publish_topic_name),
+  device_id_(device_id),
+  state_led_visualizer_(led_pin),
+  current_state_(RadarManagerState::WAITING_FOR_AGENT),
+  sensors_(),
+  serials_(),
+  allocator_(rcutils_get_default_allocator()),
+  node_(rcl_get_zero_initialized_node()),
+  target_frame_array_publisher_(rcl_get_zero_initialized_publisher()),
+  publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
 {
     ros_serial_.reset(new HardwareSerial(ros_serial_config.uart_num_));
 
     //Use the internal UART_to_USB bridge (only possible with UART 0) for ros serial communciation.
-    if(ros_serial_config.uart_num_ == 0 && ros_serial_config.rx_pin_ == 0 && ros_serial_config.tx_pin_ == 0) 
-    {
+    if(ros_serial_config.uart_num_ == 0 && ros_serial_config.rx_pin_ == 0 && ros_serial_config.tx_pin_ == 0) {
         ros_serial_->begin(ros_serial_config.baudrate_);
     }
-    else
-    {
+    else{
         ros_serial_->begin(ros_serial_config.baudrate_, SERIAL_8N1, ros_serial_config.rx_pin_, ros_serial_config.tx_pin_);
     }
     set_microros_serial_transports(*ros_serial_);
@@ -64,17 +64,17 @@ RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_
 template <size_t N_RADAR_SENSORS>
 RadarLd2410Manager<N_RADAR_SENSORS>::RadarLd2410Manager(const std::string& node_name, const std::string& radar_publish_topic_name, const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs,
                                                         const WifiConfig& wifi_config, uint8_t device_id, uint8_t led_pin)
-: node_name_(node_name)
-, radar_publish_topic_name_(radar_publish_topic_name)
-, device_id_(device_id)
-, state_led_visualizer_(led_pin)
-, current_state_(RadarManagerState::WAITING_FOR_AGENT)
-, sensors_()
-, serials_()
-, allocator_(rcutils_get_default_allocator())
-, node_(rcl_get_zero_initialized_node())
-, target_frame_array_publisher_(rcl_get_zero_initialized_publisher())
-, publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
+: node_name_(node_name),
+  radar_publish_topic_name_(radar_publish_topic_name),
+  device_id_(device_id),
+  state_led_visualizer_(led_pin),
+  current_state_(RadarManagerState::WAITING_FOR_AGENT),
+  sensors_(),
+  serials_(),
+  allocator_(rcutils_get_default_allocator()),
+  node_(rcl_get_zero_initialized_node()),
+  target_frame_array_publisher_(rcl_get_zero_initialized_publisher()),
+  publish_target_frame_array_timer_(rcl_get_zero_initialized_timer())
 {
     IPAddress agent_ip;
     agent_ip.fromString(wifi_config.ip_.c_str());
@@ -103,8 +103,7 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::isAgentAvailable()
 template <size_t N_RADAR_SENSORS>
 void RadarLd2410Manager<N_RADAR_SENSORS>::initializeRadars(const std::array<UartConfig, N_RADAR_SENSORS>& radar_configs)
 {
-    for(size_t i = 0; i<N_RADAR_SENSORS; ++i)
-    {
+    for(size_t i = 0; i<N_RADAR_SENSORS; ++i) {
         const UartConfig& radar_config = radar_configs[i];
         
         serials_[i].reset(new HardwareSerial(radar_config.uart_num_));
@@ -139,8 +138,7 @@ bool RadarLd2410Manager<N_RADAR_SENSORS>::initMicroRos()
             if(timer == nullptr) return;
 
             auto it = radar_manager_instance_map_.find(timer);
-            if (it != radar_manager_instance_map_.end())
-            {
+            if (it != radar_manager_instance_map_.end()) {
                 it->second->collectAndPublishRadarData();
             }    
         },
@@ -185,8 +183,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
     switch (current_state_)
     {
         case RadarManagerState::WAITING_FOR_AGENT:
-            if(isAgentAvailable())
-            {
+            if(isAgentAvailable()) {
                 current_state_ = RadarManagerState::CREATE_ROS_NODE;
                 state_led_visualizer_.setColor(STATE_LED_COLOR_CYAN); 
                 state_led_visualizer_.show();
@@ -194,22 +191,19 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::updateStateMachine()
             break;
 
         case RadarManagerState::CREATE_ROS_NODE:
-            if(initMicroRos())
-            {
+            if(initMicroRos()) {
                 current_state_ = RadarManagerState::RUNNING_ROS_NODE;
                 state_led_visualizer_.setColor(STATE_LED_COLOR_GREEN);
                 state_led_visualizer_.show();
             }
-            else
-            {
+            else {
                 current_state_ = RadarManagerState::DESTROY_ROS_NODE;
             }
             break;
         
         case RadarManagerState::RUNNING_ROS_NODE:
         
-            if(!spinSome(RCLC_SPIN_SOME_TIMEOUT_MS) || !isAgentAvailable())
-            {
+            if(!spinSome(RCLC_SPIN_SOME_TIMEOUT_MS) || !isAgentAvailable()) {
                 current_state_ = RadarManagerState::DESTROY_ROS_NODE;
                 state_led_visualizer_.setColor(STATE_LED_COLOR_RED);
                 state_led_visualizer_.show();
@@ -249,12 +243,10 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::collectAndPublishRadarData()
 {
     target_frame_array_msg_.sensors.size = 0;
 
-    for (size_t i = 0; i < N_RADAR_SENSORS; i++)
-    {
+    for (size_t i = 0; i < N_RADAR_SENSORS; i++) {
         Ld2410Radar& sensor = sensors_[i];
 
-        if (sensor.read())
-        {
+        if (sensor.read()) {
             const TargetFrameData& fd = sensor.getCurrentTargetFrame();
             addTargetFrameDataToArray(fd, i);
         }
@@ -280,5 +272,7 @@ void RadarLd2410Manager<N_RADAR_SENSORS>::addTargetFrameDataToArray(const Target
     target_frame_array_msg_.sensors.data[target_frame_array_msg_.sensors.size] = temp_target_frame;
     target_frame_array_msg_.sensors.size++;
 }
+
+} // namespace radar_lld
 
 #endif // RADAR_LD2410_MANAGER_TPP

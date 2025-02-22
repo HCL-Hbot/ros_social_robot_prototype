@@ -3,6 +3,8 @@
 
 #include <Adafruit_NeoPixel.h>
 
+namespace radar_lld {
+
 /**
  * @brief Class to control a RGB LED
  * 
@@ -42,5 +44,7 @@ public:
 private:
     Adafruit_NeoPixel strip;
 };
+
+} // namespace radar_lld
 
 #endif // RGB_LED_HPP_

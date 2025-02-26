@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,ros2,python,eclipse,visualstudiocode,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,ros2,python,eclipse,visualstudiocode,node
 
+### CUSTOM ###
+ros2_ws/src/eye_display_lld/src/styles.css
+
 ### C++ ###
 # Prerequisites
 *.d

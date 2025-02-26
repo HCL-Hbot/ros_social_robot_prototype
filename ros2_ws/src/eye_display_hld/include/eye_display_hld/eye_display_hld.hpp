@@ -47,9 +47,9 @@ private:
     
     void sendToLowLevelDriver(Eye eye, const eye_display_hld::msg::EyeControl::SharedPtr& eye_control_msg);
 
-    float getPupilDialation(uint16_t target_distance_cm);
+    double getPupilDialation(uint16_t target_distance_cm);
 
-    eye_display_lld::msg::EyesDirection getEyeDirectionMsg(float yaw, float pitch);
+    eye_display_lld::msg::EyesDirection getEyeDirectionMsg(double yaw, double pitch);
     
     void screenExpressionCallback(const eye_display_hld::msg::ScreenExpression::SharedPtr screen_expression_msg);
     rclcpp::Subscription<eye_display_hld::msg::EyeControl>::SharedPtr both_eyes_subscriber_;

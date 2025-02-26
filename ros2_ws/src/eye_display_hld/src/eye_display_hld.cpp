@@ -1,4 +1,5 @@
 #include "eye_display_hld.hpp"
+#include <algorithm> // For std::clamp
 
 constexpr const char* DEFAULT_NODE_NAME = "eyes_hld_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB_BOTH_EYE = "eye_control";
@@ -9,6 +10,23 @@ constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYE_LID_CONTROL = "eye_lid_control"
 //constexpr const char* DEFAULT_TOPIC_NAME_PUB_LEFT_EYE = "left_eye_lld";
 //constexpr const char* DEFAULT_TOPIC_NAME_PUB_RIGHT_EYE = "right_eye_lld";
 
+
+constexpr double MIN_DISTANCE = 30.0f;   // Minimum distance (max percentage)
+constexpr double MAX_DISTANCE = 100.0f;  // Maximum distance (min percentage)
+constexpr double MIN_EYE_PERCENTAGE = 50.0f; // Percentage at maxDistance and above
+constexpr double MAX_EYE_PERCENTAGE = 90.0f; // Percentage at minDistance and below
+
+// Function to calculate the percentage based on distance
+constexpr static double calculatePercentage(double distance, double minDistance, double maxDistance, double minPercentage, double maxPercentage) {
+    if (distance >= maxDistance) return minPercentage; // Above maxDistance -> minPercentage
+    if (distance <= minDistance) return maxPercentage; // Below minDistance -> maxPercentage
+
+    // Linear interpolation
+    double slope = (minPercentage - maxPercentage) / (maxDistance - minDistance);
+    double intercept = maxPercentage - (slope * minDistance);
+
+    return slope * distance + intercept;
+}
 
 namespace eye_display_hld {
 
@@ -47,17 +65,19 @@ void EyeDisplayHLD::sendToLowLevelDriver(Eye eye, const eye_display_hld::msg::Ey
 }
 
 
-float EyeDisplayHLD::getPupilDialation(uint16_t target_distance_cm) 
+double EyeDisplayHLD::getPupilDialation(uint16_t target_distance_cm) 
 {
-    float pupil_conversion = (25.0f/100.0f); //Verhouding van 0 tot 100. Bij een afstand 100 cm 25% pupil dialation
-    return target_distance_cm * pupil_conversion;
+    //double pupil_conversion = (25.0/100.0); //Verhouding van 0 tot 100. Bij een afstand 100 cm 25% pupil dialation
+    //return target_distance_cm * pupil_conversion;
+    double pupil_dialation = calculatePercentage(target_distance_cm, MIN_DISTANCE, MAX_DISTANCE, MIN_EYE_PERCENTAGE, MAX_EYE_PERCENTAGE);
+    return pupil_dialation;
 }
 
-eye_display_lld::msg::EyesDirection EyeDisplayHLD::getEyeDirectionMsg(float yaw, float pitch)
+eye_display_lld::msg::EyesDirection EyeDisplayHLD::getEyeDirectionMsg(double yaw, double pitch)
 {
     eye_display_lld::msg::EyesDirection eyes_direction_msg;
-    eyes_direction_msg.yaw = yaw;
-    eyes_direction_msg.pitch = pitch;
+    eyes_direction_msg.yaw = yaw * 180.0 / M_PI;
+    eyes_direction_msg.pitch = pitch * 180.0 / M_PI;
     return eyes_direction_msg;
 }
 

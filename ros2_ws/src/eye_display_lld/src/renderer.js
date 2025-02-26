@@ -20,7 +20,7 @@ window.onload = () => {
   //const eyeSize = document.querySelector('.eye').getBoundingClientRect().width; //width and height are the same for both eyes
   const eyes = document.querySelectorAll('.eye');
   const irises = document.querySelectorAll('.iris');
-  const pupiles = document.querySelectorAll('pupil'); //TODO make this controlable
+  const pupiles = document.querySelectorAll('.pupil'); //TODO make this controlable
   const topLids = document.querySelectorAll('.eyelid.top'); //TODO make this controlable
   const bottomLids = document.querySelectorAll('.eyelid.bottom'); //TODO make this controlable
   let isAnimationActive = false; //TODO make animation controlable?
@@ -46,7 +46,7 @@ window.onload = () => {
     // Hier kun je de logica toevoegen om de pupil dilatatie te verwerken
     
     //TODO this does not seem to work.
-    //updatePupilDilation(msg.dilation_percentage);
+    updatePupilDilation(msg.dilation_percentage);
   });
 
   function updatePupilDilation(dilationPercentage) {
@@ -80,11 +80,11 @@ window.onload = () => {
     //Recht voor camera yaw 75 pitch 55 (voornu dus hiermee compenseneren)
     //wat er nu fout gebeurd als input. Ik krijg een lage pitch waarde voor omhoog en hoge pitch warde voor omlaag 
 
-    yaw = yaw-75; //temp fix for offset 
+    // yaw = yaw-75; //temp fix for offset 
 
-    pitch = pitch-55; //temp fix for offset
+    // pitch = pitch-55; //temp fix for offset
 
-    pitch = pitch * -1; //for mirror effect, because currenty we get the input mirrored
+    // pitch = pitch * -1; //for mirror effect, because currenty we get the input mirrored
 
     const x = yawToX(yaw);
     const y = pitchToY(pitch);
@@ -97,10 +97,10 @@ window.onload = () => {
   function yawToX(yaw) {
     // Assuming yaw ranges from -90 to 90 degrees
     // Map this range to a suitable x position range (e.g., -50 to 50)
-    const minYaw = -30; // left
-    const maxYaw = 30; // right
-    const minX = 0; //left
-    const maxX = 100; //right
+    const minYaw = 30; // left
+    const maxYaw = -30; // right
+    const minX = 0; //left (robot perspective)
+    const maxX = 100; //right (robot persepective)
     const x = ((yaw - minYaw) / (maxYaw - minYaw)) * (maxX - minX) + minX;
     return Math.max(minX, Math.min(maxX, x));
   }

@@ -48,10 +48,16 @@ eye_display_hld::msg::EyeControl InteractionController::convertFacePositionToEye
     //Origin is (0,0,0) at the center of the camera frame
     //x = forward (distance to camera) , y = left/right, z = up/down
   
-    // Calculate yaw (horizontal angle) in degrees
-    eye_control_msg.yaw = std::atan2(face_position->point.y, face_position->point.x) * 180.0 / M_PI;
-    // Calculate pitch (vertical angle) in degrees
-    eye_control_msg.pitch = std::atan2(face_position->point.z, face_position->point.x) * 180.0 / M_PI;
+    // // Calculate yaw (horizontal angle) in degrees
+    // eye_control_msg.yaw = std::atan2(face_position->point.y, face_position->point.x) * 180.0 / M_PI;
+    // // Calculate pitch (vertical angle) in degrees
+    // eye_control_msg.pitch = std::atan2(face_position->point.z, face_position->point.x) * 180.0 / M_PI;
+    // Calculate yaw (horizontal angle) in radians
+    eye_control_msg.yaw = std::atan2(face_position->point.y, face_position->point.x);
+    // Calculate horizontal distance z-axis to xy-plane
+    double r = std::sqrt(std::pow(face_position->point.x, 2) + std::pow(face_position->point.y, 2));
+    // Calculate pitch (vertical angle) in radians
+    eye_control_msg.pitch = std::atan2(face_position->point.z, r);
     // Calculate distance to face in cm
     eye_control_msg.target_distance_cm = face_position->point.x;
 

@@ -73,7 +73,8 @@ private:
    */
   const std::array<cv::Rect, 2> calculate_eye_roi(const cv::Point &left_eye_landmark, const cv::Point &right_eye_landmark);
 
-  float getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois);
+  float getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois, const cv::Mat& frame);
+
   float getIrisDiameterInPixel(const std::array<cv::Point3f, CLFML::IrisMesh::NUM_OF_IRIS_MESH_POINTS> iris_mesh_landmarks);
 
   /**
@@ -97,10 +98,14 @@ private:
   //cv::Rect calculateIrisRoi(cv::Point left_most, cv::Point rightMost) const;
   /************************END OF NOT USED METHOD********************************/
 
+  void publishDebugImage(const cv::Mat& frame);
+  
   CLFML::FaceDetection::FaceDetector face_detector_;
   CLFML::IrisMesh::IrisMesh iris_mesh_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr face_position_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr debug_image_pub_;
+
   std::string tf_frame_id_;
 };
 

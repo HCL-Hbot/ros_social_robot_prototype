@@ -10,14 +10,13 @@ constexpr const char* TF_CAMERA_FRAME_ID_PARAMETER = "tf_frame_id";
 constexpr const char* DEFAULT_TF_CAMERA_FRAME_ID = "camera";
 constexpr const char* DEBUG_TOPIC_NAME_PUB = "debug_image";
 
-constexpr double FACE_WIDTH_CM = 16.0;
-constexpr double IRIS_DIAMETER_MM = 11.7;
-constexpr double IRIS_DIAMETER_CM = IRIS_DIAMETER_MM / 10.0;
+constexpr double FACE_WIDTH_CM = 18.0;
 constexpr double FOCAL_LENGTH_PIXEL = 487.50;
 
-constexpr double KNOWN_PIXEL_WIDTH = 55.0; //pixel width of a known reference object
-constexpr double KNOWN_WIDTH_CM = 100.0; 
-constexpr double PIXEL_PER_CM = KNOWN_PIXEL_WIDTH / KNOWN_WIDTH_CM;
+//experimental
+constexpr double IRIS_DIAMETER_MM = 11.7;
+constexpr double IRIS_DIAMETER_CM = IRIS_DIAMETER_MM / 10.0;
+
 
 namespace camera_hld {
 
@@ -64,10 +63,9 @@ void CameraHLD::imageCallback(const sensor_msgs::msg::Image::SharedPtr image_msg
    //cv::Rect face_roi = face_detector_.get_face_roi();
    //cv::rectangle(frame, face_roi, cv::Scalar(0, 255, 0), 2);
 
-    // Publish the debug image
+    // Publish the debug image (contains the face ROI and iris keypoints)
     publishDebugImage(frame);
     
-    //RCLCPP_INFO(this->get_logger(), "Image width @ %d, height @ %d", frame.size().width, frame.size().height);
     publishFacePosition(frame);
   }
   else {
@@ -146,8 +144,24 @@ void CameraHLD::publishDebugImage(const cv::Mat& frame)
 
     //RCLCPP_INFO(this->get_logger(), "Biggest iris diameter: %f", biggest_iris_diameter);
 
-    //float distance_to_face = (FACE_WIDTH_CM * FOCAL_LENGTH_PIXEL) / face_roi.width; 
-    float distance_to_face = (29.7f * FOCAL_LENGTH_PIXEL) / face_roi.width; 
+    if(biggest_iris_diameter == 0.0f) {
+      RCLCPP_INFO(this->get_logger(), "No iris detected, distance to face cannot be calculated.");
+      return;
+    }
+
+    /*Option 1: Current implementation based on face width*/
+    float distance_to_face = (FACE_WIDTH_CM * FOCAL_LENGTH_PIXEL) / face_roi.width; 
+    // float distance_to_face = (29.7f * FOCAL_LENGTH_PIXEL) / face_roi.width; 
+    //------------------------------------------------------------------------------------------------
+    /*Option 2: Expirmantal with iris */
+    // const double focal_length_mm = 2.7;
+    // const double iris_diameter_mm = 11.7;
+    // const double iris_diameter_pixel = biggest_iris_diameter;
+    // const double pixel_size_mm = 0.0014;
+
+    // double distance_to_face = (iris_diameter_mm * focal_length_mm) / (iris_diameter_pixel*pixel_size_mm);
+    // distance_to_face = distance_to_face / 10.0f; //convert to CM
+    //------------------------------------------------------------------------------------------------
 
     // put distance to face on the image
     std::string distance_to_face_str = "Distance to face: " + std::to_string(distance_to_face) + " cm";
@@ -177,21 +191,32 @@ void CameraHLD::publishFacePosition(const cv::Mat& frame)
   // float irisSizePixel = getBiggestIrisDiameterInPixel(eye_roi, frame);
   // float distance_to_face =  (IRIS_DIAMETER_MM * FOCAL_LENGTH_PIXEL) / irisSizePixel;
   // distance_to_face = distance_to_face / 10.0f; //convert to CM
+  //------------  ----------------------------------------------------------------------------------------------
 
-  /*option 2: calculate distance to face with width of face*/
-  //float distance_to_face = (FACE_WIDTH_CM * FOCAL_LENGTH_PIXEL) / face_roi.width;
-  //float distance_to_face = getDistanceToFace(face_roi, eye_roi, frame.size().width); //mockup for now, needed for distance calculation
-
+  /*CURRENT IMPLEMENTATION: option 2: calculate distance to face with paper width as reference... i don't know why... but the distances i get are the closed on to reality distances up to 120cm */
   const double reference_distance_mm = 1000.0f; // 1 meter
   const double known_width_of_a_object_mm = 297.0f; //pixel width of a known reference object
   const double distance_to_face_mm = (known_width_of_a_object_mm * FOCAL_LENGTH_PIXEL) / face_roi.width;
   const double pixels_per_mm = face_roi.width / known_width_of_a_object_mm;
   const double adjusted_pixels_per_mm = pixels_per_mm * (reference_distance_mm / distance_to_face_mm);
-  const double face_center_x_mm = (center_of_face.x - (640 / 2.0)) / adjusted_pixels_per_mm; // 640 is een voorbeeld camerabreedte
-  const double face_center_y_mm = (center_of_face.y - (480 / 2.0)) / adjusted_pixels_per_mm; // 480 is een voorbeeld camerahoogte
+  const double face_center_x_mm = (center_of_face.x - (640 / 2.0)) / adjusted_pixels_per_mm; // 640 is imagebreedte
+  const double face_center_y_mm = (center_of_face.y - (480 / 2.0)) / adjusted_pixels_per_mm; // 480 is imagehoogte
 
   center_of_face.x = face_center_x_mm;
   center_of_face.y = face_center_y_mm;
+  //------------------------------------------------------------------------------------------------
+
+  // DESIRED IMPLEMENTATION: option 3: calculate distance to face with face width as reference. Need to test this a same location. At home i get up to 60cm distance to face. why????
+  // const double pixels_per_mm_reference = 2.0889;
+  // const double object_reference_width_mm = 200.0;
+  // const double distance_to_face_mm = (FOCAL_LENGTH_PIXEL * (FACE_WIDTH_CM*10)) / face_roi.width;
+  // const double adjusted_pixels_per_mm = pixels_per_mm_reference * (object_reference_width_mm / distance_to_face_mm);
+  // const double face_center_x_mm = (center_of_face.x - (640 / 2.0)) / adjusted_pixels_per_mm; // 640 is imagebreedte
+  // const double face_center_y_mm = (center_of_face.y - (480 / 2.0)) / adjusted_pixels_per_mm; // 480 is imagehoogte
+
+  // center_of_face.x = face_center_x_mm;
+  // center_of_face.y = face_center_y_mm;
+  //------------------------------------------------------------------------------------------------
 
   auto face_position_msg = createFacePositionMsg(center_of_face, distance_to_face_mm);
 

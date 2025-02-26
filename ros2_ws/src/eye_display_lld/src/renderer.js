@@ -137,7 +137,7 @@ window.onload = () => {
       console.log("Lets move one eye");
       const irisElement = document.querySelector(`#${searchId} .iris`);
       if (irisElement) {
-        irisElement.style.transform = `ttranslate(-${x}%, -${y}%)`;// translate(${x}px, ${y}px)`;
+        irisElement.style.transform = `translate(-${x}%, -${y}%)`;// translate(${x}px, ${y}px)`;
       }
     }
   }

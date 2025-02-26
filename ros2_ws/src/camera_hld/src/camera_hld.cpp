@@ -146,7 +146,8 @@ void CameraHLD::publishDebugImage(const cv::Mat& frame)
 
     //RCLCPP_INFO(this->get_logger(), "Biggest iris diameter: %f", biggest_iris_diameter);
 
-    float distance_to_face = (FACE_WIDTH_CM * FOCAL_LENGTH_PIXEL) / face_roi.width; 
+    //float distance_to_face = (FACE_WIDTH_CM * FOCAL_LENGTH_PIXEL) / face_roi.width; 
+    float distance_to_face = (29.7f * FOCAL_LENGTH_PIXEL) / face_roi.width; 
 
     // put distance to face on the image
     std::string distance_to_face_str = "Distance to face: " + std::to_string(distance_to_face) + " cm";

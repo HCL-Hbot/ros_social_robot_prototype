@@ -2,10 +2,8 @@
 
 # TODO list this BRANCH! URGENT (SOFT DEADLINE)
 
-- [ ] Write high level eye driver (ROS C++ node)
-- [ ] Write low level eye driver (typescript (use POC electron app as codebase), maybe C++ rosnode for websockets)
-- [ ] Write documentation for high level and low level eye driver and add this to this repro with a folder "documentation"
-  - [ ] Old documentation should be updated to (i.e. does it match with newly written section)
+- [X] Write high level eye driver (ROS C++ node)
+- [X] Write low level eye driver (use POC electron app as codebase)
 - [ ] POC symposium DEMO README me should be written completly
   - [ ] What should be installed at server and client side (startup script: screen setup, hotspot setup, app startup)
 - [ ] Proof of concept folder should be complete (Move micro-ros-pub sub to this section and update te README)
@@ -27,8 +25,8 @@
 - [ ] Speaker
 - ~~[ ] Ledmatrix RGB~~
 - [ ] LCD screen(s)
-  - [ ] HLD eyes
-  - [ ] LLD eyes
+  - [X] HLD eyes
+  - [X] LLD eyes
 
 2. Define the real controller behaviour for this project with projectmananger and implement this.
 3. Write about project and how to use it.

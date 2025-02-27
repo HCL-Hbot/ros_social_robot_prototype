@@ -10,7 +10,7 @@ constexpr const char* TF_CAMERA_FRAME_ID_PARAMETER = "tf_frame_id";
 constexpr const char* DEFAULT_TF_CAMERA_FRAME_ID = "camera";
 constexpr const char* DEBUG_TOPIC_NAME_PUB = "debug_image";
 
-constexpr double FACE_WIDTH_CM = 18.0;
+constexpr double FACE_WIDTH_CM = 20.0;
 constexpr double FOCAL_LENGTH_PIXEL = 487.50;
 
 //experimental
@@ -180,29 +180,16 @@ void CameraHLD::publishFacePosition(const cv::Mat& frame)
   // distance_to_face = distance_to_face / 10.0f; //convert to CM
   //----------------------------------------------------------------------------------------------------------
 
-  /*CURRENT IMPLEMENTATION: option 2: calculate distance to face with paper width as reference... i don't know why... but the distances i get are the closed on to reality distances up to 120cm */
-  const double reference_distance_mm = 1000.0f; // 1 meter
-  const double known_width_of_a_object_mm = 297.0f; //pixel width of a known reference object
-  const double distance_to_face_mm = (known_width_of_a_object_mm * FOCAL_LENGTH_PIXEL) / face_roi.width;
-  const double pixels_per_mm = face_roi.width / known_width_of_a_object_mm;
-  const double adjusted_pixels_per_mm = pixels_per_mm * (reference_distance_mm / distance_to_face_mm);
+  //Current implementation based on face width
+  const double pixels_per_mm_reference = 2.0889;
+  const double object_reference_width_mm = 200.0;
+  const double distance_to_face_mm = getDistanceToFace(face_roi);
+  const double adjusted_pixels_per_mm = pixels_per_mm_reference * (object_reference_width_mm / distance_to_face_mm);
   const double face_center_x_mm = (center_of_face.x - (640 / 2.0)) / adjusted_pixels_per_mm; // 640 is imagebreedte
   const double face_center_y_mm = (center_of_face.y - (480 / 2.0)) / adjusted_pixels_per_mm; // 480 is imagehoogte
 
   center_of_face.x = face_center_x_mm;
   center_of_face.y = face_center_y_mm;
-  //------------------------------------------------------------------------------------------------
-
-  // DESIRED IMPLEMENTATION: option 3: calculate distance to face with face width as reference. Need to test this a same location. At home i get up to 60cm distance to face. why????
-  // const double pixels_per_mm_reference = 2.0889;
-  // const double object_reference_width_mm = 200.0;
-  // const double distance_to_face_mm = getDistanceToFace(face_roi);
-  // const double adjusted_pixels_per_mm = pixels_per_mm_reference * (object_reference_width_mm / distance_to_face_mm);
-  // const double face_center_x_mm = (center_of_face.x - (640 / 2.0)) / adjusted_pixels_per_mm; // 640 is imagebreedte
-  // const double face_center_y_mm = (center_of_face.y - (480 / 2.0)) / adjusted_pixels_per_mm; // 480 is imagehoogte
-
-  // center_of_face.x = face_center_x_mm;
-  // center_of_face.y = face_center_y_mm;
   //------------------------------------------------------------------------------------------------
 
   auto face_position_msg = createFacePositionMsg(center_of_face, distance_to_face_mm);
@@ -239,10 +226,10 @@ geometry_msgs::msg::PointStamped CameraHLD::createFacePositionMsg(const cv::Poin
   face_position_msg.point.z =  face_position_msg.point.z / 10;
 
   // DEBUG INFO
-  // double yaw = std::atan2(face_position_msg.point.y, face_position_msg.point.x) * 180.0 / M_PI;
-  // double pitch = std::atan2(face_position_msg.point.z, std::sqrt(std::pow(face_position_msg.point.x, 2) + std::pow(face_position_msg.point.y, 2))) * 180 / M_PI;
-  // RCLCPP_INFO(this->get_logger(), "Face detected at x: %f, y: %f, z: %f", face_position_msg.point.x, face_position_msg.point.y, face_position_msg.point.z);
-  // RCLCPP_INFO(this->get_logger(), "Yaw: %f, Pitch: %f", yaw, pitch);
+  double yaw = std::atan2(face_position_msg.point.y, face_position_msg.point.x) * 180.0 / M_PI;
+  double pitch = std::atan2(face_position_msg.point.z, std::sqrt(std::pow(face_position_msg.point.x, 2) + std::pow(face_position_msg.point.y, 2))) * 180 / M_PI;
+  RCLCPP_INFO(this->get_logger(), "Face detected at x: %f, y: %f, z: %f", face_position_msg.point.x, face_position_msg.point.y, face_position_msg.point.z);
+  RCLCPP_INFO(this->get_logger(), "Yaw: %f, Pitch: %f", yaw, pitch);
 
   return face_position_msg;
 }

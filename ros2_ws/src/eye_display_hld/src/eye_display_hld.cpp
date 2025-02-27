@@ -12,7 +12,7 @@ constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYE_LID_CONTROL = "eye_lid_control"
 
 
 constexpr double MIN_DISTANCE = 30.0f;   // Minimum distance (max percentage)
-constexpr double MAX_DISTANCE = 100.0f;  // Maximum distance (min percentage)
+constexpr double MAX_DISTANCE = 50.0f;  // Maximum distance (min percentage)
 constexpr double MIN_EYE_PERCENTAGE = 50.0f; // Percentage at maxDistance and above
 constexpr double MAX_EYE_PERCENTAGE = 90.0f; // Percentage at minDistance and below
 

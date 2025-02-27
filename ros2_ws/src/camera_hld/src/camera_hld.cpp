@@ -176,7 +176,7 @@ void CameraHLD::publishFacePosition(const cv::Mat& frame)
   /*option 1: calculate distance to face with iris (for now not good!, because it seems i get pupil detection instead of iris!!!)*/
   // auto eye_roi =  calculateEyeRoi(face_keypoints[0], face_keypoints[1]); 
   // float irisSizePixel = getBiggestIrisDiameterInPixel(eye_roi, frame);
-  // float distance_to_face =  (IRIS_DIAMETER_MM * FOCAL_LENGTH_PIXEL) / irisSizePixel;
+  // float distance_to_face_mm =  (IRIS_DIAMETER_MM * FOCAL_LENGTH_PIXEL) / irisSizePixel;
   // distance_to_face = distance_to_face / 10.0f; //convert to CM
   //----------------------------------------------------------------------------------------------------------
 

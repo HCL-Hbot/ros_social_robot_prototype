@@ -16,42 +16,37 @@ window.onload = () => {
     leftEye.remove();
   }
 
-  //TODO might need to calculate iris size based on eye size
-  //const eyeSize = document.querySelector('.eye').getBoundingClientRect().width; //width and height are the same for both eyes
+
   const eyes = document.querySelectorAll('.eye');
   const irises = document.querySelectorAll('.iris');
-  const pupiles = document.querySelectorAll('.pupil'); //TODO make this controlable
-  const topLids = document.querySelectorAll('.eyelid.top'); //TODO make this controlable
-  const bottomLids = document.querySelectorAll('.eyelid.bottom'); //TODO make this controlable
-  let isAnimationActive = false; //TODO make animation controlable?
+  const pupiles = document.querySelectorAll('.pupil'); 
+  const topLids = document.querySelectorAll('.eyelid.top'); 
+  const bottomLids = document.querySelectorAll('.eyelid.bottom');
 
+  /* features taken from proof of concept, but not used yet */
+  // let isAnimationActive = false; //TODO make animation controlable?
 
-  function blink() {
-    topLids.forEach(lid => lid.style.height = '50%');
-    bottomLids.forEach(lid => lid.style.height = '50%');
-    setTimeout(() => {
-      if (!isAnimationActive) {
-        topLids.forEach(lid => lid.style.height = '0%');
-        bottomLids.forEach(lid => lid.style.height = '0%');
-      }
-    }, 200);
-  }
+  // function blink() {
+  //   topLids.forEach(lid => lid.style.height = '50%');
+  //   bottomLids.forEach(lid => lid.style.height = '50%');
+  //   setTimeout(() => {
+  //     if (!isAnimationActive) {
+  //       topLids.forEach(lid => lid.style.height = '0%');
+  //       bottomLids.forEach(lid => lid.style.height = '0%');
+  //     }
+  //   }, 200);
+  // }
 
   // let blinkInterval = setInterval(() => {
   //   if (!isAnimationActive) blink();
   // }, 2000);
+  /************************************************** */
 
   ipcRenderer.on('pupil-control', (event, msg) => {
-    //console.log(`Received PupilControl message in renderer: ${msg.dilation_percentage}`);
-    // Hier kun je de logica toevoegen om de pupil dilatatie te verwerken
-    
-    //TODO this does not seem to work.
     updatePupilDilation(msg.dilation_percentage);
   });
 
   function updatePupilDilation(dilationPercentage) {
-    // Add logic to handle the pupil dilation
-    // For example, update the size of an HTML element representing the pupil
     pupiles.forEach((pupil) => {
       pupil.style.width = `${dilationPercentage}%`;
       pupil.style.height = `${dilationPercentage}%`;
@@ -62,30 +57,19 @@ window.onload = () => {
     //for now only support one value for both eyes
     if(eye_lid_control_msg.eye_id===2)
     {
-      moveLid('all', eye_lid_control_msg.top_lid_position); //TODO each eye lid seperatly. For now everything is the same
+      moveLid('all', eye_lid_control_msg.top_lid_position); //TODO create conrol for each eye lid seperatly? For now everything is the same
     }
-    //TODO each eye seperatly
+    //TODO each eye seperatly?
   });
 
   ipcRenderer.on('eyes_direction_control', (event, eyes_direction) => {
-    console.log('Eyes direction yaw:', eyes_direction.yaw);
-    console.log('Eyes direction pitch:', eyes_direction.pitch);
+    // console.log('Eyes direction yaw:', eyes_direction.yaw);
+    // console.log('Eyes direction pitch:', eyes_direction.pitch);
     moveEyes(eyes_direction.yaw, eyes_direction.pitch);
   });
 
   // Function to move the eyes based on yaw and pitch
   function moveEyes(yaw, pitch) {
-    // Map yaw and pitch to x and y positions
-    // yaw links-rechts, pitch omhoog-omlaag
-    //Recht voor camera yaw 75 pitch 55 (voornu dus hiermee compenseneren)
-    //wat er nu fout gebeurd als input. Ik krijg een lage pitch waarde voor omhoog en hoge pitch warde voor omlaag 
-
-    // yaw = yaw-75; //temp fix for offset 
-
-    // pitch = pitch-55; //temp fix for offset
-
-    // pitch = pitch * -1; //for mirror effect, because currenty we get the input mirrored
-
     const x = yawToX(yaw);
     const y = pitchToY(pitch);
 
@@ -96,7 +80,7 @@ window.onload = () => {
   // Helper function to map yaw to x position
   function yawToX(yaw) {
     // Assuming yaw ranges from -90 to 90 degrees
-    // Map this range to a suitable x position range (e.g., -50 to 50)
+    // Map this range to a suitable x position range
     const minYaw = 30; // left
     const maxYaw = -30; // right
     const minX = 0; //left (robot perspective)
@@ -108,7 +92,7 @@ window.onload = () => {
   // Helper function to map pitch to y position
   function pitchToY(pitch) {
     // Assuming pitch ranges from -90 to 90 degrees
-    // Map this range to a suitable y position range (e.g., -50 to 50)
+    // Map this range to a suitable y position range
     const minPitch = -20; //down
     const maxPitch = 20; //up
     const minY = 0; //down
@@ -130,20 +114,21 @@ window.onload = () => {
       console.log("Lets move both iris");
       irises.forEach((iris) => {
         //translate(left-right, up-down) (0= full left, 0= full down) robot perspective
-        iris.style.transform = `translate(-${x}%, -${y}%)`; //translate(${x}px, ${y}px)`;
+        iris.style.transform = `translate(-${x}%, -${y}%)`;
       });
     }
     else if (searchId !== null) {
       console.log("Lets move one eye");
       const irisElement = document.querySelector(`#${searchId} .iris`);
       if (irisElement) {
-        irisElement.style.transform = `translate(-${x}%, -${y}%)`;// translate(${x}px, ${y}px)`;
+        irisElement.style.transform = `translate(-${x}%, -${y}%)`;
       }
     }
   }
 
-  // FROME HERE ONWARDS IS NOT USED YET. OLD CODE FROM PROOF OF CONCEPT WHICH SHOULD BE REFACTORED AND REVIEWED HOW TO USE IT IN MY CASE
-  // Example: Move a eyelid to a specific position. Also supports 'all' as lid parameter which moves all eyelids
+  // FROME HERE ONWARDS ALL THE FUNCTIONS ARE NOT USED YET. OLD CODE FROM PROOF OF CONCEPT WHICH SHOULD BE REFACTORED AND REVIEWED HOW TO USE IT IN MY CASE
+  // Currently ONLY using the moveLid function from PROOF OF CONCEPT verssion, only the case where we move both lids at the same time
+  // The rest of the code in the function is not used yet, but can be used to control the eyes in a more advanced way. Should be tested and reviewed how to use it in my case
   function moveLid(lid, position) {
 
     const searchClass = lid === "all" ? "eyelid" : null;

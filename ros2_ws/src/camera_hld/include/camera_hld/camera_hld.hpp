@@ -57,21 +57,16 @@ private:
   
   cv::Point getCenterOfFace(const cv::Rect& face_roi);
 
-  //mocked return value for now
-  cv::Rect getEyeRoi(const cv::Point& left_eye_landmark, const cv::Point& right_eye_landmark);
-
-  //mocked return value for now
-  float getDistanceToFace(const cv::Rect& face_roi, const cv::Rect& eye_roi, uint32_t image_width);
+  float getDistanceToFace(const cv::Rect& face_roi);
   
   geometry_msgs::msg::PointStamped createFacePositionMsg(const cv::Point center_of_face, float distance_to_face);
 
-  //*********** METHODS BELOW ARE NOT USED (YET) NEEDS A REVIEW: DO WE NEED OR HOW TO GET DEPTH OF FACE! */
   /**
    * @brief Calculate the eye regions on the face by using two 2D-facial landmarks of the eye_center.
    *        It uses the distance between the eye's as reference for how big the regions should be.
    *        For most people it works, but it is a very crude and easy way!
    */
-  const std::array<cv::Rect, 2> calculate_eye_roi(const cv::Point &left_eye_landmark, const cv::Point &right_eye_landmark);
+  const std::array<cv::Rect, 2> calculateEyeRoi(const cv::Point &left_eye_landmark, const cv::Point &right_eye_landmark);
 
   float getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois, const cv::Mat& frame);
 
@@ -86,17 +81,6 @@ private:
    */
   bool is_roi_within_bounds(const cv::Rect &roi, const cv::Mat &image);
 
-  //implementation 1
-  float getDistanceFromIrisToCamera(float iris_diameter);
-
-  //implementation 2
-  float calculateCameraDistance(const cv::Rect &eye_roi, uint32_t image_width);
-
-  cv::Rect getBiggestIrisRoi(const std::array<cv::Rect, 2> &eye_rois);
-
-  //maybe better version for caluclating the eye roi??
-  //cv::Rect calculateIrisRoi(cv::Point left_most, cv::Point rightMost) const;
-  /************************END OF NOT USED METHOD********************************/
 
   void publishDebugImage(const cv::Mat& frame);
   

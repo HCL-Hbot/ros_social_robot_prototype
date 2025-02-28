@@ -27,6 +27,14 @@ def generate_launch_description():
         }]
     )
 
+    static_transform_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_camera_to_eyes',
+        arguments=['0', '0', '0.25', '0', '0', '0', 'camera_1_front', 'robot_eyes'],
+        output='screen'
+    )
+
     # Test later when we have two (USB) camera's
     # camera_lld_node_side_view = Node(
     #     package='camera_lld',
@@ -51,6 +59,7 @@ def generate_launch_description():
     #)
 
     return LaunchDescription([
+        static_transform_publisher,
         camera_lld_node_front_view,
         camera_hld_node_front_view,
         ])

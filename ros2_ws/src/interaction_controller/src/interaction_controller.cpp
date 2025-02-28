@@ -1,5 +1,6 @@
 #include "interaction_controller.hpp"
 
+
 constexpr const char* DEFAULT_NODE_NAME = "interaction_controller_node";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB_FACE = "face_info";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYE_CONTROL = "eye_control";
@@ -18,6 +19,9 @@ InteractionController::InteractionController()
   screen_expression_pub_(this->create_publisher<eye_display_hld::msg::ScreenExpression>(DEFAULT_TOPIC_NAME_PUB_SCREEN_EXPRESSION, 10)),
   last_precence_msg_()
 {
+    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+    
     last_precence_msg_.presence_state = interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
     last_precence_msg_.target_state = interaction_controller::msg::PresenceDetection::TARGET_STANDING;
 }
@@ -28,41 +32,45 @@ InteractionController::~InteractionController()
 
 void InteractionController::facePositionCallback(const geometry_msgs::msg::PointStamped::SharedPtr face_position)
 {
-    eye_display_hld::msg::EyeControl eye_control_msg = convertFacePositionToEyeControl(face_position);
-    eye_control_pub_->publish(eye_control_msg);
+    try {
+        eye_display_hld::msg::EyeControl eye_control_msg = convertFacePositionToEyeControl(face_position);
+        eye_control_pub_->publish(eye_control_msg);
+    } catch (const tf2::TransformException& ex) {
+        RCLCPP_WARN(this->get_logger(), "TF Transformatie mislukt: %s", ex.what());
+    }
 }
 
 eye_display_hld::msg::EyeControl InteractionController::convertFacePositionToEyeControl(const geometry_msgs::msg::PointStamped::SharedPtr& face_position)
 {
+    // Search for the transformation from camera_1_front (face_position->header.frame_id) to robot_eyes
+    geometry_msgs::msg::TransformStamped transform_stamped;
+    //todo make first parameter a variable
+    transform_stamped = tf_buffer_->lookupTransform("robot_eyes", face_position->header.frame_id, face_position->header.stamp, rclcpp::Duration::from_seconds(0.1)); //todo instead of duration can we get the latest? ff uitzoeken
+
+    // Transform the point to the reference frame
+    geometry_msgs::msg::PointStamped transformed_point;
+    tf2::doTransform(*face_position, transformed_point, transform_stamped);
+    
+    RCLCPP_INFO(this->get_logger(), "Transformed point: x=%.2f, y=%.2f, z=%.2f",
+                transformed_point.point.x, transformed_point.point.y, transformed_point.point.z);
+
+    
     eye_display_hld::msg::EyeControl eye_control_msg = eye_display_hld::msg::EyeControl();
 
-    //Face position is in the camera frame, so we need to convert it to the eye frame.
-    //Coordinates of face position are defined in ROS Right-Hand Rule
-
-    //Todo convert face position to eye position with tf frames
-    // TODO better implementations
-    //------------------------------------------------------------------------------------------------
-    
-    // Quick implementation!    
-    //for now assume the face position frame is the same as the eye frame for testing purposes
-    //Origin is (0,0,0) at the center of the camera frame
-    //x = forward (distance to camera) , y = left/right, z = up/down
-  
-    // // Calculate yaw (horizontal angle) in degrees
-    // eye_control_msg.yaw = std::atan2(face_position->point.y, face_position->point.x) * 180.0 / M_PI;
-    // // Calculate pitch (vertical angle) in degrees
-    // eye_control_msg.pitch = std::atan2(face_position->point.z, face_position->point.x) * 180.0 / M_PI;
     // Calculate yaw (horizontal angle) in radians
-    eye_control_msg.yaw = std::atan2(face_position->point.y, face_position->point.x);
+    eye_control_msg.yaw = std::atan2(transformed_point.point.y, transformed_point.point.x);
     // Calculate horizontal distance z-axis to xy-plane
-    double r = std::sqrt(std::pow(face_position->point.x, 2) + std::pow(face_position->point.y, 2));
+    double r = std::sqrt(std::pow(transformed_point.point.x, 2) + std::pow(transformed_point.point.y, 2));
     // Calculate pitch (vertical angle) in radians
-    eye_control_msg.pitch = std::atan2(face_position->point.z, r);
+    eye_control_msg.pitch = std::atan2(transformed_point.point.z, r);
     // Calculate distance to face in cm
-    eye_control_msg.target_distance_cm = face_position->point.x;
+    eye_control_msg.target_distance_cm = static_cast<uint16_t>((transformed_point.point.x*100.0f));
 
-    //Of moet ik de distance zo berekenen? Probleem hierbij is x is cm, y is pixels en z is pixels
-    //eye_control_msg.target_distance_cm = std::sqrt(std::pow(face_position->point.x, 2) + std::pow(face_position->point.y, 2) + std::pow(face_position->point.z, 2));
+    //Of moet ik de distance zo berekenen? (beide geven zelfde resultaat lijkt het)
+    //    eye_control_msg.target_distance_cm = static_cast<uint16_t>(
+    //    std::sqrt(std::pow(transformed_point.point.x, 2) +
+    //              std::pow(transformed_point.point.y, 2) +
+    //              std::pow(transformed_point.point.z, 2)) * 100.0f);
     //------------------------------------------------------------------------------------------------
 
     return eye_control_msg;

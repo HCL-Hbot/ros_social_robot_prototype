@@ -176,8 +176,8 @@ void CameraHLD::publishFacePosition(const cv::Mat& frame)
   /*option 1: calculate distance to face with iris (for now not good!, because it seems i get pupil detection instead of iris!!!)*/
   // auto eye_roi =  calculateEyeRoi(face_keypoints[0], face_keypoints[1]); 
   // float irisSizePixel = getBiggestIrisDiameterInPixel(eye_roi, frame);
-  // float distance_to_face_mm =  (IRIS_DIAMETER_MM * FOCAL_LENGTH_PIXEL) / irisSizePixel;
-  // distance_to_face = distance_to_face / 10.0f; //convert to CM
+  // float distance_to_face_mm_iris =  (IRIS_DIAMETER_MM * FOCAL_LENGTH_PIXEL) / irisSizePixel;
+  //distance_to_face_mm_iris = distance_to_face_mm_iris / 10.0f; //convert to CM
   //----------------------------------------------------------------------------------------------------------
 
   //Current implementation based on face width
@@ -219,11 +219,10 @@ geometry_msgs::msg::PointStamped CameraHLD::createFacePositionMsg(const cv::Poin
   face_position_msg.point.y = -1 * center_of_face.x; // Y =  left (positive)
   face_position_msg.point.z = -1 * center_of_face.y; // Z = up (positive)
 
-  //Convert to CM (Expected input: mm -> convert to cm)
-  //For testing purpuses everthing is in CM, later x and y should be converted to meters and z to cm
-  face_position_msg.point.x =  face_position_msg.point.x / 10;
-  face_position_msg.point.y =  face_position_msg.point.y / 10; 
-  face_position_msg.point.z =  face_position_msg.point.z / 10;
+  //Convert to meters (Expected input: mm -> convert to meters)
+  face_position_msg.point.x =  face_position_msg.point.x / 1000;
+  face_position_msg.point.y =  face_position_msg.point.y / 1000; 
+  face_position_msg.point.z =  face_position_msg.point.z / 1000;
 
   // DEBUG INFO
   double yaw = std::atan2(face_position_msg.point.y, face_position_msg.point.x) * 180.0 / M_PI;

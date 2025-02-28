@@ -12,6 +12,9 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)  
+find_package(tf2_ros REQUIRED)  
+find_package(tf2_geometry_msgs REQUIRED) 
 find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED) #Contains message to receive the position of the detected person
 find_package(camera_hld REQUIRED) # Contains message to communciate with camera_hld
@@ -38,6 +41,9 @@ target_compile_features(interaction_controller_node PUBLIC c_std_99 cxx_std_17) 
 ament_target_dependencies(
   interaction_controller_node
   "rclcpp"
+  "tf2"
+  "tf2_ros"
+  "tf2_geometry_msgs"
   "geometry_msgs"
   "camera_hld"
   "eye_display_hld"

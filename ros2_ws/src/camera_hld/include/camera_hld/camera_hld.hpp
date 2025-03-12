@@ -20,7 +20,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <face_detection.hpp>
-#include <iris_mesh.hpp>
 
 namespace camera_hld {
 /**
@@ -61,31 +60,9 @@ private:
   
   geometry_msgs::msg::PointStamped createFacePositionMsg(const cv::Point center_of_face, float distance_to_face);
 
-  /**
-   * @brief Calculate the eye regions on the face by using two 2D-facial landmarks of the eye_center.
-   *        It uses the distance between the eye's as reference for how big the regions should be.
-   *        For most people it works, but it is a very crude and easy way!
-   */
-  const std::array<cv::Rect, 2> calculateEyeRoi(const cv::Point &left_eye_landmark, const cv::Point &right_eye_landmark);
-
-  float getBiggestIrisDiameterInPixel(const std::array<cv::Rect, 2> &eye_rois, const cv::Mat& frame);
-
-  float getIrisDiameterInPixel(const std::array<cv::Point3f, CLFML::IrisMesh::NUM_OF_IRIS_MESH_POINTS> iris_mesh_landmarks);
-
-  /**
-   * @brief Check if the given ROI is within the bounds of the image.
-   * 
-   * @param roi The region of interest to check.
-   * @param image The image in which the ROI should be checked.
-   * @return true if the ROI is within the bounds of the image, false otherwise.
-   */
-  bool is_roi_within_bounds(const cv::Rect &roi, const cv::Mat &image);
-
-
   void publishDebugImage(const cv::Mat& frame);
   
   CLFML::FaceDetection::FaceDetector face_detector_;
-  CLFML::IrisMesh::IrisMesh iris_mesh_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr raw_image_sub_;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr face_position_pub_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr debug_image_pub_;

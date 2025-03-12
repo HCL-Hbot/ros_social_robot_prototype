@@ -12,7 +12,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-#find_package(rosidl_default_generators REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -32,27 +31,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(face_detector)
 ####
 
-# Fetch iris mesh library (with FetchContent)
-FetchContent_Declare(
-    iris_mesh.cpp
-    GIT_REPOSITORY https://github.com/CLFML/Iris_Mesh.Cpp
-    GIT_TAG main
-    # Put the Iris_Mesh lib into lib/ folder
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/lib/Iris_Mesh.Cpp
-)
-FetchContent_MakeAvailable(iris_mesh.cpp)
-####
-
-# set(msg_files
-#   "msg/FaceInfo.msg"
-# )
-
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#   ${msg_files}
-#   DEPENDENCIES std_msgs geometry_msgs
-# )
-
-#ament_export_dependencies(rosidl_default_runtime)
 
 # Voeg het pad naar de TensorFlow Lite bibliotheek toe
 set(TENSORFLOW_LITE_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/Face_Detector.Cpp/external/tensorflow/lib")
@@ -63,7 +41,6 @@ if(NOT TENSORFLOW_LITE_LIBRARY)
   message(FATAL_ERROR "TensorFlow Lite library not found")
 endif()
 
-
 add_executable(camera_hld_node src/main.cpp src/camera_hld.cpp)
 
 target_include_directories(camera_hld_node PUBLIC
@@ -71,7 +48,7 @@ $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
 ament_target_dependencies(camera_hld_node rclcpp sensor_msgs cv_bridge OpenCV)
-target_link_libraries(camera_hld_node ${TENSORFLOW_LITE_LIBRARY} CLFML::face_detector CLFML::iris_mesh)
+target_link_libraries(camera_hld_node ${TENSORFLOW_LITE_LIBRARY} CLFML::face_detector)
 
 target_compile_features(camera_hld_node PUBLIC cxx_std_17)  # Require C++17
 
@@ -85,32 +62,6 @@ install(
   FILES ${TENSORFLOW_LITE_LIB_PATH}/libtensorflowlite.so
   DESTINATION lib
 )
-#install(FILES bindings/ros2/set_ld_path.sh DESTINATION lib/${PROJECT_NAME})
-
-
-  
-# rosidl_get_typesupport_target(cpp_typesupport_target
-# ${PROJECT_NAME} rosidl_typesupport_cpp)
-
-#target_link_libraries(camera_hld_node "${cpp_typesupport_target}" CLFML::face_detector)
-
-
-#Place the shared library face decetor in the lib folder so it can be found by the camera_hld_node
-# install(
-#     FILES ${CMAKE_BINARY_DIR}/_deps/face_detector-build/libface_detector.so
-#     DESTINATION lib
-# )
-
-# install(
-#     FILES ${CMAKE_BINARY_DIR}/_deps/iris_mesh.cpp-build/libiris_mesh.so
-#     DESTINATION lib
-# )
-
-# Install shared library libtensorflowlite.so
-# install(
-#     FILES ${CMAKE_CURRENT_SOURCE_DIR}/lib/Face_Detector.Cpp/external/tensorflow/lib/libtensorflowlite.so
-#     DESTINATION lib/${PROJECT_NAME}
-# )
 
 # Install launch files
 install(DIRECTORY launch

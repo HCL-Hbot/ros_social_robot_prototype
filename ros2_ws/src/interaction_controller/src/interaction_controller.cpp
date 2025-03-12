@@ -6,6 +6,7 @@ constexpr const char* DEFAULT_TOPIC_NAME_SUB_FACE = "face_info";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB_EYE_CONTROL = "eye_control";
 constexpr const char* DEFAULT_TOPIC_NAME_SUB_RADAR_PRESENCE_HL = "radar_presence";
 constexpr const char* DEFAULT_TOPIC_NAME_PUB_SCREEN_EXPRESSION = "screen_expression";
+constexpr const char* BETWEEN_EYES_FRAME = "robot_eyes_between";
 
 namespace interaction_controller {
     
@@ -36,7 +37,7 @@ void InteractionController::facePositionCallback(const geometry_msgs::msg::Point
         eye_display_hld::msg::EyeControl eye_control_msg = convertFacePositionToEyeControl(face_position);
         eye_control_pub_->publish(eye_control_msg);
     } catch (const tf2::TransformException& ex) {
-        RCLCPP_WARN(this->get_logger(), "TF Transformatie mislukt: %s", ex.what());
+        RCLCPP_WARN(this->get_logger(), "TF Transformation failed: %s", ex.what());
     }
 }
 
@@ -44,8 +45,8 @@ eye_display_hld::msg::EyeControl InteractionController::convertFacePositionToEye
 {
     // Search for the transformation from camera_1_front (face_position->header.frame_id) to robot_eyes
     geometry_msgs::msg::TransformStamped transform_stamped;
-    //todo make first parameter a variable
-    transform_stamped = tf_buffer_->lookupTransform("robot_eyes", face_position->header.frame_id, face_position->header.stamp, rclcpp::Duration::from_seconds(0.1)); //todo instead of duration can we get the latest? ff uitzoeken
+
+    transform_stamped = tf_buffer_->lookupTransform(BETWEEN_EYES_FRAME, face_position->header.frame_id, face_position->header.stamp, rclcpp::Duration::from_seconds(0.0)); // 0.0 means the latest available transform, we don't need a timeout. Because relation between camera and eyes is a static transform and is always available.
 
     // Transform the point to the reference frame
     geometry_msgs::msg::PointStamped transformed_point;
@@ -63,15 +64,12 @@ eye_display_hld::msg::EyeControl InteractionController::convertFacePositionToEye
     double r = std::sqrt(std::pow(transformed_point.point.x, 2) + std::pow(transformed_point.point.y, 2));
     // Calculate pitch (vertical angle) in radians
     eye_control_msg.pitch = std::atan2(transformed_point.point.z, r);
+    
     // Calculate distance to face in cm
-    eye_control_msg.target_distance_cm = static_cast<uint16_t>((transformed_point.point.x*100.0f));
-
-    //Of moet ik de distance zo berekenen? (beide geven zelfde resultaat lijkt het)
-    //    eye_control_msg.target_distance_cm = static_cast<uint16_t>(
-    //    std::sqrt(std::pow(transformed_point.point.x, 2) +
-    //              std::pow(transformed_point.point.y, 2) +
-    //              std::pow(transformed_point.point.z, 2)) * 100.0f);
-    //------------------------------------------------------------------------------------------------
+    eye_control_msg.target_distance_cm = static_cast<uint16_t>(
+    std::sqrt(std::pow(transformed_point.point.x, 2) +
+                std::pow(transformed_point.point.y, 2) +
+                std::pow(transformed_point.point.z, 2)) * 100.0f);
 
     return eye_control_msg;
 }

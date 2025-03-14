@@ -5,7 +5,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -14,39 +14,43 @@ find_package(std_srvs REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 
-include_directories(
-  include
-  ${GSTREAMER_INCLUDE_DIRS} 
+
+find_package(rosidl_default_generators REQUIRED)
+
+set(SERVICE_FILES
+  "srv/PlayAudioFile.srv"
 )
 
-link_directories(
-  ${GSTREAMER_LIBRARY_DIRS}
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${SERVICE_FILES}
 )
 
-add_library(speaker src/speaker.cpp)
-target_include_directories(speaker PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(speaker ${GSTREAMER_LIBRARIES})
+ include_directories(
+   ${GSTREAMER_INCLUDE_DIRS} 
+ )
 
-add_executable(audio_lld_node src/audio_lld_node.cpp)
-target_include_directories(audio_lld_node PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(audio_lld_node speaker ${GSTREAMER_LIBRARIES})
-ament_target_dependencies(audio_lld_node rclcpp std_msgs std_srvs)
+
+add_executable(audio_file_player_node src/main.cpp src/audio_file_player_node.cpp)
+target_include_directories(audio_file_player_node PUBLIC
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
+$<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+
+target_link_libraries(audio_file_player_node ${GSTREAMER_LIBRARIES})
+ament_target_dependencies(audio_file_player_node rclcpp std_srvs)
+
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
+target_link_libraries(audio_file_player_node ${cpp_typesupport_target})
+
+target_compile_features(audio_file_player_node PUBLIC cxx_std_17)  # Require C++17
 
 install(TARGETS
-  audio_lld_node
+  audio_file_player_node
   DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS speaker
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
 )
 
 install(DIRECTORY include/
   DESTINATION include/
 )
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

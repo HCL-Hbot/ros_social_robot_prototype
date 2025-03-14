@@ -1,28 +1,30 @@
 #include "audio_file_player_node.hpp"
 
-AudioFilePlayerNode::AudioFilePlayerNode() : Node("audio_file_player"), pipeline_(nullptr) {
+constexpr const char* DEFAULT_NODE_NAME = "audio_file_player";
+constexpr const char* AUDIO_DEVICE_PARAMETER = "audio_device";
+constexpr const char* SAMPLE_RATE_PARAMETER = "sample_rate";
+
+namespace audio_lld {
+
+AudioFilePlayerNode::AudioFilePlayerNode() 
+: Node(DEFAULT_NODE_NAME), 
+  pipeline_(nullptr),
+  play_service_(create_service<audio_lld::srv::PlayAudioFile>("play_audio_file", std::bind(&AudioFilePlayerNode::play_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
+  pause_service_(create_service<std_srvs::srv::Trigger>("pause_audio_file", std::bind(&AudioFilePlayerNode::pause_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
+  resume_service_(create_service<std_srvs::srv::Trigger>("resume_audio_file", std::bind(&AudioFilePlayerNode::resume_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
+  stop_service_(create_service<std_srvs::srv::Trigger>("stop_audio_file", std::bind(&AudioFilePlayerNode::stop_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2)))
+{
     // Declare parameters for audio device selection and sample rate
-    this->declare_parameter<std::string>("audio_device", "");
-    this->declare_parameter<int>("sample_rate", 48000);  // Default: 48 kHz
-
-    play_service_ = this->create_service<audio_lld::srv::PlayAudioFile>(
-        "play_audio_file", std::bind(&AudioFilePlayerNode::play_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2));
-
-    pause_service_ = this->create_service<std_srvs::srv::Trigger>(
-        "pause_audio_file", std::bind(&AudioFilePlayerNode::pause_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2));
-
-    resume_service_ = this->create_service<std_srvs::srv::Trigger>(
-        "resume_audio_file", std::bind(&AudioFilePlayerNode::resume_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2));
-
-    stop_service_ = this->create_service<std_srvs::srv::Trigger>(
-        "stop_audio_file", std::bind(&AudioFilePlayerNode::stop_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2));
+    this->declare_parameter<std::string>(AUDIO_DEVICE_PARAMETER, "");
+    this->declare_parameter<int>(SAMPLE_RATE_PARAMETER, 48000);  // Default: 48 kHz
 
     gst_init(nullptr, nullptr);
 
     RCLCPP_INFO(this->get_logger(), "Audio File Player Node started. Waiting for service requests...");
 }
 
-AudioFilePlayerNode::~AudioFilePlayerNode() {
+AudioFilePlayerNode::~AudioFilePlayerNode()
+{
     if (pipeline_) {
         gst_element_set_state(pipeline_, GST_STATE_NULL);
         gst_object_unref(pipeline_);
@@ -39,8 +41,8 @@ void AudioFilePlayerNode::play_audio_file_callback(
     std::string audio_device;
     int sample_rate;
 
-    this->get_parameter("audio_device", audio_device);
-    this->get_parameter("sample_rate", sample_rate);
+    this->get_parameter(AUDIO_DEVICE_PARAMETER, audio_device);
+    this->get_parameter(SAMPLE_RATE_PARAMETER, sample_rate);
     if (pipeline_) {
         gst_element_set_state(pipeline_, GST_STATE_NULL);
         gst_object_unref(pipeline_);
@@ -149,3 +151,5 @@ void AudioFilePlayerNode::stop_audio_file_callback(
 
     response->success = handle_gst_state_change(GST_STATE_NULL, "Stopping", response->message);
 }
+
+} // namespace audio_lld

@@ -6,6 +6,8 @@
 #include "audio_lld/srv/play_audio_file.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
+namespace audio_lld {
+
 class AudioFilePlayerNode : public rclcpp::Node {
 public:
     AudioFilePlayerNode();
@@ -33,5 +35,7 @@ private:
 
     bool handle_gst_state_change(GstState new_state, const std::string &action, std::string &message);
 };
+
+}  // namespace audio_lld
 
 #endif // AUDIO_FILE_PLAYER_HPP

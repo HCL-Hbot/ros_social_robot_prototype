@@ -16,6 +16,27 @@ This node acts as a ``low level audio driver`` for the ros_social_robot_prototyp
 - 🔊 **Set volume** when requesting playback.
 - 🎧 **Configure sample rate** (default: 48 kHz when choosing a device output).
 - 🔹 **Choose an audio output device** (ALSA-supported hardware or auto-detected).
+
+---
+
+## 📊 **Required Installation**
+To use this node, ensure the following dependencies are installed:
+
+```bash
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-tools gstreamer1.0-alsa gstreamer1.0-plugins-ugly gstreamer1.0-libav
+```
+
+### 📂 **Why These Packages Are Required?**
+
+| **Package**                           | **Function** | **Why Needed?** |
+|---------------------------------------|------------|-------------------|
+| `libgstreamer1.0-dev`                 | 🛠️ **Core API** | Provides the GStreamer C++ API, essential for integrating GStreamer with ROS2. |
+| `libgstreamer-plugins-base1.0-dev`    | 🔧 **Basic Plugins** | Includes key elements such as `decodebin`, `audioconvert`, and `autoaudiosink`, necessary for audio playback. |
+| `gstreamer1.0-tools`                  | 🛠️ **CLI Debugging Tools** | Contains `gst-launch-1.0` and `gst-inspect-1.0`, useful for testing and debugging GStreamer pipelines. |
+| `gstreamer1.0-alsa`                   | 🔊 **ALSA Audio Output** | Enables playback through **ALSA**, the default Linux sound system. |
+| `gstreamer1.0-plugins-ugly`           | 🎵 **MP3 Support** | Provides the **MP3 decoder (`mad`)**, required to play MP3 files. |
+| `gstreamer1.0-libav`                  | 🎥 **FFmpeg Integration** | Adds FFmpeg-based decoders, supporting **AAC, MP3, and H.264** for extended format compatibility. |
+
 ---
 
 ## 📚 **Build Instructions**
@@ -58,7 +79,7 @@ source install/setup.bash
 - **If no audio device is specified**, the application **automatically detects** an output device (`autoaudiosink`).
   - In this case, **the sample rate setting is ignored**.
   - The system selects the **best sample rate** based on the detected output device.
-  - **Note**: The automatically detected device is the current Sound output device on your linux system.
+  - **Note**: The automatically detected device is the current Sound output device on your Linux system.
     -   Current system sound output device for Ubuntu can be found at: Settings->Sound->Output->Output Device.
 - This means that if you want to **enforce a specific sample rate**, you **must specify an audio device**.
 

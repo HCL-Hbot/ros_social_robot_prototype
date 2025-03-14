@@ -4,8 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <gst/gst.h>
 #include "audio_lld/srv/play_audio_file.hpp"
-#include <std_srvs/srv/trigger.hpp>
-
+#include "std_srvs/srv/trigger.hpp"
 
 class AudioFilePlayerNode : public rclcpp::Node {
 public:
@@ -14,8 +13,7 @@ public:
 
 private:
     GstElement *pipeline_;
-    GstState current_state_;
-    
+
     rclcpp::Service<audio_lld::srv::PlayAudioFile>::SharedPtr play_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr resume_service_;
@@ -32,6 +30,8 @@ private:
     
     void stop_audio_file_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                   std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+
+    bool handle_gst_state_change(GstState new_state, const std::string &action, std::string &message);
 };
 
 #endif // AUDIO_FILE_PLAYER_HPP

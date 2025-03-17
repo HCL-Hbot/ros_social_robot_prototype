@@ -5,9 +5,9 @@
 #include "custom_action_interfaces/action/fibonacci.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
-#include "rclcpp_components/register_node_macro.hpp"
+//#include "rclcpp_components/register_node_macro.hpp"
 
-#include "custom_action_cpp/visibility_control.h"
+//#include "custom_action_cpp/visibility_control.h"
 
 namespace custom_action_cpp
 {
@@ -17,7 +17,7 @@ public:
   using Fibonacci = custom_action_interfaces::action::Fibonacci;
   using GoalHandleFibonacci = rclcpp_action::ServerGoalHandle<Fibonacci>;
 
-  CUSTOM_ACTION_CPP_PUBLIC
+  //CUSTOM_ACTION_CPP_PUBLIC
   explicit FibonacciActionServer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
   : Node("fibonacci_action_server", options)
   {
@@ -99,4 +99,15 @@ private:
 
 }  // namespace custom_action_cpp
 
-RCLCPP_COMPONENTS_REGISTER_NODE(custom_action_cpp::FibonacciActionServer)
+int main(int argc, char ** argv)
+{
+  rclcpp::init(argc, argv);
+
+  auto action_server = std::make_shared<custom_action_cpp::FibonacciActionServer>();
+
+  rclcpp::spin(action_server);
+
+  rclcpp::shutdown();
+  return 0;
+}
+//RCLCPP_COMPONENTS_REGISTER_NODE(custom_action_cpp::FibonacciActionServer)

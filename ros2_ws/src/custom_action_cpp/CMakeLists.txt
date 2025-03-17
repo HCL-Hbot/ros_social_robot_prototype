@@ -10,31 +10,36 @@ find_package(ament_cmake REQUIRED)
 find_package(custom_action_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(rclcpp_components REQUIRED)
+#find_package(rclcpp_components REQUIRED)
 
-add_library(action_server SHARED
-  src/fibonacci_action_server.cpp)
+# add_library(action_server SHARED
+#   src/fibonacci_action_server.cpp)
 
-target_include_directories(action_server PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+# target_include_directories(action_server PRIVATE
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
 
-target_compile_definitions(action_server
-  PRIVATE "CUSTOM_ACTION_CPP_BUILDING_DLL")
+# target_compile_definitions(action_server
+#   PRIVATE "CUSTOM_ACTION_CPP_BUILDING_DLL")
+
+add_executable(action_server src/fibonacci_action_server.cpp)
 
 ament_target_dependencies(action_server
   "custom_action_interfaces"
   "rclcpp"
   "rclcpp_action"
-  "rclcpp_components")
+)
+  #"rclcpp_components")
 
-rclcpp_components_register_node(action_server PLUGIN "custom_action_cpp::FibonacciActionServer" EXECUTABLE fibonacci_action_server)
+#rclcpp_components_register_node(action_server PLUGIN "custom_action_cpp::FibonacciActionServer" EXECUTABLE fibonacci_action_server)
 
 install(TARGETS
   action_server
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+  # ARCHIVE DESTINATION lib
+  # LIBRARY DESTINATION lib
+  # RUNTIME DESTINATION bin)
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

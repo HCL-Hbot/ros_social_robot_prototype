@@ -1,0 +1,2 @@
+uint8 GREET=0
+uint8 FAREWELL=1

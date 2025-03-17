@@ -1,6 +1,4 @@
 #include "audio_manager_node.hpp"
-#include "audio_hld/action/play_sound.hpp"  // Ensure this is included
-#include "audio_hld/msg/play_sound_result.hpp"
 #include <chrono>
 #include <thread>
 
@@ -41,71 +39,57 @@ void AudioManagerNode::handle_accepted(const std::shared_ptr<GoalHandlePlaySound
 }
 
 void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
-    //auto result = PlaySound::Result::SharedPtr();
-    auto feedback = std::make_shared<PlaySound::Feedback>();
+
     auto result = std::make_shared<PlaySound::Result>();
-    audio_hld::msg::PlaySoundResult play_sound_result;
-    play_sound_result.success = true;
-    play_sound_result.message = "Command executed successfully.";
-    play_sound_result.executed_count = 1;
-    result->result = play_sound_result;
-    //result->executed_count = 0;
-    // result->feedback->executed_count = 0;
-    // result->feedback->message = "Command executed successfully";
-    // result->feedback->success = true;
-    // auto play_sound_result = std::make_shared<audio_hld::msg::PlaySoundResult>();
-    // play_sound_result->success = true;
-    // play_sound_result->message = "Command executed successfully.";
-    // play_sound_result->executed_count = 1;
-    //result->result = play_sound_result;
-    //result->success = true;
-    // std::string file_path;
-    // switch (goal_handle->get_goal()->command) {
-    //     case PlaySound::Goal::GREET:
-    //         file_path = "/home/user/sounds/greeting.mp3";
-    //         break;
-    //     case PlaySound::Goal::FAREWELL:
-    //         file_path = "/home/user/sounds/farewell.mp3";
-    //         break;
-    //     default:
-    //         RCLCPP_ERROR(this->get_logger(), "Invalid command.");
-    //         result->success = false;
-    //         result->message = "Invalid command.";
-    //         goal_handle->abort(result);
-    //         return;
-    // }
+    //default response
+    result->success = false;
+    result->executed_count = 0;
 
-    // for (uint8_t i = 0; i < goal_handle->get_goal()->repeat_count; i++) {
-    //     if (goal_handle->is_canceling()) {
-    //         result->message = "Playback was canceled.";
-    //         result->executed_count = i;
-    //         goal_handle->canceled(result);
-    //         return;
-    //     }
+    std::string file_path;
+    switch (goal_handle->get_goal()->command) {
+        case PlaySound::Goal::GREET:
+            file_path = "/home/hcl/Downloads/hello.mp3";
+            break;
+        case PlaySound::Goal::FAREWELL:
+            file_path = "/home/hcl/Downloads/i_like_you.mp3";
+            break;
+        default:
+            RCLCPP_ERROR(this->get_logger(), "Invalid command.");
+            result->message = "Invalid command.";
+            goal_handle->abort(result);
+            return;
+    }
 
-    //     auto request = std::make_shared<audio_lld::srv::PlayAudioFile::Request>();
-    //     request->file_path = file_path;
-    //     request->volume = 80;
+    for (uint8_t i = 0; i < goal_handle->get_goal()->repeat_count; i++) {
+        if (goal_handle->is_canceling()) {
+            result->message = "Playback was canceled.";
+            result->executed_count = i;
+            goal_handle->canceled(result);
+            return;
+        }
 
-    //     if (!audio_client_->wait_for_service(std::chrono::seconds(2))) {
-    //         RCLCPP_ERROR(this->get_logger(), "audio_lld service not available.");
-    //         result->success = false;
-    //         result->message = "audio_lld service unavailable.";
-    //         goal_handle->abort(result);
-    //         return;
-    //     }
+        auto request = std::make_shared<audio_lld::srv::PlayAudioFile::Request>();
+        request->file_path = file_path;
+        request->volume = 80;
 
-    //     auto response = audio_client_->async_send_request(request);
-    //     feedback->executed_count = i + 1;
-    //     goal_handle->publish_feedback(feedback);
+        if (!audio_client_->wait_for_service(std::chrono::seconds(2))) {
+            RCLCPP_ERROR(this->get_logger(), "audio_lld service not available.");
+            result->message = "audio_lld service unavailable.";
+            result->executed_count = i;
+            goal_handle->abort(result);
+            return;
+        }
 
-    //     RCLCPP_INFO(this->get_logger(), "Playing: %s (Repeat %d/%d)", file_path.c_str(), i + 1, goal_handle->get_goal()->repeat_count);
-    //     std::this_thread::sleep_for(std::chrono::duration<float>(goal_handle->get_goal()->repeat_delay_sec));
-    // }
+        
+        auto response = audio_client_->async_send_request(request);
 
-    // result->success = true;
-    // result->message = "Command executed successfully.";
-    // result->executed_count = goal_handle->get_goal()->repeat_count;
+        RCLCPP_INFO(this->get_logger(), "Playing: %s (Repeat %d/%d)", file_path.c_str(), i + 1, goal_handle->get_goal()->repeat_count);
+        std::this_thread::sleep_for(std::chrono::duration<float>(goal_handle->get_goal()->repeat_delay_sec));
+    }
+
+    result->success = true;
+    result->message = "Command executed successfully.";
+    result->executed_count = goal_handle->get_goal()->repeat_count;
     goal_handle->succeed(result);
 }
 

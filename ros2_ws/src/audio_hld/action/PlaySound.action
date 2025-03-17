@@ -1,16 +1,15 @@
-# Goal
+# Request (Goal)
 uint8 GREET=0
 uint8 FAREWELL=1
-uint8 STOP=255
+
 uint8 command
 uint8 repeat_count
 float32 repeat_delay_sec  # Delay between repetitions in seconds
 ---
-# Feedback
-uint8 executed_count  # Number of times the sound has played
+# Response (Result)
+bool success
+uint8 executed_count  # Number of successful plays before stopping
+string message
 ---
-# Result
-PlaySoundResult result
-# bool success
-# string message
-# uint8 executed_count  # Number of successful plays before stopping
+# Feedback (stream)
+# No feedback!

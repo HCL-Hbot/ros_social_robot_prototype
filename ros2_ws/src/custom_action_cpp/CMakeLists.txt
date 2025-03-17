@@ -20,7 +20,6 @@ ament_export_dependencies(rosidl_default_runtime)
 add_executable(action_server src/fibonacci_action_server.cpp)
 
 ament_target_dependencies(action_server
-  #"custom_action_interfaces"
   "rclcpp"
   "rclcpp_action"
 )

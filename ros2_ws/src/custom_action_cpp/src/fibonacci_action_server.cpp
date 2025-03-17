@@ -2,22 +2,18 @@
 #include <memory>
 #include <thread>
 
-#include "custom_action_interfaces/action/fibonacci.hpp"
+#include "custom_action_cpp/action/fibonacci.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
-//#include "rclcpp_components/register_node_macro.hpp"
-
-//#include "custom_action_cpp/visibility_control.h"
 
 namespace custom_action_cpp
 {
 class FibonacciActionServer : public rclcpp::Node
 {
 public:
-  using Fibonacci = custom_action_interfaces::action::Fibonacci;
+  using Fibonacci = custom_action_cpp::action::Fibonacci;
   using GoalHandleFibonacci = rclcpp_action::ServerGoalHandle<Fibonacci>;
 
-  //CUSTOM_ACTION_CPP_PUBLIC
   explicit FibonacciActionServer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
   : Node("fibonacci_action_server", options)
   {
@@ -110,4 +106,3 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return 0;
 }
-//RCLCPP_COMPONENTS_REGISTER_NODE(custom_action_cpp::FibonacciActionServer)

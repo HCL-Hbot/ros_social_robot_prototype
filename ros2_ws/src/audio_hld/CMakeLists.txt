@@ -18,17 +18,12 @@ set(msg_files
   "msg/SoundCommand.msg"
 )
 
-set(SERVICE_FILES
-  "srv/SoundRequest.srv"
-)
-
 set(action_files
   "action/PlaySound.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
-  ${SERVICE_FILES}
   ${action_files}
 )
 

@@ -1,4 +1,5 @@
 #include "audio_manager_node.hpp"
+#include "audio_hld/msg/sound_command.hpp"
 #include <chrono>
 #include <thread>
 
@@ -22,12 +23,12 @@ AudioManagerNode::AudioManagerNode() : Node("audio_manager_node") {
     RCLCPP_INFO(this->get_logger(), "AudioManagerNode started with Action Server.");
 }
 
-rclcpp_action::GoalResponse AudioManagerNode::handle_goal(const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal) {
-    RCLCPP_INFO(this->get_logger(), "Received sound request: %d (Repeat %d times)", goal->command, goal->repeat_count);
+rclcpp_action::GoalResponse AudioManagerNode::handle_goal([[maybe_unused]] const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal) {
+    RCLCPP_INFO(this->get_logger(), "Received sound request: %d (Repeat %d times)", goal->sound_command.command, goal->sound_command.repeat_count);
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse AudioManagerNode::handle_cancel(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
+rclcpp_action::CancelResponse AudioManagerNode::handle_cancel([[maybe_unused]] const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
     RCLCPP_WARN(this->get_logger(), "Playback canceled.");
     return rclcpp_action::CancelResponse::ACCEPT;
 }
@@ -45,12 +46,14 @@ void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> 
     result->success = false;
     result->executed_count = 0;
 
+    uint8_t command = goal_handle->get_goal()->sound_command.command;
+
     std::string file_path;
-    switch (goal_handle->get_goal()->command) {
-        case PlaySound::Goal::GREET:
+    switch (command) {
+        case audio_hld::msg::SoundCommand::GREET:
             file_path = "/home/hcl/Downloads/hello.mp3";
             break;
-        case PlaySound::Goal::FAREWELL:
+        case audio_hld::msg::SoundCommand::FAREWELL:
             file_path = "/home/hcl/Downloads/i_like_you.mp3";
             break;
         default:
@@ -60,7 +63,7 @@ void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> 
             return;
     }
 
-    for (uint8_t i = 0; i < goal_handle->get_goal()->repeat_count; i++) {
+    for (uint8_t i = 0; i < goal_handle->get_goal()->sound_command.repeat_count; i++) {
         if (goal_handle->is_canceling()) {
             result->message = "Playback was canceled.";
             result->executed_count = i;
@@ -83,13 +86,13 @@ void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> 
         
         auto response = audio_client_->async_send_request(request);
 
-        RCLCPP_INFO(this->get_logger(), "Playing: %s (Repeat %d/%d)", file_path.c_str(), i + 1, goal_handle->get_goal()->repeat_count);
-        std::this_thread::sleep_for(std::chrono::duration<float>(goal_handle->get_goal()->repeat_delay_sec));
+        RCLCPP_INFO(this->get_logger(), "Playing: %s (Repeat %d/%d)", file_path.c_str(), i + 1, goal_handle->get_goal()->sound_command.repeat_count);
+        std::this_thread::sleep_for(std::chrono::duration<float>(goal_handle->get_goal()->sound_command.repeat_delay_sec));
     }
 
     result->success = true;
     result->message = "Command executed successfully.";
-    result->executed_count = goal_handle->get_goal()->repeat_count;
+    result->executed_count = goal_handle->get_goal()->sound_command.repeat_count;
     goal_handle->succeed(result);
 }
 

@@ -1,8 +1,0 @@
-# Request
-uint8 command # Should be one of SoundCommand (GREET, FAREWELL)
-uint8 repeat_count
-float32 repeat_delay_sec  # Delay between repeats in seconds
----
-# Response
-bool success
-string message

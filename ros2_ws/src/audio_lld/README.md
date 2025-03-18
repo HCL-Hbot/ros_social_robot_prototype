@@ -3,19 +3,20 @@
 This ROS2 node provides an **audio playback service** using **GStreamer**. It allows playing, pausing, resuming, and stopping audio files via ROS2 services. 
 
 The node supports **custom sample rates** and **audio device selection**, allowing flexible playback options.
+**Parameters such as audio device and sample rate must be set at startup.**
 
 This node acts as a ``low level audio driver`` for the ros_social_robot_prototype.
 
 ---
 
 ## 🚀 Features
-
-- 🎧 **Play audio files** from a given file path.
-- ⏸️ **Pause and resume** playback.
-- 🚫 **Stop** playback at any time.
+- 🎧 **Play audio files** from a given file path (*only when stopped or no audio file is already given*).
+- ⏸️ **Pause and resume** playback (*only when a file is playing*).
+- 🚫 **Stop** playback (*can be called anytime*).
 - 🔊 **Set volume** when requesting playback.
-- 🎧 **Configure sample rate** (default: 48 kHz when choosing a device output).
-- 🔹 **Choose an audio output device** (ALSA-supported hardware or auto-detected).
+- 🎧 **Configure sample rate** (*must be set at startup, default: 48 kHz when choosing a device output*).
+- 🔹 **Choose an audio output device** (*must be set at startup*).
+- 🔔 **Publishes the availability of the audio device**.
 
 ---
 
@@ -111,84 +112,60 @@ ros2 service call /play_audio_file audio_lld/srv/PlayAudioFile "{file_path: '/ab
 - `file_path`: **Full path** to the audio file.
 - `volume`: **0 to 100** (percentage of max volume).
 
+**Conditions:**
+- ❌ **Cannot be called if audio is already playing or paused.**
+- ✅ **Must be stopped before playing a new file.**
 ---
 
-### **3️⃣ Pause Playback**
+### **3️⃣ Pause Playback** (*Only when playing*)
 ```bash
 ros2 service call /pause_audio_file std_srvs/srv/Trigger "{}"
 ```
 
 ---
 
-### **4️⃣ Resume Playback**
+### **4️⃣ Resume Playback** (*Only when paused*)
 ```bash
 ros2 service call /resume_audio_file std_srvs/srv/Trigger "{}"
 ```
 
 ---
 
-### **5️⃣ Stop Playback**
+### **5️⃣ Stop Playback** (*Can be called anytime*)
 ```bash
 ros2 service call /stop_audio_file std_srvs/srv/Trigger "{}"
 ```
 
 ---
 
-## ⚙️ **Configuration Options**
+## 🛠️ Configuration Options
 
-### **Set the Sample Rate**
+### **Set the Sample Rate** (*Must be set at startup*)
 If an audio device is provided, you can configure the sample rate:
-
-```bash
-ros2 param set /audio_file_player sample_rate 44100
-```
-
-Verify the change:
-```bash
-ros2 param get /audio_file_player sample_rate
-```
-
-Or set it **when launching the node**:
-
 ```bash
 ros2 run audio_lld audio_file_player_node --ros-args -p sample_rate:=44100
 ```
 
----
-
-### **Set a Specific Audio Output Device**
-If you want to enforce a specific **ALSA audio output device**, use:
-
+### **Set a Specific Audio Output Device** (*Must be set at startup*)
 ```bash
 ros2 run audio_lld audio_file_player_node --ros-args -p audio_device:=hw:1,0
 ```
-
 If no device is set, the node defaults to **autoaudiosink**, and the sample rate is determined automatically.
 
 ---
 
-## 🔧 **Check Available Parameters**
-To see all parameters currently available in the node:
 
-```bash
-ros2 param list /audio_file_player
-```
-
----
-
-## 📉 **Summary of Commands**
+## 📉 **Summary of Valid Commands**
 
 | Action | Command |
 |--------|---------|
 | **Start node (default)** | `ros2 run audio_lld audio_file_player_node` |
 | **Start node with all parameters** | `ros2 run audio_lld audio_file_player_node --ros-args -p sample_rate:=16000 -p audio_device:=hw:1,0` |
-| **Start node with choosen device and default samplerate (48kHz)** | `ros2 run audio_lld audio_file_player_node --ros-args -p audio_device:=hw:1,0`|
+| **Start node with choosen device and default sample rate (48kHz)** | `ros2 run audio_lld audio_file_player_node --ros-args -p audio_device:=hw:1,0`|
 | **Play audio file** | `ros2 service call /play_audio_file audio_lld/srv/PlayAudioFile "{file_path: '/path/to/audio.mp3', volume: 50}"` |
 | **Pause playback** | `ros2 service call /pause_audio_file std_srvs/srv/Trigger "{}"` |
 | **Resume playback** | `ros2 service call /resume_audio_file std_srvs/srv/Trigger "{}"` |
 | **Stop playback** | `ros2 service call /stop_audio_file std_srvs/srv/Trigger "{}"` |
-| **Set sample rate** | `ros2 param set /audio_file_player sample_rate 48000` |
-| **List available parameters** | `ros2 param list /audio_file_player` |
 
 ---
 

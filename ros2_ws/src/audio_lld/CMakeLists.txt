@@ -36,7 +36,7 @@ $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}>
 $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
 target_link_libraries(audio_file_player_node ${GSTREAMER_LIBRARIES})
-ament_target_dependencies(audio_file_player_node rclcpp std_srvs)
+ament_target_dependencies(audio_file_player_node rclcpp std_srvs std_msgs)
 
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 target_link_libraries(audio_file_player_node ${cpp_typesupport_target})

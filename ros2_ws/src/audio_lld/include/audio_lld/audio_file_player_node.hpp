@@ -3,8 +3,10 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <gst/gst.h>
+#include <thread>
 #include "audio_lld/srv/play_audio_file.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 namespace audio_lld {
 
@@ -15,11 +17,24 @@ public:
 
 private:
     GstElement *pipeline_;
+    GstElement *source_;
+    GstElement *decoder_;
+    GstElement *convert_;
+    GstElement *resample_;
+    GstElement *capsfilter_;
+    GstElement *volume_element_;
+    GstElement *sink_;
+    bool is_audio_player_free_;
 
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr audio_device_is_free_publisher_;
     rclcpp::Service<audio_lld::srv::PlayAudioFile>::SharedPtr play_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr resume_service_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_service_;
+
+    std::thread bus_thread_;
+
+    bool initAudioPlayer();
 
     void play_audio_file_callback(const std::shared_ptr<audio_lld::srv::PlayAudioFile::Request> request,
                                   std::shared_ptr<audio_lld::srv::PlayAudioFile::Response> response);
@@ -33,7 +48,11 @@ private:
     void stop_audio_file_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                   std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    bool handle_gst_state_change(GstState new_state, const std::string &action, std::string &message);
+    void publish_audio_device_is_free(bool is_free);
+
+    bool isValidAlsaDevice(const std::string& device) const;
+
+    void monitor_bus();
 };
 
 }  // namespace audio_lld

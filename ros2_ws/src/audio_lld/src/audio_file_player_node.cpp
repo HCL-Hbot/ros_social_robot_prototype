@@ -49,10 +49,12 @@ AudioFilePlayerNode::~AudioFilePlayerNode()
     publish_audio_device_is_free(false); //Because there will be no audio device anymore ;)
     if (pipeline_) {
         gst_element_set_state(pipeline_, GST_STATE_NULL);
-        gst_object_unref(pipeline_);
     }
     if (bus_thread_.joinable()) {
         bus_thread_.join();
+    }
+    if(pipeline_) {
+        gst_object_unref(pipeline_);
     }
     gst_deinit();   
 }
@@ -65,6 +67,7 @@ bool AudioFilePlayerNode::initAudioPlayer() {
 
     std::string audio_device;
     int sample_rate;
+    bool using_autoaudiosink = false;
     this->get_parameter(AUDIO_DEVICE_PARAMETER, audio_device);
     this->get_parameter(SAMPLE_RATE_PARAMETER, sample_rate);
 
@@ -86,10 +89,12 @@ bool AudioFilePlayerNode::initAudioPlayer() {
         } else {
             RCLCPP_WARN(this->get_logger(), "Invalid ALSA format or device! Using default autoaudiosink.");
             sink_ = gst_element_factory_make("autoaudiosink", "sink");
+            using_autoaudiosink = true;
         }
     } else {
         // Default to autoaudiosink
         sink_ = gst_element_factory_make("autoaudiosink", "sink");
+        using_autoaudiosink = true;
     }
 
     if (!pipeline_ || !source_ || !decoder_ || !convert_ || !resample_ || !capsfilter_ || !volume_element_ || !sink_) {
@@ -97,13 +102,18 @@ bool AudioFilePlayerNode::initAudioPlayer() {
         return false;
     }
 
-    // Configure sample rate via capsfilter
-    GstCaps *caps = gst_caps_new_simple("audio/x-raw", "rate", G_TYPE_INT, sample_rate, NULL);
-    g_object_set(G_OBJECT(capsfilter_), "caps", caps, NULL);
-    gst_caps_unref(caps);
+    if(using_autoaudiosink) {
+        RCLCPP_INFO(this->get_logger(), "Configured sample rate will be ignored. Using default audio sink.");
+    }
+    else
+    {
+        // Configure sample rate via capsfilter
+        GstCaps *caps = gst_caps_new_simple("audio/x-raw", "rate", G_TYPE_INT, sample_rate, NULL);
+        g_object_set(G_OBJECT(capsfilter_), "caps", caps, NULL);
+        gst_caps_unref(caps);
+        RCLCPP_INFO(this->get_logger(), "Audio playback will use sample rate: %d Hz", sample_rate);
+    }
 
-    RCLCPP_INFO(this->get_logger(), "Audio pipeline initialized with sample rate: %d Hz", sample_rate);
-    
     // Path connection for decodebin    
     g_signal_connect(decoder_, "pad-added", G_CALLBACK(+[](GstElement *src, GstPad *new_pad, gpointer data) {
         GstElement *convert = static_cast<GstElement *>(data);
@@ -280,7 +290,7 @@ void AudioFilePlayerNode::monitor_bus() {
     GstMessage *msg;
 
     while (rclcpp::ok()) {
-        msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS | GST_MESSAGE_STATE_CHANGED));
+        msg = gst_bus_timed_pop_filtered(bus, GST_MSECOND * 500, static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS | GST_MESSAGE_STATE_CHANGED));
 
         if (!msg) {
             continue;

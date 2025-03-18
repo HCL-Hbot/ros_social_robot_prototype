@@ -13,7 +13,10 @@ namespace audio_lld {
 class AudioFilePlayerNode : public rclcpp::Node {
 public:
     AudioFilePlayerNode();
+    
     ~AudioFilePlayerNode();
+
+    void publishAudioDeviceIsFree(bool is_free);
 
 private:
     GstElement *pipeline_;
@@ -36,23 +39,22 @@ private:
 
     bool initAudioPlayer();
 
-    void play_audio_file_callback(const std::shared_ptr<audio_lld::srv::PlayAudioFile::Request> request,
+    void playAudioFileCallback(const std::shared_ptr<audio_lld::srv::PlayAudioFile::Request> request,
                                   std::shared_ptr<audio_lld::srv::PlayAudioFile::Response> response);
     
-    void pause_audio_file_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void pauseAudioFileCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
     
-    void resume_audio_file_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void resumeAudiFileCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                     std::shared_ptr<std_srvs::srv::Trigger::Response> response);
     
-    void stop_audio_file_callback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void stopAudioFileCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                   std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    void publish_audio_device_is_free(bool is_free);
 
     bool isValidAlsaDevice(const std::string& device) const;
 
-    void monitor_bus();
+    void monitorBus();
 };
 
 }  // namespace audio_lld

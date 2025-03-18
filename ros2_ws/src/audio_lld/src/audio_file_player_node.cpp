@@ -25,10 +25,10 @@ AudioFilePlayerNode::AudioFilePlayerNode()
   sink_(nullptr),
   is_audio_player_free_(false),
   audio_device_is_free_publisher_(create_publisher<std_msgs::msg::Bool>("audio_device_is_free", 10)),
-  play_service_(create_service<audio_lld::srv::PlayAudioFile>("play_audio_file", std::bind(&AudioFilePlayerNode::play_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
-  pause_service_(create_service<std_srvs::srv::Trigger>("pause_audio_file", std::bind(&AudioFilePlayerNode::pause_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
-  resume_service_(create_service<std_srvs::srv::Trigger>("resume_audio_file", std::bind(&AudioFilePlayerNode::resume_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2))),
-  stop_service_(create_service<std_srvs::srv::Trigger>("stop_audio_file", std::bind(&AudioFilePlayerNode::stop_audio_file_callback, this, std::placeholders::_1, std::placeholders::_2)))
+  play_service_(create_service<audio_lld::srv::PlayAudioFile>("play_audio_file", std::bind(&AudioFilePlayerNode::playAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  pause_service_(create_service<std_srvs::srv::Trigger>("pause_audio_file", std::bind(&AudioFilePlayerNode::pauseAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  resume_service_(create_service<std_srvs::srv::Trigger>("resume_audio_file", std::bind(&AudioFilePlayerNode::resumeAudiFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  stop_service_(create_service<std_srvs::srv::Trigger>("stop_audio_file", std::bind(&AudioFilePlayerNode::stopAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2)))
 {
     gst_init(nullptr, nullptr);
 
@@ -38,15 +38,17 @@ AudioFilePlayerNode::AudioFilePlayerNode()
     }
 
     RCLCPP_INFO(this->get_logger(), "Audio File Player Node started. Waiting for service requests...");
-    publish_audio_device_is_free(true);
+    publishAudioDeviceIsFree(true);
 
     // Start a thread to monitor the GStreamer bus
-    bus_thread_ = std::thread(&AudioFilePlayerNode::monitor_bus, this);
+    bus_thread_ = std::thread(&AudioFilePlayerNode::monitorBus, this);
 }
 
 AudioFilePlayerNode::~AudioFilePlayerNode()
 {
-    publish_audio_device_is_free(false); //Because there will be no audio device anymore ;)
+    //Todo for improvement: publish false before shutting down. It seems we can't publish anymore after shutdown 
+    publishAudioDeviceIsFree(false); //Because there will be no audio device anymore ;)
+    
     if (pipeline_) {
         gst_element_set_state(pipeline_, GST_STATE_NULL);
     }
@@ -135,10 +137,9 @@ bool AudioFilePlayerNode::initAudioPlayer() {
     return true;
 }
 
-void AudioFilePlayerNode::play_audio_file_callback(
+void AudioFilePlayerNode::playAudioFileCallback(
     const std::shared_ptr<audio_lld::srv::PlayAudioFile::Request> request,
     std::shared_ptr<audio_lld::srv::PlayAudioFile::Response> response) {
-
     if (!pipeline_) {
         response->success = false;
         response->message = "Pipeline is not initialized.";
@@ -174,10 +175,10 @@ void AudioFilePlayerNode::play_audio_file_callback(
 
     response->success = true;
     response->message = "Playback started.";
-    publish_audio_device_is_free(false);
+    publishAudioDeviceIsFree(false);
 }
 
-void AudioFilePlayerNode::pause_audio_file_callback(
+void AudioFilePlayerNode::pauseAudioFileCallback(
     [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
@@ -206,7 +207,7 @@ void AudioFilePlayerNode::pause_audio_file_callback(
     response->message = "Playback paused.";
 }
 
-void AudioFilePlayerNode::resume_audio_file_callback(
+void AudioFilePlayerNode::resumeAudiFileCallback(
     [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
@@ -235,7 +236,7 @@ void AudioFilePlayerNode::resume_audio_file_callback(
     response->message = "Playback resumed.";
 }
 
-void AudioFilePlayerNode::stop_audio_file_callback(
+void AudioFilePlayerNode::stopAudioFileCallback(
     [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
@@ -247,10 +248,10 @@ void AudioFilePlayerNode::stop_audio_file_callback(
 
     response->success = true;
     response->message = "Playback stopped.";
-    publish_audio_device_is_free(true);
+    publishAudioDeviceIsFree(true);
 }
 
-void AudioFilePlayerNode::publish_audio_device_is_free(bool is_free) {
+void AudioFilePlayerNode::publishAudioDeviceIsFree(bool is_free) {
     if(is_free != is_audio_player_free_) {
         is_audio_player_free_ = is_free;
         auto msg = std_msgs::msg::Bool();
@@ -285,7 +286,7 @@ bool AudioFilePlayerNode::isValidAlsaDevice(const std::string& device) const {
     }
 }
 
-void AudioFilePlayerNode::monitor_bus() {
+void AudioFilePlayerNode::monitorBus() {
     GstBus *bus = gst_element_get_bus(pipeline_);
     GstMessage *msg;
 
@@ -300,7 +301,7 @@ void AudioFilePlayerNode::monitor_bus() {
             case GST_MESSAGE_EOS: { 
                 RCLCPP_INFO(this->get_logger(), "Audio playback finished.");
                 gst_element_set_state(pipeline_, GST_STATE_NULL);
-                publish_audio_device_is_free(true);
+                publishAudioDeviceIsFree(true);
                 break;
             }
 
@@ -313,7 +314,7 @@ void AudioFilePlayerNode::monitor_bus() {
                 g_free(debug);
 
                 gst_element_set_state(pipeline_, GST_STATE_NULL);
-                publish_audio_device_is_free(true);
+                publishAudioDeviceIsFree(true);
                 break;
             }
 

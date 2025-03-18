@@ -115,7 +115,7 @@ bool AudioFilePlayerNode::initAudioPlayer() {
     }
 
     // Path connection for decodebin    
-    g_signal_connect(decoder_, "pad-added", G_CALLBACK(+[](GstElement *src, GstPad *new_pad, gpointer data) {
+    g_signal_connect(decoder_, "pad-added", G_CALLBACK(+[]( [[maybe_unused]] GstElement *src, GstPad *new_pad, gpointer data) {
         GstElement *convert = static_cast<GstElement *>(data);
         GstPad *sink_pad = gst_element_get_static_pad(convert, "sink");
 
@@ -178,7 +178,7 @@ void AudioFilePlayerNode::play_audio_file_callback(
 }
 
 void AudioFilePlayerNode::pause_audio_file_callback(
-    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
     GstState state;
@@ -207,7 +207,7 @@ void AudioFilePlayerNode::pause_audio_file_callback(
 }
 
 void AudioFilePlayerNode::resume_audio_file_callback(
-    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
     GstState state;
@@ -236,7 +236,7 @@ void AudioFilePlayerNode::resume_audio_file_callback(
 }
 
 void AudioFilePlayerNode::stop_audio_file_callback(
-    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
 
     if (gst_element_set_state(pipeline_, GST_STATE_NULL) == GST_STATE_CHANGE_FAILURE) {

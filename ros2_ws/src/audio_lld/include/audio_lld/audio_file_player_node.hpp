@@ -15,9 +15,6 @@ public:
     AudioFilePlayerNode();
     
     ~AudioFilePlayerNode();
-
-    void publishAudioDeviceIsFree(bool is_free);
-
 private:
     GstElement *pipeline_;
     GstElement *source_;
@@ -51,6 +48,8 @@ private:
     void stopAudioFileCallback(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                                   std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
+
+    void publishAudioDeviceIsFree(bool is_free);
 
     bool isValidAlsaDevice(const std::string& device) const;
 

@@ -10,6 +10,7 @@
 constexpr const char* DEFAULT_NODE_NAME = "audio_file_player";
 constexpr const char* AUDIO_DEVICE_PARAMETER = "audio_device";
 constexpr const char* SAMPLE_RATE_PARAMETER = "sample_rate";
+constexpr const char* AUDIO_PLAYER_FREE_TOPIC = "audio_device_is_free";
 
 namespace audio_lld {
 
@@ -24,7 +25,7 @@ AudioFilePlayerNode::AudioFilePlayerNode()
   volume_element_(nullptr),
   sink_(nullptr),
   is_audio_player_free_(false),
-  audio_device_is_free_publisher_(create_publisher<std_msgs::msg::Bool>("audio_device_is_free", 10)),
+  audio_device_is_free_publisher_(create_publisher<std_msgs::msg::Bool>(AUDIO_PLAYER_FREE_TOPIC, 10)),
   play_service_(create_service<audio_lld::srv::PlayAudioFile>("play_audio_file", std::bind(&AudioFilePlayerNode::playAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
   pause_service_(create_service<std_srvs::srv::Trigger>("pause_audio_file", std::bind(&AudioFilePlayerNode::pauseAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
   resume_service_(create_service<std_srvs::srv::Trigger>("resume_audio_file", std::bind(&AudioFilePlayerNode::resumeAudiFileCallback, this, std::placeholders::_1, std::placeholders::_2))),

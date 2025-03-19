@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include "std_msgs/msg/bool.hpp"
 
 namespace audio_hld {
 
@@ -19,13 +20,20 @@ public:
     AudioManagerNode();
 
 private:
+    bool audio_device_is_free_;
+    std::shared_ptr<GoalHandlePlaySound> active_goal_;  // Huidige actieve goal
+    std::shared_ptr<PlaySound::Result> current_response_;
+
     rclcpp_action::Server<PlaySound>::SharedPtr action_server_;
     rclcpp::Client<audio_lld::srv::PlayAudioFile>::SharedPtr audio_client_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr is_audio_player_free_subscriber_;
+
 
     void execute_sound(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
     rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal);
     rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
     void handle_accepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
+    void audio_player_free_callback(const std_msgs::msg::Bool::SharedPtr msg);
 };
 
 }  // namespace audio_hld

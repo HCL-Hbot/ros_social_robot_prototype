@@ -3,28 +3,36 @@
 #include <chrono>
 #include <thread>
 
+constexpr const char* DEFAULT_NODE_NAME = "audio_manager_node";
+constexpr const char* AUDIO_PLAYER_FREE_TOPIC = "audio_device_is_free";
+
 namespace audio_hld {
 
-AudioManagerNode::AudioManagerNode() : Node("audio_manager_node") {
-    using namespace std::placeholders;
-
-    // Create the action server
-    action_server_ = rclcpp_action::create_server<PlaySound>(
-        this,
-        "/play_sound",
-        std::bind(&AudioManagerNode::handle_goal, this, _1, _2),
-        std::bind(&AudioManagerNode::handle_cancel, this, _1),
-        std::bind(&AudioManagerNode::handle_accepted, this, _1)
-    );
-
-    // Audio client to call `audio_lld`
-    audio_client_ = this->create_client<audio_lld::srv::PlayAudioFile>("/play_audio_file");
-
+AudioManagerNode::AudioManagerNode() 
+: Node(DEFAULT_NODE_NAME),
+  audio_device_is_free_(true),
+  active_goal_(nullptr),
+  current_response_(nullptr),
+  action_server_(rclcpp_action::create_server<PlaySound>(this,"/play_sound",
+    std::bind(&AudioManagerNode::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&AudioManagerNode::handle_cancel, this, std::placeholders::_1),
+    std::bind(&AudioManagerNode::handle_accepted, this, std::placeholders::_1))),
+  audio_client_(this->create_client<audio_lld::srv::PlayAudioFile>("/play_audio_file")),
+  is_audio_player_free_subscriber_(this->create_subscription<std_msgs::msg::Bool>(AUDIO_PLAYER_FREE_TOPIC,10,std::bind(&AudioManagerNode::audio_player_free_callback, this, std::placeholders::_1)))
+{
     RCLCPP_INFO(this->get_logger(), "AudioManagerNode started with Action Server.");
 }
 
 rclcpp_action::GoalResponse AudioManagerNode::handle_goal([[maybe_unused]] const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal) {
+    
     RCLCPP_INFO(this->get_logger(), "Received sound request: %d (Repeat %d times)", goal->sound_command.command, goal->sound_command.repeat_count);
+
+    // Als er een bestaand doel actief is, annuleer deze
+    if (active_goal_ && active_goal_->is_active()) {
+        RCLCPP_WARN(this->get_logger(), "Aborting previous action and executing the recevieved action.");
+        active_goal_->abort(current_response_);
+    }
+        
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
@@ -34,17 +42,39 @@ rclcpp_action::CancelResponse AudioManagerNode::handle_cancel([[maybe_unused]] c
 }
 
 void AudioManagerNode::handle_accepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
+    
+    active_goal_ = goal_handle;
+    current_response_.reset(new PlaySound::Result);
+    current_response_->success = false;
+    current_response_->executed_count = 0;
+    current_response_->message = "Playback not executed.";
+
     using namespace std::placeholders;
-    std::thread{std::bind(&AudioManagerNode::execute_sound, this, _1), goal_handle}.detach();
-    //std::thread{std::bind(&AudioManagerNode::execute_sound, this, goal_handle)}.detach();
+    std::thread{std::bind(&AudioManagerNode::execute_sound, this, _1), active_goal_}.detach();
+    
+    //active_goal_ = goal_handle;
+
+    //std::thread{std::bind(&AudioManagerNode::execute_sound, this, std::placeholders::_1), goal_handle}.detach();
+    //std::thread{std::bind(&AudioManagerNode::execute_sound, this, active_goal_)}.detach();
+}
+
+void AudioManagerNode::audio_player_free_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+    if (msg->data) {
+        audio_device_is_free_ = true;
+        RCLCPP_INFO(this->get_logger(), "Audio player is free.");
+    } else {
+        audio_device_is_free_ = false;
+        RCLCPP_INFO(this->get_logger(), "Audio player is busy.");
+    }
 }
 
 void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
 
-    auto result = std::make_shared<PlaySound::Result>();
+    //auto result = std::make_shared<PlaySound::Result>();
+    auto& result = current_response_;
     //default response
-    result->success = false;
-    result->executed_count = 0;
+    //result->success = false;
+    //result->executed_count = 0;
 
     uint8_t command = goal_handle->get_goal()->sound_command.command;
 
@@ -82,6 +112,26 @@ void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> 
             goal_handle->abort(result);
             return;
         }
+
+        // // Send the request and wait for response
+        // auto future = audio_client_->async_send_request(request);
+        // if (future.wait_for(std::chrono::seconds(2)) == std::future_status::ready) {
+        //     auto response = future.get();
+        //     if (!response->success) {
+        //         RCLCPP_ERROR(this->get_logger(), "Audio playback failed: %s", response->message.c_str());
+        //         result->message = "Audio playback failed.";
+        //         result->executed_count = i;
+        //         goal_handle->abort(result);
+        //         return;
+        //     }
+        //     RCLCPP_INFO(this->get_logger(), "Audio playback started successfully.");
+        // } else {
+        //     RCLCPP_ERROR(this->get_logger(), "Timeout waiting for audio playback response.");
+        //     result->message = "Audio playback service timed out.";
+        //     result->executed_count = i;
+        //     goal_handle->abort(result);
+        //     return;
+        // }
 
         
         auto response = audio_client_->async_send_request(request);

@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 #find_package(std_srvs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(audio_lld REQUIRED)
 
 
@@ -40,6 +41,7 @@ $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 ament_target_dependencies(audio_manager_node 
   "rclcpp"
   "rclcpp_action" 
+  "std_msgs"
   "audio_lld")
 
 target_link_libraries(audio_manager_node "${cpp_typesupport_target}")
@@ -49,6 +51,10 @@ target_compile_features(audio_manager_node PUBLIC cxx_std_17)  # Require C++17
 install(TARGETS
   audio_manager_node
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 

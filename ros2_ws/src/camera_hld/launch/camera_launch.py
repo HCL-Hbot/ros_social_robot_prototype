@@ -36,7 +36,8 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='static_tf_camera_to_eyes',
-        arguments=['0', '0', '0.25', '0', '0', '0', parent_frame_id, child_frame_id],  #Setup on my desktop (from camera to between the eyes is 25cm upwards.)
+        #arguments=['0', '0', '0.25', '0', '0', '0', parent_frame_id, child_frame_id],  #Setup on my desktop (from camera to between the eyes is 25cm upwards.)
+        arguments=['0', '0', '-0.175', '0', '0', '0', parent_frame_id, child_frame_id], #Setup for desktop at work.
         #arguments=['0', '0', '-0.045', '0', '0', '0', parent_frame_id, child_frame_id], #Setup for the real robot
         output='screen'
     )

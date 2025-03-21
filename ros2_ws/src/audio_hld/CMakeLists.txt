@@ -10,7 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-#find_package(std_srvs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(audio_lld REQUIRED)
 
@@ -40,7 +40,8 @@ $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
 
 ament_target_dependencies(audio_manager_node 
   "rclcpp"
-  "rclcpp_action" 
+  "rclcpp_action"
+  "std_srvs" 
   "std_msgs"
   "audio_lld")
 

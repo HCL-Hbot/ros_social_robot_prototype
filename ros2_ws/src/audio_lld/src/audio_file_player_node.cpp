@@ -11,6 +11,10 @@ constexpr const char* DEFAULT_NODE_NAME = "audio_file_player";
 constexpr const char* AUDIO_DEVICE_PARAMETER = "audio_device";
 constexpr const char* SAMPLE_RATE_PARAMETER = "sample_rate";
 constexpr const char* AUDIO_PLAYER_FREE_TOPIC = "audio_device_is_free";
+constexpr const char* PLAY_AUDIO_FILE_SERVICE = "play_audio_file";
+constexpr const char* PAUSE_AUDIO_FILE_SERVICE = "pause_audio_file";
+constexpr const char* RESUME_AUDIO_FILE_SERVICE = "resume_audio_file";
+constexpr const char* STOP_AUDIO_FILE_SERVICE = "stop_audio_file";
 
 namespace audio_lld {
 
@@ -26,10 +30,10 @@ AudioFilePlayerNode::AudioFilePlayerNode()
   sink_(nullptr),
   is_audio_player_free_(false),
   audio_device_is_free_publisher_(create_publisher<std_msgs::msg::Bool>(AUDIO_PLAYER_FREE_TOPIC, 10)),
-  play_service_(create_service<audio_lld::srv::PlayAudioFile>("play_audio_file", std::bind(&AudioFilePlayerNode::playAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
-  pause_service_(create_service<std_srvs::srv::Trigger>("pause_audio_file", std::bind(&AudioFilePlayerNode::pauseAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
-  resume_service_(create_service<std_srvs::srv::Trigger>("resume_audio_file", std::bind(&AudioFilePlayerNode::resumeAudiFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
-  stop_service_(create_service<std_srvs::srv::Trigger>("stop_audio_file", std::bind(&AudioFilePlayerNode::stopAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2)))
+  play_service_(create_service<audio_lld::srv::PlayAudioFile>(PLAY_AUDIO_FILE_SERVICE, std::bind(&AudioFilePlayerNode::playAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  pause_service_(create_service<std_srvs::srv::Trigger>(PAUSE_AUDIO_FILE_SERVICE, std::bind(&AudioFilePlayerNode::pauseAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  resume_service_(create_service<std_srvs::srv::Trigger>(RESUME_AUDIO_FILE_SERVICE, std::bind(&AudioFilePlayerNode::resumeAudiFileCallback, this, std::placeholders::_1, std::placeholders::_2))),
+  stop_service_(create_service<std_srvs::srv::Trigger>(STOP_AUDIO_FILE_SERVICE, std::bind(&AudioFilePlayerNode::stopAudioFileCallback, this, std::placeholders::_1, std::placeholders::_2)))
 {
     gst_init(nullptr, nullptr);
 

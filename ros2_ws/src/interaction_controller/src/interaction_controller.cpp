@@ -25,6 +25,13 @@ InteractionController::InteractionController()
     
     last_precence_msg_.presence_state = interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE;
     last_precence_msg_.target_state = interaction_controller::msg::PresenceDetection::TARGET_STANDING;
+
+    RCLCPP_INFO(this->get_logger(), "InteractionController started");
+
+    //Testing audio component from the interaction controller:
+    this->client_ptr_ = rclcpp_action::create_client<PlaySound>(this,"/play_sound");
+    std::thread{std::bind(&InteractionController::send_goal, this)}.detach();
+
 }
 
 InteractionController::~InteractionController()
@@ -115,5 +122,54 @@ eye_display_hld::msg::ScreenExpression::SharedPtr InteractionController::convert
     return screen_expression_msg;
 }
 
+void InteractionController::send_goal()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    RCLCPP_INFO(this->get_logger(), "Sending goal");
+    auto goal_msg = audio_hld::action::PlaySound::Goal();
+    goal_msg.sound_command.command = audio_hld::msg::SoundCommand::FAREWELL;
+    goal_msg.sound_command.repeat_count = 2;
+    goal_msg.sound_command.repeat_delay_ms = 1000;
+    
+    auto send_goal_options = rclcpp_action::Client<PlaySound>::SendGoalOptions();
+
+    send_goal_options.goal_response_callback = [this](const GoalHandlePlaySound::SharedPtr & goal_handle)
+    {
+      if (!goal_handle) {
+        RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+      } else {
+        RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+      }
+    };
+
+    send_goal_options.feedback_callback = [this](
+        GoalHandlePlaySound::SharedPtr,
+        const std::shared_ptr<const PlaySound::Feedback> feedback)
+      {
+        RCLCPP_INFO(this->get_logger(), "Next sound command is being executed: %d", feedback->executing_count);
+      };
+
+    send_goal_options.result_callback = [this](const GoalHandlePlaySound::WrappedResult & result)
+    {
+        switch (result.code) {
+            case rclcpp_action::ResultCode::SUCCEEDED:
+            RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+            break;
+            case rclcpp_action::ResultCode::ABORTED:
+            RCLCPP_INFO(this->get_logger(), "Goal was aborted");
+            break;
+            case rclcpp_action::ResultCode::CANCELED:
+            RCLCPP_INFO(this->get_logger(), "Goal was canceled");
+            break;
+            default:
+            RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+            break;
+        }
+        RCLCPP_INFO(this->get_logger(), "Result message: %s", result.result->message.c_str());
+        RCLCPP_INFO(this->get_logger(), "Executed count: %d", result.result->executed_count);
+        rclcpp::shutdown();
+    };
+    this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
+}
 }  // namespace interaction_controller
 

@@ -1,12 +1,14 @@
 #ifndef AUDIO_FILE_PLAYER_HPP
 #define AUDIO_FILE_PLAYER_HPP
 
+#include <thread>
+
 #include <rclcpp/rclcpp.hpp>
 #include <gst/gst.h>
-#include <thread>
-#include "audio_lld/srv/play_audio_file.hpp"
+
 #include "std_srvs/srv/trigger.hpp"
 #include "std_msgs/msg/bool.hpp"
+#include "audio_lld/srv/play_audio_file.hpp"
 
 namespace audio_lld {
 

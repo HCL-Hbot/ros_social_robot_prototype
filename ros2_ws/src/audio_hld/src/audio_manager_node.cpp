@@ -1,7 +1,5 @@
 #include "audio_manager_node.hpp"
 #include "audio_hld/msg/sound_command.hpp"
-#include <chrono>
-#include <thread>
 
 constexpr const char* DEFAULT_NODE_NAME = "audio_manager_node";
 constexpr const char* AUDIO_PLAYER_FREE_TOPIC = "audio_device_is_free";
@@ -17,28 +15,17 @@ AudioManagerNode::AudioManagerNode()
   active_goal_(nullptr),
   current_response_(nullptr),
   action_server_(rclcpp_action::create_server<PlaySound>(this,"/play_sound",
-    std::bind(&AudioManagerNode::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&AudioManagerNode::handle_cancel, this, std::placeholders::_1),
-    std::bind(&AudioManagerNode::handle_accepted, this, std::placeholders::_1))),
+    std::bind(&AudioManagerNode::handleGoal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&AudioManagerNode::handleCancel, this, std::placeholders::_1),
+    std::bind(&AudioManagerNode::handleAccepted, this, std::placeholders::_1))),
   audio_play_client_(this->create_client<audio_lld::srv::PlayAudioFile>(PLAY_AUDIO_FILE_SERVICE)),
   audio_stop_client_(this->create_client<std_srvs::srv::Trigger>(STOP_AUDIO_FILE_SERVICE)),
-  is_audio_player_free_subscriber_(this->create_subscription<std_msgs::msg::Bool>(AUDIO_PLAYER_FREE_TOPIC,10,std::bind(&AudioManagerNode::audio_player_free_callback, this, std::placeholders::_1)))
+  is_audio_player_free_subscriber_(this->create_subscription<std_msgs::msg::Bool>(AUDIO_PLAYER_FREE_TOPIC,10,std::bind(&AudioManagerNode::audioPlayerFreeCallback, this, std::placeholders::_1)))
 {
     RCLCPP_INFO(this->get_logger(), "AudioManagerNode started with Action Server.");
 }
 
-bool AudioManagerNode::abort_current_goal()
-{
-    if (active_goal_ && active_goal_->is_active()) {
-        //active_goal_->canceled(current_response_);
-        active_goal_->abort(current_response_);
-        active_goal_.reset();
-        return true;
-    }
-    return false;
-}
-
-rclcpp_action::GoalResponse AudioManagerNode::handle_goal([[maybe_unused]] const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal) {
+rclcpp_action::GoalResponse AudioManagerNode::handleGoal([[maybe_unused]] const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal) {
     
     RCLCPP_INFO(this->get_logger(), "Received sound request: %d (Repeat %d times)", goal->sound_command.command, goal->sound_command.repeat_count);
 
@@ -52,12 +39,12 @@ rclcpp_action::GoalResponse AudioManagerNode::handle_goal([[maybe_unused]] const
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse AudioManagerNode::handle_cancel([[maybe_unused]] const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
+rclcpp_action::CancelResponse AudioManagerNode::handleCancel([[maybe_unused]] const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
     RCLCPP_WARN(this->get_logger(), "Playback canceled.!!");
     return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void AudioManagerNode::handle_accepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
+void AudioManagerNode::handleAccepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
     
     active_goal_ = goal_handle;
     current_response_.reset(new PlaySound::Result);
@@ -65,10 +52,10 @@ void AudioManagerNode::handle_accepted(const std::shared_ptr<GoalHandlePlaySound
     current_response_->executed_count = 0;
     current_response_->message = "Playback not executed.";
 
-    std::thread{std::bind(&AudioManagerNode::execute_sound, this, active_goal_)}.detach();
+    std::thread{std::bind(&AudioManagerNode::executeSound, this, active_goal_)}.detach();
 }
 
-void AudioManagerNode::audio_player_free_callback(const std_msgs::msg::Bool::SharedPtr msg) {
+void AudioManagerNode::audioPlayerFreeCallback(const std_msgs::msg::Bool::SharedPtr msg) {
     if (msg->data) {
         audio_device_is_free_ = true;
         RCLCPP_INFO(this->get_logger(), "Audio player is free.");
@@ -78,7 +65,7 @@ void AudioManagerNode::audio_player_free_callback(const std_msgs::msg::Bool::Sha
     }
 }
 
-void AudioManagerNode::execute_sound(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
+void AudioManagerNode::executeSound(const std::shared_ptr<GoalHandlePlaySound> goal_handle) {
 
     auto feedback = std::make_shared<PlaySound::Feedback>();
     feedback->executing_count = 0;

@@ -1,11 +1,6 @@
-#include "audio_file_player_node.hpp"
-#include "std_msgs/msg/bool.hpp"
-
-#include <iostream>
-#include <sstream>
-#include <vector>
 #include <regex>
-#include <memory>
+
+#include "audio_file_player_node.hpp"
 
 constexpr const char* DEFAULT_NODE_NAME = "audio_file_player";
 constexpr const char* AUDIO_DEVICE_PARAMETER = "audio_device";

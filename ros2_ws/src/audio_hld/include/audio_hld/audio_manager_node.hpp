@@ -1,15 +1,14 @@
 #ifndef AUDIO_HLD_AUDIO_MANAGER_NODE_HPP_
 #define AUDIO_HLD_AUDIO_MANAGER_NODE_HPP_
 
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-#include "audio_hld/action/play_sound.hpp"
-#include "audio_lld/srv/play_audio_file.hpp"
-#include <string>
-#include <memory>
-#include <atomic>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
 #include "std_msgs/msg/bool.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "audio_hld/action/play_sound.hpp"
+#include "audio_lld/srv/play_audio_file.hpp"
+
 
 namespace audio_hld {
 
@@ -24,7 +23,7 @@ private:
     bool audio_device_is_free_;
     bool goal_aborted_by_new_request_;
     
-    std::shared_ptr<GoalHandlePlaySound> active_goal_;  // Huidige actieve goal
+    std::shared_ptr<GoalHandlePlaySound> active_goal_;  // Current active goal
     std::shared_ptr<PlaySound::Result> current_response_;
 
     rclcpp_action::Server<PlaySound>::SharedPtr action_server_;
@@ -33,12 +32,11 @@ private:
 
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr is_audio_player_free_subscriber_;
 
-    bool abort_current_goal();
-    void execute_sound(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
-    rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal);
-    rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
-    void handle_accepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
-    void audio_player_free_callback(const std_msgs::msg::Bool::SharedPtr msg);
+    void executeSound(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
+    rclcpp_action::GoalResponse handleGoal(const rclcpp_action::GoalUUID &uuid, std::shared_ptr<const PlaySound::Goal> goal);
+    rclcpp_action::CancelResponse handleCancel(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
+    void handleAccepted(const std::shared_ptr<GoalHandlePlaySound> goal_handle);
+    void audioPlayerFreeCallback(const std_msgs::msg::Bool::SharedPtr msg);
 };
 
 }  // namespace audio_hld

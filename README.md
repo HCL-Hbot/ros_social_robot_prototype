@@ -1,36 +1,14 @@
 # ros_social_robot_prototype
 
-# TODO list this BRANCH! URGENT (SOFT DEADLINE)
+# TODO list this BRANCH! 
 
-- [X] Write high level eye driver (ROS C++ node)
-- [X] Write low level eye driver (use POC electron app as codebase)
 - [ ] POC symposium DEMO README me should be written completly
   - [ ] What should be installed at server and client side (startup script: screen setup, hotspot setup, app startup)
-- [ ] Proof of concept folder should be complete (Move micro-ros-pub sub to this section and update te README)
+- [ ] Proof of concept folder should be complete (Move micro-ros-pub sub, and maybe also the interface, to this section and update te README)
 - [ ] This README, in the root directory, should be up-to-date.
+  - [ ] Each package should have his own README.
 
 -------------------------------------------------------------
-
-## Project todolist
-
-1. Proof that we have a technical working robot with some sensors and actuators using the robot model (LLD -> HLD -> basic controller). Drivers for the following sensor en actuators should be implemented:
-- [ ] Camera(s) 
-    - [x] LLD
-    - [x] HLD (Mocked version)
-    - [ ] Real HLD (Later in project)
-- [ ] Radar(s)
-    - [x] LLD
-    - [ ] HLD
-- [ ] Microphone
-- [ ] Speaker
-- ~~[ ] Ledmatrix RGB~~
-- [ ] LCD screen(s)
-  - [X] HLD eyes
-  - [X] LLD eyes
-
-2. Define the real controller behaviour for this project with projectmananger and implement this.
-3. Write about project and how to use it.
-
 
 # GENERAL
 Building this project should be done in the ros2_ws directory

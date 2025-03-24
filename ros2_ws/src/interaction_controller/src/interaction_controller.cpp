@@ -101,9 +101,9 @@ void InteractionController::radarPresenceCallback(const interaction_controller::
         if(screen_expression_msg != nullptr) {
             updateLastPresenceDetection(presence_msg);
             screen_expression_pub_->publish(*screen_expression_msg);
-            if(presence_msg->presence_state == interaction_controller::msg::PresenceDetection::TARGET_IN_RANGE) {
+            if(screen_expression_msg->action == eye_display_hld::msg::ScreenExpression::EYE_AWAKE) {
                 greet_= true;
-            } else if (presence_msg->presence_state == interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE) {
+            } else if (screen_expression_msg->action == eye_display_hld::msg::ScreenExpression::EYE_SLEEP && !greet_) {
                 farewell();
                 greet_ = true;
             }

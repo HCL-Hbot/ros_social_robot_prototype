@@ -103,13 +103,13 @@ body {
 
 .eyelid.top {
   top: 0;  /* Top eyelid (control) */
-  // border-bottom: 2px solid #000; // Feature when we use blinking
+  border-bottom: 2px solid #000; 
   // transition: height 0.2s ease-in-out;  /* Optionele transitie bij handmatige controle */
 }
 
 .eyelid.bottom {
   bottom: 0; /* Bottom eyelid (control) */
-  //border-top: 2px solid #000; // Feature when we use blinking
+  border-top: 2px solid #000;
   // transition: height 0.2s ease-in-out;  /* Optionele transitie bij handmatige controle */
 }
 

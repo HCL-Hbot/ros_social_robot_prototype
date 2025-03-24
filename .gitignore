@@ -3,7 +3,8 @@
 
 ### CUSTOM ###
 ros2_ws/src/eye_display_lld/src/styles.css
-
+*/src/*.css
+*/src/*.css.map
 ### C++ ###
 # Prerequisites
 *.d

@@ -42,6 +42,12 @@ private:
 
     void updateLastPresenceDetection(const interaction_controller::msg::PresenceDetection::SharedPtr& presence_msg);
 
+    bool isFacePositionInFrontOfRobotStationary(const geometry_msgs::msg::PointStamped::SharedPtr& face_position);
+
+    void greet();
+
+    void farewell();
+    
     void send_goal();
     
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_sub_;
@@ -52,6 +58,8 @@ private:
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     rclcpp_action::Client<PlaySound>::SharedPtr client_ptr_;
+    geometry_msgs::msg::PointStamped previous_face_position_;
+    bool greet_;
 
 };
 

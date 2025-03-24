@@ -78,10 +78,10 @@ void AudioManagerNode::executeSound(const std::shared_ptr<GoalHandlePlaySound> g
     std::string file_path;
     switch (command) {
         case audio_hld::msg::SoundCommand::GREET:
-            file_path = "/home/hcl/Downloads/hello.mp3";
+            file_path = "/home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/audio_hld/audio_files/groet.mp3"; //future improvement: get mapping command to file_path from config file
             break;
         case audio_hld::msg::SoundCommand::FAREWELL:
-            file_path = "/home/hcl/Downloads/i_like_you.mp3";
+            file_path = "/home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/audio_hld/audio_files/doei.mp3"; //future improvement: get mapping command to file_path from config file
             break;
         default:
             RCLCPP_ERROR(this->get_logger(), "Invalid command.");

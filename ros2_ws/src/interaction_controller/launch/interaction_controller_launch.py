@@ -13,6 +13,12 @@ def generate_launch_description():
         )
     )
 
+    audio_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory('audio_hld'), 'launch', 'audio_launch.py')
+        )
+    )
+
     interaction_controller_node = Node(
         package='interaction_controller',
         executable='interaction_controller_node',
@@ -35,8 +41,9 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        camera_launch,
-        interaction_controller_node,
+        audio_launch,
         eye_display_hld_node,
+        interaction_controller_node,
+        camera_launch,
         radar_presence_hld_node
     ])

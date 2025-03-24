@@ -22,7 +22,7 @@ InteractionController::InteractionController()
   screen_expression_pub_(this->create_publisher<eye_display_hld::msg::ScreenExpression>(DEFAULT_TOPIC_NAME_PUB_SCREEN_EXPRESSION, 10)),
   last_precence_msg_(),
   previous_face_position_(),
-  greet_(true)
+  greet_(false)
 {
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -50,7 +50,7 @@ void InteractionController::facePositionCallback(const geometry_msgs::msg::Point
         eye_control_pub_->publish(eye_control_msg);
         if(isFacePositionInFrontOfRobotStationary(face_position)) {
             RCLCPP_INFO(this->get_logger(), "Face is in front of robot and stationary");
-            if(greet_) {
+            if(greet_ && last_precence_msg_.presence_state == interaction_controller::msg::PresenceDetection::TARGET_IN_RANGE) {
                 greet_ = false;
                 RCLCPP_INFO(this->get_logger(), "Greeting the person");
                 greet();
@@ -101,7 +101,9 @@ void InteractionController::radarPresenceCallback(const interaction_controller::
         if(screen_expression_msg != nullptr) {
             updateLastPresenceDetection(presence_msg);
             screen_expression_pub_->publish(*screen_expression_msg);
-            if(screen_expression_msg->action == eye_display_hld::msg::ScreenExpression::EYE_SLEEP) {
+            if(presence_msg->presence_state == interaction_controller::msg::PresenceDetection::TARGET_IN_RANGE) {
+                greet_= true;
+            } else if (presence_msg->presence_state == interaction_controller::msg::PresenceDetection::TARGET_OUT_OF_RANGE) {
                 farewell();
                 greet_ = true;
             }

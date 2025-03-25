@@ -108,14 +108,14 @@ The GIF below demonstrates the application running with both eyes displayed on o
 *Duration of gif = 1 min 52 seconds*
 
 ## Possible future improvements
-This section outlines potential improvements for the app. These suggestions are written as a checklist. This codebase will serve as the foundation for the low-level eye driver of the "ros_social_robot_prototype". Checked items will be added to the prototype.
+This section outlines potential improvements for the app. This codebase will serve as the foundation for the low-level eye driver of the "ros_social_robot_prototype". 
 
-- [x] Make random animations "truly random" by calculating positions dynamically using JavaScript instead of SASS (SASS precompiles values into CSS, the position are calculated once!).
+- Make random animations "truly random" by calculating positions dynamically using JavaScript instead of SASS (SASS precompiles values into CSS, the position are calculated once!).
 
-- [x] add a "sleepy" eye animation.
-- [x] Add a "close all eyes" command.
-- [x] Add an "awake/open eyes" command.
-- [x] Rewrite the codebase in TypeScript for compile-time and type checking.
+- Add a "sleepy" eye animation.
+- Add a "close all eyes" command.
+- Add an "awake/open eyes" command.
+- Rewrite the codebase in TypeScript for compile-time and type checking.
 
-- [ ] When touch functionality will be integrated in another project. Don't forget to disable zoom in and scrolling with javascript (for touch device)! Because zooming in a eye is prorabably not a desired functionalty.
+- When touch functionality will be integrated in another project. Don't forget to disable zoom in and scrolling with javascript (for touch device)! Because zooming in a eye is prorabably not a desired functionalty.
 No code is written for enabling/disabling touch. I don't know what the default is. This was not in my scope. Just reminding some logic needed to be added for this.

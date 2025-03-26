@@ -6,6 +6,9 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
+# ----------------------------------
+# Interface messages
+# ----------------------------------
 
 set(msg_files
  "msg/PupilControl.msg"
@@ -23,15 +26,17 @@ ament_export_dependencies(rosidl_default_runtime)
 rosidl_get_typesupport_target(cpp_typesupport_target
 ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-# Install the msg files
+# ----------------------------------
+# Install msg 
+# ----------------------------------
+
 install(DIRECTORY msg
   DESTINATION share/${PROJECT_NAME}
 )
 
-# Install launch files
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
-)
+# ----------------------------------
+# Electron UI - development install
+# ----------------------------------
 
 # Ensure Node.js and npm are available
 find_program(NPM_EXECUTABLE npm)
@@ -73,5 +78,11 @@ else()
   message(STATUS "electron-rebuild succeeded: ${electron_rebuild_output}")
 endif()
 
+# ----------------------------------
+# Install launch files (when installation is done)
+# ----------------------------------
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()

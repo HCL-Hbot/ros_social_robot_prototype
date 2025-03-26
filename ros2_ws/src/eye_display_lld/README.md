@@ -31,3 +31,19 @@ npm install #install all the required packages
 # Every time you run "npm install" after adding new packages, run this:
 ./node_modules/.bin/electron-rebuild #recompile packages with the nodejs version of our current electron app. This way all packages will be compatible.
 ```
+
+## Run from ros cli
+```bash
+
+```
+
+## Executing application outside vscode terminal (chrome-sandbox)
+Chrome sandbox is needed outside visual studio code
+1. Zet het bestand in eigendom van root:
+```bash
+sudo chown root /home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/eye_display_lld/src/node_modules/electron/dist/chrome-sandbox
+```
+2.Stel de juiste permissies in (setuid root):
+```bash
+sudo chmod 4755 /home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/eye_display_lld/src/node_modules/electron/dist/chrome-sandbox
+```

@@ -45,8 +45,6 @@ function setupScreens() {
   const options = parseArguments();
   const argumentCount = Object.keys(options).length;
   console.log('Arguments:', argumentCount);
-  let leftEyeScreenIndex = null;
-  let rightEyeScreenIndex = null;
 
   if(displays.length === 0)
   {
@@ -65,7 +63,7 @@ function setupScreens() {
     {
       createWindowForScreen(displays[0], 'both');
     }
-    console.log('Windows object:', windows); // Debugging
+    // console.log('Windows object:', windows); // Debugging
     return;
   }
   if (options.leftEye !== undefined) {
@@ -86,7 +84,7 @@ function setupScreens() {
     }
   }
 
-  console.log('Windows object:', windows); // Debugging
+  // console.log('Windows object:', windows); // Debugging
 }
 
 

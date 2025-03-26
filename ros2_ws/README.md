@@ -33,6 +33,7 @@ OR
 ```bash
 colcon build --cmake-args -DBUILD_TESTING=ON
 ```
+
 ## How to build one package specific
 An example with camera_hld package
 ```bash
@@ -43,7 +44,9 @@ Building the project this way will include unittest and cppcheck.
 ```bash
 colcon build --packages-select camera_hdl #build one package
 colcon build --event-handlers console_direct+ --packages-select camera_hld #build one package with verbose output
+colcon build --packages-select eye_display_lld --cmake-clean-cache --event-handlers console_direct+ #Build with verbose output but also remove cmake cache before the build
 ```
+
 ## Run tests
 
 step 1 run tests:

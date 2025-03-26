@@ -6,8 +6,9 @@
     "sass": "sass styles.scss styles.css",
     "sass-watch": "sass --watch styles.scss styles.css",
     "start": "NODE_ENV=production npm run sass && electron .",
-    "dev": "NODE_ENV=development concurrently \"npm run sass-watch\" \"electron .\"",
+    "dev": "NODE_ENV=development ./dev-launch.sh",
     "rebuild": "./node_modules/.bin/electron-rebuild",
+    "postinstall": "chmod +x dev-launch.sh && ./node_modules/.bin/electron-rebuild",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

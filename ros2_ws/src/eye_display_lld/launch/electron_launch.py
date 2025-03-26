@@ -1,32 +1,43 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, DeclareLaunchArgument, LogInfo
+from launch.actions import DeclareLaunchArgument, LogInfo, OpaqueFunction, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 import os
 
-def generate_launch_description():
-    # Get the launch argument for the mode (default: 'start')
-    mode = LaunchConfiguration('mode')
+def launch_setup(context, *args, **kwargs):
+    # Get argument values from launch context
+    mode = LaunchConfiguration('mode').perform(context)
+    left_eye = LaunchConfiguration('left_eye').perform(context)
+    right_eye = LaunchConfiguration('right_eye').perform(context)
 
-    # Resolve the path to the Electron app (relative to this launch file in the install folder)
+    # Path to the Electron app (always points to source folder)
     electron_app_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '../../../../../src/eye_display_lld/src')
     )
 
-    return LaunchDescription([
-        # Declare the launch argument
-        DeclareLaunchArgument(
-            'mode',
-            default_value='start',
-            description='Mode to run the Electron app: "start" for production, "dev" for development which includes hot-reloading'
-        ),
+    # Prepare CLI flags only if values are given
+    extra_args = []
+    if left_eye:
+        extra_args.append(f'--left-eye={left_eye}')
+    if right_eye:
+        extra_args.append(f'--right-eye={right_eye}')
 
-        # Log the mode being used
-        LogInfo(msg=["Launching Electron app in mode: ", mode]),
+    # Build final command
+    cmd = ['npm', 'run', mode, '--'] + extra_args
 
-        # Start the Electron app with npm
+    return [
+        LogInfo(msg=f'Launching Electron app in mode="{mode}" with args: {" ".join(extra_args)}'),
         ExecuteProcess(
-            cmd=['npm', 'run', mode],
+            cmd=cmd,
             cwd=electron_app_path,
             output='screen'
         )
+    ]
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument('mode', default_value='start', description='Run mode: start or dev'),
+        DeclareLaunchArgument('left_eye', default_value='', description='Left eye screen index (0 or 1)'),
+        DeclareLaunchArgument('right_eye', default_value='', description='Right eye screen index (0 or 1)'),
+
+        OpaqueFunction(function=launch_setup)
     ])

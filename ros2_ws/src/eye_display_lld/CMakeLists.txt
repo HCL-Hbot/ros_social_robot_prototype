@@ -35,54 +35,73 @@ install(DIRECTORY msg
 )
 
 # ----------------------------------
-# Electron UI - development install
-# ----------------------------------
-
-# Ensure Node.js and npm are available
-find_program(NPM_EXECUTABLE npm)
-if(NOT NPM_EXECUTABLE)
-  message(FATAL_ERROR "npm not found. Make sure Node.js and npm are installed.")
-endif()
-
-# Run npm install
-execute_process(
-  COMMAND ${NPM_EXECUTABLE} install
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
-  RESULT_VARIABLE npm_install_result
-  OUTPUT_VARIABLE npm_install_output
-  ERROR_VARIABLE npm_install_error
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_STRIP_TRAILING_WHITESPACE
-)
-
-if(npm_install_result)
-  message(FATAL_ERROR "npm install failed: ${npm_install_error}")
-else()
-  message(STATUS "npm install succeeded: ${npm_install_output}")
-endif()
-
-# Run electron-rebuild
-execute_process(
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/src/node_modules/.bin/electron-rebuild
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
-  RESULT_VARIABLE electron_rebuild_result
-  OUTPUT_VARIABLE electron_rebuild_output
-  ERROR_VARIABLE electron_rebuild_error
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_STRIP_TRAILING_WHITESPACE
-)
-
-if(electron_rebuild_result)
-  message(FATAL_ERROR "electron-rebuild failed: ${electron_rebuild_error}")
-else()
-  message(STATUS "electron-rebuild succeeded: ${electron_rebuild_output}")
-endif()
-
-# ----------------------------------
 # Install launch files (when installation is done)
 # ----------------------------------
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
+
+# ----------------------------------
+# Electron UI - development install
+# ----------------------------------
+
+# Ensure Node.js and npm are available
+# Check at configure time
+find_program(NPM_EXECUTABLE npm)
+if(NOT NPM_EXECUTABLE)
+  message(FATAL_ERROR "npm not found. Make sure Node.js and npm are installed.")
+endif()
+
+# Run npm install during the install phase
+install(CODE "
+  message(STATUS \"🔧 Running 'npm install' in: ${CMAKE_CURRENT_SOURCE_DIR}/src\")
+
+  execute_process(
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/src\"
+    RESULT_VARIABLE npm_install_result
+    OUTPUT_VARIABLE npm_install_output
+    ERROR_VARIABLE npm_install_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE
+  )
+
+  if(npm_install_result)
+    message(FATAL_ERROR \"npm install failed: \${npm_install_error}\")
+  else()
+    message(STATUS \"npm install succeeded: \${npm_install_output}\")
+  endif()
+")
+
+# Run npm install
+# execute_process(
+#   COMMAND ${NPM_EXECUTABLE} install
+#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+#   RESULT_VARIABLE npm_install_result
+#   OUTPUT_VARIABLE npm_install_output
+#   ERROR_VARIABLE npm_install_error
+#   OUTPUT_STRIP_TRAILING_WHITESPACE
+#   ERROR_STRIP_TRAILING_WHITESPACE
+# )
+# message(STATUS "DONE!")
+# message(STATUS "npm_install_result: ${npm_install_result}")
+# if(npm_install_result)
+#   message(FATAL_ERROR "npm install failed: ${npm_install_error}")
+# else()
+#   message(STATUS "npm install succeeded: ${npm_install_output} !!!")
+# endif()
+
+# Install phase: run `npm install` (with postinstall running electron-rebuild)
+install(CODE "
+  message(STATUS \"Running npm install in src folder...\")
+  execute_process(
+    COMMAND npm install
+    WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/src\"
+    RESULT_VARIABLE npm_result
+  )
+  if(NOT \${npm_result} EQUAL 0)
+    message(FATAL_ERROR \"npm install failed with code \${npm_result}\")
+  endif()
+")
 
 ament_package()

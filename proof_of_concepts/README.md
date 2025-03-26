@@ -1,26 +1,51 @@
 # Proof of Concepts (POCs)
 
-In this directory some various POCs can be found. Every POC has it's own README file where it explains what its purpose is and how it can run.
+This directory contains various proof-of-concept (POC) projects.  
+Each POC has its own `README.md` file that explains its purpose and how to run it.
 
-## Brief description of each POC
+---
 
-### mico_ros_pub_sub 
-*TODO: This project is already done but it's content and it's documentation needs to me moved to this directory. Will be done soon...*
+## Overview of Available POCs
 
-This project shows how a micro-ros node can be created for the esp32 with platformio and arduino. Some core functionality of ROS are shown in this project.
+### `proof_of_concept_micro_ros`
 
-### eye_ui_with_python
-The [eye_ui_with_python](./eye_ui_with_python/) is a example that shows how a eye can be controlled with keyboard input. One eye will be drawn for each available screen (max 2).
+This project demonstrates how to create a micro-ROS node for the ESP32 using PlatformIO and the Arduino framework.  
+It showcases core ROS functionality such as publishing, subscribing, and using services.  
 
-### eye_ui_with_electron_old
-The [eye_ui_with_electron_old](./eye_ui_with_electron_old/) is a example where two eyes (on one screen) follow mouse movement. Also a blinking animation is implemented. 
+The core logic from this project served as the foundation for the [`ld2410_node` / `ld2410_manager_node`](../micro_ros_platform_io_ws/) in the main prototype.
 
-### eye_ui_with_electron
-The [eye_ui_with_electron](./eye_ui_with_electron/) project represents the final POC for eye animation. I developed this codebase and used it as the foundation for implementing the low-level eye driver in the social robot prototype. This project served as the groundwork, which I further built upon and refined in the actual product. 
+---
 
-Core functionality: 
-- Detect whether there is one or two screens.
-- Display one eye on each screen; if there is only one screen, display both eyes on it.
-- Support for various animations.
-- Eye control using a mouse and a control panel.
-- A control panel client to test eye functionality and animations.
+### `eye_ui_with_python`
+
+The [`eye_ui_with_python`](./eye_ui_with_python/) project is a simple example that shows how an eye animation can be controlled using keyboard input.  
+It renders one eye per available screen (up to 2 screens supported).
+
+---
+
+### `eye_ui_with_electron_old`
+
+The [`eye_ui_with_electron_old`](./eye_ui_with_electron_old/) project displays two animated eyes on a single screen that follow the mouse cursor.  
+Basic blinking animations are also included.
+
+---
+
+### `eye_ui_with_electron`
+
+The [`eye_ui_with_electron`](./eye_ui_with_electron/) project is the final POC for eye animations. This project served as the groundwork, which I further built upon and refined in the actual product. A great part of the code base is used for the [low-level eye display driver](../ros2_ws/src/eye_display_lld/) which is software component of the actual robot.
+
+**Key features:**
+- Detects whether one or two screens are connected.
+- Displays one eye per screen, or both eyes on a single screen if only one is available.
+- Includes various eye animations.
+- Supports mouse control and a graphical control panel.
+- Provides a control panel client for testing eye behavior and animations.
+
+---
+
+### `eye_ui_with_electron_symposium_demo`
+
+The [`eye_ui_with_electron_symposium_demo`](./eye_ui_with_electron_symposium_demo/) is an extension of `eye_ui_with_electron`.  
+This version adds the ability to remotely launch and control the application and connected LCD-screens. 
+
+Insights and techniques from this project were translated into automation scripts used in the final robot demo. These scripts can be found in the [`scripts`](../scripts/) directory.

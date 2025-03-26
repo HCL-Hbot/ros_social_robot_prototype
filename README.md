@@ -1,95 +1,46 @@
 # ros_social_robot_prototype
+Welcome to the `ros_social_robot_prototype` repository.
 
-# TODO list this BRANCH! 
+This repository contains the software for the HCL-robot, internally referred to as **Mika** or **BuddyBot**.  
+It includes ROS 2 nodes, micro-ROS nodes, documentation, and proof-of-concept demos for various components.
 
-- [ ] POC symposium DEMO README me should be written completly
-  - [ ] What should be installed at server and client side (startup script: screen setup, hotspot setup, app startup)
-- [ ] Proof of concept folder should be complete (Move micro-ros-pub sub, and maybe also the interface, to this section and update te README)
-- [ ] This README, in the root directory, should be up-to-date.
-  - [ ] Each package should have his own README.
+---
+## Project Structure
 
--------------------------------------------------------------
+| Folder                              | Description |
+|-------------------------------------|-------------|
+| [`micro_ros_agent`](./micro_ros_agent/) | Contains the software and setup instructions for the Micro-ROS agent. This agent acts as a bridge between micro-ROS nodes and ROS 2 nodes. |
+| [`ros2_ws`](./ros2_ws/) | ROS 2 workspace containing all the standard ROS nodes for the robot. |
+| [`micro_ros_platform_io_ws`](./micro_ros_platform_io_ws/) | PlatformIO workspace containing micro-ROS nodes. Currently has the `ld2410_manager_node` for ESP32-S3 as a radar low-level driver. |
+| [`docs`](./docs/) | Contains the Software Requirements Specification (SRS) and Software Design Description (SDD). |
+| [`proof_of_concepts`](./proof_of_concepts/) | A collection of PoCs that explore specific technologies or integrations used in the robot. |
 
-# GENERAL
-Building this project should be done in the ros2_ws directory
+Each folder contains its own `README.md` with usage instructions and relevant information.
 
-```bash
-cd ros2_ws
-```
+--- 
 
-Add sourcing to your shell startup script.
+## Prerequisites
+
+## ROS 2 Jazzy jalisco
+ROS2 jazzy jalisco is needed for the ros nodes and to install the correct version of micro-ros. Installation guide: [ROS Jazzy Installation Guide](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html)
+
+After the installation DO NOT FORGET to source the ros installation to bashrc, this way the command line tools of ros2 are alway aviable in a (new) terminal shell.
+
 ```bash
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 ```
 
-## Table of Content
+---
 
-1. [How to build project without tests](#how-to-build-project-without-tests-fast-build)
-2. [How to build project with testing](#how-to-build-project-with-testing)
-3. [How to build one package specific](#how-to-build-one-package-specific)
-4. [Run tests](#run-tests)
-5. [Run test for one package](#run-test-for-one-package)
-6. [Configuration for serial port access](#configuration-for-serial-port-access-needed-for-flashing-to-mcu)
-7. [Platform IO setup for ubuntu](#platform-io-setup-for-ubuntu)
-8. [Arduino IDE setup for ubuntu](#arduino-ide-setup-for-ubuntu)
-9. [Brief Steps for micro-ros agent setups](#brief-steps-for-micro-ros-agent-setups)
-10. [Steps to run micro-ros node successfully](#steps-to-run-micro-ros-node-succsfully)
-11. [Adding Custom messages types or Custom micro-ROS packages](#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio)
-12. [Micro-ros pub_sub_led_control example / proof of concept](#micro-ros-pub_sub_led_control-example--proof-of-concept)
+### Micro ros agent
 
+See [micro_ros_agent/README.md](./micro_ros_agent/README.md) for setup and usage instructions.
 
-# How to build project without tests (Fast build)
-```bash
-colcon build --cmake-args -DBUILD_TESTING=OFF
-```
+---
 
-# How to build project with testing
+### Serial Port Access (for microcontrollers)
 
-```bash
- colcon build
-```
-
-OR
-
-```bash
-colcon build --cmake-args -DBUILD_TESTING=ON
-```
-## How to build one package specific
-An example with camera_hld package
-```bash
- colcon test --packages-select camera_hld
-```
-Building the project this way will include unittest and cppcheck.
-
-```bash
-colcon build --packages-select camera_hdl #build one package
-colcon build --event-handlers console_direct+ --packages-select camera_hld #build one package with verbose output
-```
-## Run tests
-
-step 1 run tests:
-```bash
-  colcon test
-```
-step 2 see results (path to xml files will be given): 
-```bash
-  colcon test-result --all
-```
-
-## Run test for one package
-
-An example with the package camera_hld
-
-step 1 run test:
-```bash
-  colcon test --packages-select camera_hld
-```
-step 2 see results (path to xml files will be given):
-```bash
-  colcon test-result --all
-```
-
-# Configuration for serial port access (needed for flashing to MCU)
+To flash microcontrollers via USB, you need read/write access to the serial port.
 
 Most likely by default your system does not have read and write acces to the serial port. In the following steps we will obtain these rights. 
 
@@ -118,10 +69,18 @@ In my case the microcontroller was connectect to ttyUSB0
 You will need to log out and log back in again (or reboot) for the user group changes to take effect.
 
 
-# Platform IO setup for ubuntu
+---
 
-1. sudo apt install -y git cmake python3-pip
-2. sudo apt install python3-venv
+
+## Platform IO setup (for building micro-ROS firmware)
+Platform IO is needed to build and flash a micro-ros node for a microcontroller. The following is needed to have platform io running.
+1. Install visual studio code. Installtion guide for linux can be found [here](https://code.visualstudio.com/docs/setup/linux).
+2. Install following packages:
+```bash
+sudo apt install -y git cmake python3-pip
+sudo apt install python3-venv
+```
+
 3. install the platform io extension: search this in the extension bar in VSstudio code (ctrl+P) -> "ext install platformio.platformio-ide"    
 
 **NOTE** **&#9432;**
@@ -133,65 +92,22 @@ Alternatively install [udev][1] rules for PlatformIO supported boards/devices. A
 [1]: https://en.wikipedia.org/wiki/Udev            "udev"
 [2]: https://docs.platformio.org/en/latest/core/installation/udev-rules.html           "here"
 
-# Arduino IDE setup for ubuntu
+---
 
-1. Download the latest release (AppImage)
+## Open a project with platform IO (for microcontroller)
+See the image below how to open a project with platform io:
 
-2. Find the AppImage file in your file manager.
+![Open project](./images/Open_folder.png)
 
-3. Make the AppImage file executable:
-  Right-click the file.
-  Choose Properties,
-  Select the Permissions.
-  Tick the Allow executing file as program box.
-  Double-click the AppImage file to launch Arduino IDE.
+---
 
-In case you cannot run the AppImage file, make sure that FUSE is installed on your system.
-
-```bash
-sudo add-apt-repository universe
-sudo apt install libfuse2
-```
-
-**NOTE** **&#9432;**
-To be able to flash to a MCU from Arduino IDE, we need read and write access to the serial port. 
-Follow the steps from the "Configuration for serial port access" section to gain these rights. 
-
-Alternatively add [udev][1] rule for Arduino IDE. To enable the Arduino IDE to access the serial port and upload code to your board, the following rule can be added to /etc/udev/rules.d/99-arduino.rules.
-
-```bash
-  SUBSYSTEMS=="usb", ATTRS{idVendor}=="2341", GROUP="“dialout”", MODE="0666"
-```
-
-# Brief Steps for micro-ros agent setup
-TODO NOT DONE YET
-
-For now brief description
-
-```bash
-sudo apt install python3-rosdep
-sudo rosdep init
-rosdep update && rosdep install --from-paths src --ignore-src -y
-```
-
-# Steps to run micro-ros node succsfully
-For now brief description
-
-1. Stop micro-ros agent (especilly if it uses the serial port, because this occupies the port and therefor we can't flash!)
-2. flash firmware to mcu
-3. Start micro-ros agent
-4. Press the reboot button of MCU.
-
-Now we can see node and topic's from the MCU.
-
-
-# Adding Custom messages types or Custom micro-ROS packages (to micro_ros_platformio)
+## Adding Custom messages types or Custom micro-ROS packages (to micro_ros_platformio)
 Whenever a new colcon package is added the platformio project should then be build from scratch.
 This can be done with the following steps:
 1. Remove the .pio directory 
 2. Build the project with PlatformIO:Build, see image below with which icon.
 
-![platfromIO:Build Icon](./platformio_build.png)
+![platfromIO:Build Icon](./images/platformio_build.png)
 
 
 Colcon packages can be added to the build process using one of the methods:
@@ -204,12 +120,24 @@ Example abstract:
 cp -r /path/to/your/ros_package /path/to/platformio_project/extra_packages/
 ```
 
-Example in my case:
+Example in the case of our prototype:
 ```bash
 cd ~/ros_social_robot_prototype/ros2_ws/src #Go to the src directory of the ros2_ws 
-cp -r my_custom_led_interface/ microROS_pub_sub_led_control/extra_packages/ #Copy the package.
+cp -r ld2410_interface/ ../micro_ros_platform_io_ws/extra_packages/ #Copy the package.
 ```
+Will result in:
+![folder extra packages radar](./images/example_extra_package_radar.png)
 
+Example in the case of [micro-ros-proof-of-concept-example](./proof_of_concepts/proof_of_concept_micro_ros/):
+```bash
+cd ~/ros_social_robot_prototype/proof_of_concepts/proof_of_concept_micro_ros/ros_ws/src/  
+cp -r my_custom_led_interface/ ../../micro_ros_ws_platform_io/extra_packages/ #Copy the package.
+```
+Will result in:
+![folder extra packages micro-ros-proof-of-concept](./images/example_extra_package_led.png)
+
+
+--- 
 ### Method 2 Include external git repro (github example)
 Git repositories included on the `<Project_directory>/extra_packages/extra_packages.repos` yaml file.
 
@@ -232,99 +160,17 @@ repositories:
 
 With this setup platformio will download (using vcstool internally) the package using git.
 
-### Method 3 Include internal git repro (experimantal)
-It is possible that the package we want use is not aviable on the internet and is package we have created our own.
-Instead of copying using method 1. We could use git to pull from a local directory. 
+--- 
 
-To be able to do this the target package must be a local repository.
-The example below shows how we create a local repository 
-```bash
-cd ~/ros_social_robot_prototype/ros2_ws/src/my_custom_led_interface
-git init #Create (local) git repository
-git add . #Add current package
-git commit -m "A commit message needed to publish the package to the local repro"
-```
+## Flashing a Micro-ROS Node (Checklist)
 
-Create .repos file in the extra_packages directory if this is not done:
-```bash
-cd /path/to/platformio_project/ #Go to your platform io project (navigate to the root directory)
-mkdir extra_packages #If you don't have a extra_packages directory in the root of the platform io project, create one.
-cd extra_packages
-nano extra_packages.repos #Create a .repos file (Content: Yaml)
-```
+1. Stop the micro-ROS agent if it uses the serial port (especilly if it uses the serial port, because this occupies the port and therefor we can't flash!).
+2. Flash the firmware via PlatformIO.
+3. Start the micro-ROS agent again.
+4. Press the reset button on your microcontroller.
 
-Add the following content in the extra_packages.repos:
-```yaml
-repositories:
-  my_custom_led_interface:
-    type: git
-    url: file:///home/hcl/ros_social_robot_prototype/ros2_ws/src/my_custom_led_interface
-    version: master
-```
-**NOTE** **&#9432;** Method 3 requires that each package need to have a local git repro. This could be improved by having every package in one local git repro, or having script which does the manual process. For now we create git repro manually for each desired package, due to the time constraint of the current project.
+You should now see topics and nodes from the MCU via `ros2 topic list` or `ros2 node list`.
 
 
-# Micro-ros pub_sub_led_control example / proof of concept
 
-To proof we can create a ros node for the esp32 a example project is made with micro-ros.
-For this project micro-ros, platformio and the arduino-framework is used.
-
-The essential functionality of a ROS application are shown in this project:
-1. We have a timer that triggers a publisher.
-2. We have a publisher that publishes on the topic "/led_status" the state of LEDs (example "data: Red LED is On and Yellow LED is On. Brightness value for all LED is 10")
-2. We have a subscriber that listen on the topic "/led_brightness". With this topic we can configure the brightness of all LEDs (range 0-255).
-3. We have a service with a custom message ROS message where we can toggle the red an yellow LED on and off for (brightness) control.
-
-
-Some parameters for this node can be configured compile time. The parameters can be found in config_example.ini. 
-To use the parameters: Create a file "config.ini" with the same contents of config_example.ini. config.ini will always be used and not be pushed to git, this way your configruation will stay private :).
-
-The project can be found in the [microROS_pub_sub_led_control package](./ros2_ws/src/microROS_pub_sub_led_control/)
-The source code of this project can be found here [src](./ros2_ws/src/microROS_pub_sub_led_control//src/main.cpp)
-
-When building this project the parameters will be automatically loaded with the pythonscript "load_config.py". The configuration file config.ini will always be used.
-
-## Steps to have this project running on your esp32
-1. Add my_custom_led_interface package to the extra_packages directory: [Adding Custom messages types or Custom micro-ROS packages](#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio)
-2. Remove .pio directory in the microRos_pubs_sub_led_control directory.
-3. Wire your setup, see: [Wiring setup](#wiring-setup). And connect the esp32 to your pc.
-4. Build and flash to the eps32.
-5. Start micro-ros agent
-6. Reboot esp32 with rst button.
-7. Try the example
-
-## Example usage of topics and service
-Whenever you open a new terminal don't forget to source your directory.
-```bash
-source install/setup.bash #do this in the ros2_ws directory
-```
-
-Listen to publishing topic:
-```bash
-ros2 topic echo /led_status
-```
-
-Publish to subscribing topic:
-```bash
-ros2 topic pub --once /led_brightness std_msgs/msg/UInt8 "{data: 180}" #Set brightness of all LEDs to 180
-```
-
-Control the LED with a service:
-```bash
-#led_color options are 1 or 2. 1 = red, 2 = yellow
-#led_on options are True to set the desired color on and False to turn it off
-ros2 service call /control_led my_custom_led_interface/srv/MyCustomLedControl "{led_color: 2, led_on: True}"
-```
-
-## Wiring setup
-<img src="./Example_setup_1.jpg" alt="Esp32 setup 1" width="800" height="600"/>
-<img src="./Example_setup_2.jpg" alt="Esp32 setup 2" width="800" height="600"/>
-
-
-| ESP32                                        | Usage      |
-| -------------------------------------------- | ------------- |
-| `Pin 3`                                      | `Connected to Red LED with orange jumpwire. 220ohm resistor is used.`     | 
-| `Pin 4`                                      | `Connected to Yellow LED with yellow jumpwire. 220ohm resistor is used.`      | 
-| `GND`                                        | `Connected to all LEDs with black wire.`      |
-|
 

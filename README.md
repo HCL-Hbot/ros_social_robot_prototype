@@ -24,7 +24,7 @@ Each folder contains its own `README.md` with usage instructions and relevant in
 ## ROS 2 Jazzy jalisco
 ROS2 jazzy jalisco is needed for the ros nodes and to install the correct version of micro-ros. Installation guide: [ROS Jazzy Installation Guide](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html)
 
-After the installation DO NOT FORGET to source the ros installation to bashrc, this way the command line tools of ros2 are alway aviable in a (new) terminal shell.
+After the installation DO NOT FORGET to source the ros installation to bashrc, this way the command line tools of ros2 are alway available in a (new) terminal shell.
 
 ```bash
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
@@ -81,7 +81,7 @@ sudo apt install -y git cmake python3-pip
 sudo apt install python3-venv
 ```
 
-3. install the platform io extension: search this in the extension bar in VSstudio code (ctrl+P) -> "ext install platformio.platformio-ide"    
+3. Install the platform io extension: search this in the extension bar in VSstudio code (ctrl+P) -> "ext install platformio.platformio-ide"    
 
 **NOTE** **&#9432;**
 To be able to flash to a MCU from platform IO, we need read and write access to the serial port. 
@@ -120,7 +120,7 @@ Example abstract:
 cp -r /path/to/your/ros_package /path/to/platformio_project/extra_packages/
 ```
 
-Example in the case of our prototype:
+Example in the case of [our prototype](./micro_ros_platform_io_ws/) :
 ```bash
 cd ~/ros_social_robot_prototype/ros2_ws/src #Go to the src directory of the ros2_ws 
 cp -r ld2410_interface/ ../micro_ros_platform_io_ws/extra_packages/ #Copy the package.

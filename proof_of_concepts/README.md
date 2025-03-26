@@ -9,7 +9,7 @@ Each POC has its own `README.md` file that explains its purpose and how to run i
 
 ### `proof_of_concept_micro_ros`
 
-This project demonstrates how to create a micro-ROS node for the ESP32 using PlatformIO and the Arduino framework.  
+[`This project`](./proof_of_concept_micro_ros/) demonstrates how to create a micro-ROS node for the ESP32 using PlatformIO and the Arduino framework.  
 It showcases core ROS functionality such as publishing, subscribing, and using services.  
 
 The core logic from this project served as the foundation for the [`ld2410_node` / `ld2410_manager_node`](../micro_ros_platform_io_ws/) in the main prototype.

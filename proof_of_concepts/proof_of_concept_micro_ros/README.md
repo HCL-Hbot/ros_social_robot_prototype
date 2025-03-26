@@ -36,17 +36,28 @@ To use it:
 
 ## Getting Started – Step-by-Step
 
-1. Copy the [`my_custom_led_interface`](./ros_ws/src/my_custom_led_interface/) package to the [`extra_packages`](./micro_ros_ws_platform_io/microROS_pub_sub_led_control/extra_packages/) directory.
+1. Copy the [`my_custom_led_interface`](./ros_ws/src/my_custom_led_interface/) package folder into the [`extra_packages`](./micro_ros_ws_platform_io/microROS_pub_sub_led_control/extra_packages/) directory.
 2. Open the [`microROS_pub_sub_led_control`](./micro_ros_ws_platform_io/microROS_pub_sub_led_control/) folder with PlatformIO.
-3. Delete the `.pio/` folder if it exists (clean build).
+3. Delete the `.pio/` folder if it exists to ensure a clean build.
 4. Configure your development board in `platformio.ini` (default: ESP32-S2).
 5. Set the transport type via `board_microros_transport` in `platformio.ini` (default: serial).
-6. Create `config.ini` from the provided `config_example.ini` and modify as needed.
+6. Duplicate `config_example.ini` as `config.ini` and adjust its settings as needed
 7. Wire your hardware (see [Wiring Setup](#wiring-setup)) and connect the ESP32 to your PC.
 8. [Build and flash the ESP32](../../README.md#adding-custom-message-types-or-custom-micro-ros-packages-to-micro_ros_platformio).
-9. [Start the Micro-ROS Agent](../../micro_ros_agent/README.md#running-the-micro-ros-agent).
-10. Press the reset (RST) button on the ESP32.
-11. Try the example.
+9. Close the serial port terminal in PlatformIO if it's open — especially when using serial transport mode.
+10. [Start the Micro-ROS Agent](../../micro_ros_agent/README.md#running-the-micro-ros-agent).
+11. Press the reset (RST) button on the ESP32. If you see the log lines shown in the image below, it means the micro-ROS node has successfully connected to the agent.
+![start_up_agent](../../images/start_up_agent.png)
+12. Open a new terminal and go the the [ros_ws](./ros_ws/) directory
+13. Build the custom interface package
+    ```bash
+    colcon build
+    ```
+14. Source the install 
+    ```bash
+    source install/setup.bash
+    ```
+15. Try the example in the next paragraph.
 
 ---
 
@@ -55,7 +66,7 @@ To use it:
 > In every new terminal, don’t forget to source ROS:
 
 ```bash
-source install/setup.bash  # Run this in the ros2_ws directory
+source install/setup.bash  # Run this in the ros_ws directory
 ```
 
 ### Listen to `/led_status`

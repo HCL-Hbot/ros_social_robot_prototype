@@ -47,9 +47,7 @@ private:
     void greet();
 
     void farewell();
-    
-    void send_goal();
-    
+        
     rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr face_position_sub_;
     rclcpp::Publisher<eye_display_hld::msg::EyeControl>::SharedPtr eye_control_pub_;
     rclcpp::Subscription<interaction_controller::msg::PresenceDetection>::SharedPtr radar_presence_sub_;

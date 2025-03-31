@@ -1,5 +1,6 @@
 #include "audio_manager_node.hpp"
 #include "audio_hld/msg/sound_command.hpp"
+#include "sound_command_mapping.hpp"
 
 constexpr const char* DEFAULT_NODE_NAME = "audio_manager_node";
 constexpr const char* AUDIO_PLAYER_FREE_TOPIC = "audio_device_is_free";
@@ -73,22 +74,18 @@ void AudioManagerNode::executeSound(const std::shared_ptr<GoalHandlePlaySound> g
     current_response_->success = false;
     current_response_->executed_count = 0;
 
-    uint8_t command = goal_handle->get_goal()->sound_command.command;
+    const uint8_t command = goal_handle->get_goal()->sound_command.command;
 
-    std::string file_path;
-    switch (command) {
-        case audio_hld::msg::SoundCommand::GREET:
-            file_path = "/home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/audio_hld/audio_files/groet.mp3"; //future improvement: get mapping command to file_path from config file
-            break;
-        case audio_hld::msg::SoundCommand::FAREWELL:
-            file_path = "/home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/audio_hld/audio_files/doei.mp3"; //future improvement: get mapping command to file_path from config file
-            break;
-        default:
-            RCLCPP_ERROR(this->get_logger(), "Invalid command.");
-            current_response_->message = "Invalid command.";
-            goal_handle->abort(current_response_);
-            return;
+    auto it = sound_command_to_file_path_map.find(command);
+    if (it == sound_command_to_file_path_map.end()) {
+        RCLCPP_ERROR(this->get_logger(), "Invalid command.");
+        current_response_->message = "Invalid command.";
+        goal_handle->abort(current_response_);
+        return;
     }
+
+    // Get the file path from the map
+    const std::string& file_path = it->second;
 
     for (uint8_t i = 0; i < goal_handle->get_goal()->sound_command.repeat_count; i++) {
     

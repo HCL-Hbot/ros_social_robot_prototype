@@ -43,7 +43,7 @@ To use it:
 5. Set the transport type via `board_microros_transport` in `platformio.ini` (default: serial).
 6. Duplicate `config_example.ini` as `config.ini` and adjust its settings as needed
 7. Wire your hardware (see [Wiring Setup](#wiring-setup)) and connect the ESP32 to your PC.
-8. [Build and flash the ESP32](../../README.md#adding-custom-message-types-or-custom-micro-ros-packages-to-micro_ros_platformio).
+8. [Build and flash the ESP32](../../README.md#adding-custom-messages-types-or-custom-micro-ros-packages-to-micro_ros_platformio).
 9. Close the serial port terminal in PlatformIO if it's open — especially when using serial transport mode.
 10. [Start the Micro-ROS Agent](../../micro_ros_agent/README.md#running-the-micro-ros-agent).
 11. Press the reset (RST) button on the ESP32. If you see the log lines shown in the image below, it means the micro-ROS node has successfully connected to the agent.

@@ -54,7 +54,7 @@ endif()
 
 # Run npm install during the install phase
 install(CODE "
-  message(STATUS \"🔧 Running 'npm install' in: ${CMAKE_CURRENT_SOURCE_DIR}/src\")
+  message(STATUS \" Running 'npm install' in: ${CMAKE_CURRENT_SOURCE_DIR}/src\")
 
   execute_process(
     COMMAND ${NPM_EXECUTABLE} install
@@ -70,37 +70,6 @@ install(CODE "
     message(FATAL_ERROR \"npm install failed: \${npm_install_error}\")
   else()
     message(STATUS \"npm install succeeded: \${npm_install_output}\")
-  endif()
-")
-
-# Run npm install
-# execute_process(
-#   COMMAND ${NPM_EXECUTABLE} install
-#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
-#   RESULT_VARIABLE npm_install_result
-#   OUTPUT_VARIABLE npm_install_output
-#   ERROR_VARIABLE npm_install_error
-#   OUTPUT_STRIP_TRAILING_WHITESPACE
-#   ERROR_STRIP_TRAILING_WHITESPACE
-# )
-# message(STATUS "DONE!")
-# message(STATUS "npm_install_result: ${npm_install_result}")
-# if(npm_install_result)
-#   message(FATAL_ERROR "npm install failed: ${npm_install_error}")
-# else()
-#   message(STATUS "npm install succeeded: ${npm_install_output} !!!")
-# endif()
-
-# Install phase: run `npm install` (with postinstall running electron-rebuild)
-install(CODE "
-  message(STATUS \"Running npm install in src folder...\")
-  execute_process(
-    COMMAND npm install
-    WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}/src\"
-    RESULT_VARIABLE npm_result
-  )
-  if(NOT \${npm_result} EQUAL 0)
-    message(FATAL_ERROR \"npm install failed with code \${npm_result}\")
   endif()
 ")
 

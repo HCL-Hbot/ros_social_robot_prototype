@@ -14,6 +14,7 @@ It includes ROS 2 nodes, micro-ROS nodes, documentation, and proof-of-concept de
 | [`micro_ros_platform_io_ws`](./micro_ros_platform_io_ws/) | PlatformIO workspace containing micro-ROS nodes. Currently has the `ld2410_manager_node` for ESP32-S3 as a radar low-level driver. |
 | [`docs`](./docs/) | Contains the Software Requirements Specification (SRS) and Software Design Description (SDD). |
 | [`proof_of_concepts`](./proof_of_concepts/) | A collection of PoCs that explore specific technologies or integrations used in the robot. |
+| [`scripts`](./scripts/) | Contains startup scripts and instructions on how to set up the robot to automatically start the software and allow remote access.  |
 
 Each folder contains its own `README.md` with usage instructions and relevant information.
 

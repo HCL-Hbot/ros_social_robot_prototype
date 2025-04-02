@@ -6,6 +6,7 @@ ros2_ws/src/eye_display_lld/src/styles.css
 ros2_ws/src/eye_display_lld/src/styles.css.map
 micro_ros_agent/src
 micro_ros_agent/micro_ros_setup
+scripts/robot_start_up/scripts/.env
 ### C++ ###
 # Prerequisites
 *.d

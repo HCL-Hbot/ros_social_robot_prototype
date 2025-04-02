@@ -1,0 +1,10 @@
+[Unit]
+Description=Start WiFi hotspot for robot
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/start_hotspot.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Start SSH server for robot
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/start_ssh.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

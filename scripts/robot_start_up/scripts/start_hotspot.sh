@@ -23,18 +23,33 @@ IFACE="${HOTSPOT_INTERFACE:-wlan0}"
 CONN_ID="${HOTSPOT_CONN_ID:-robot-hotspot}"
 
 
-# Delete existing connection if it exists
-if nmcli con show "$CONN_ID" &>/dev/null; then
-    echo "Removing existing connection '$CONN_ID'"
-    nmcli con delete "$CONN_ID"
-fi
+echo "Recreating hotspot '$SSID' on interface '$IFACE'..."
 
-# Create new connection
-echo "Creating hotspot '$SSID' on interface '$IFACE'"
-nmcli con add type wifi ifname "$IFACE" con-name "$CONN_ID" autoconnect yes ssid "$SSID"
-nmcli con modify "$CONN_ID" 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
+# Delete existing connection
+nmcli con delete "$CONN_ID" &>/dev/null || true
+
+nmcli con add type wifi ifname "$IFACE" con-name "$CONN_ID" ssid "$SSID"
+nmcli con modify "$CONN_ID" 802-11-wireless.mode ap
+nmcli con modify "$CONN_ID" 802-11-wireless.band bg
+nmcli con modify "$CONN_ID" ipv4.addresses 10.42.0.1/24
+nmcli con modify "$CONN_ID" ipv4.gateway 10.42.0.1
+nmcli con modify "$CONN_ID" ipv4.method shared
 nmcli con modify "$CONN_ID" wifi-sec.key-mgmt wpa-psk
 nmcli con modify "$CONN_ID" wifi-sec.psk "$PASSWORD"
+nmcli con modify "$CONN_ID" 802-11-wireless-security.proto rsn
+nmcli con modify "$CONN_ID" 802-11-wireless-security.group ccmp
+nmcli con modify "$CONN_ID" 802-11-wireless-security.pairwise ccmp
 
+echo "Disconnecting other Wi-Fi profiles..."
+ACTIVE_CONNS=$(nmcli -t -f UUID,TYPE con show --active | grep '^.*:wifi$' | cut -d: -f1)
+for UUID in $ACTIVE_CONNS; do
+    CUR_ID=$(nmcli -g NAME con show "$UUID")
+    if [ "$CUR_ID" != "$CONN_ID" ]; then
+        echo "Disconnecting: $CUR_ID"
+        nmcli con down "$CUR_ID" || true
+    fi
+done
+
+echo "Starting hotspot '$SSID'..."
 # Start the hotspot
 nmcli con up "$CONN_ID"

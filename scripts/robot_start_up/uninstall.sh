@@ -3,7 +3,6 @@
 echo "Uninstalling robot services..."
 
 SERVICES=(
-  robot-hotspot.service
   robot-ssh-init.service
   robot-display.service
   #robot-launch-eye.service
@@ -17,10 +16,17 @@ for SERVICE in "${SERVICES[@]}"; do
   sudo rm -f "/etc/systemd/system/$SERVICE"
 done
 
-# Reload systemd to apply changes
-sudo systemctl daemon-reexec
-
 #Remove entire config folder  
 sudo rm -rf /etc/robot_start_up
+
+echo "Resetting autoconnect for all Wi-Fi profiles..."
+for UUID in $(nmcli -t -f UUID,TYPE con show | grep '^.*:wifi$' | cut -d: -f1); do
+    nmcli connection modify "$UUID" connection.autoconnect yes || true
+done
+
+# Reload systemd to apply changes
+echo "Reloading systemd..."
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
 
 echo "Uninstall complete."

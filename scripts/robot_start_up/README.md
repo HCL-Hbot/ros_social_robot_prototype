@@ -1,11 +1,6 @@
 # 🤖 Robot Startup Scripts
 
-This directory contains all necessary scripts and systemd services to configure your robot to:
-
-- Start a local Wi-Fi hotspot
-- Enable SSH server
-- Automatically rotate screens
-- Launch your ROS 2 node (`eye_display_lld`) at boot
+This project automates the startup of ``Mika``, including starting a local Wi-Fi hotspot, rotating screens, enabling SSH, and launching ROS 2 display node.
 
 Tested on **Ubuntu 24.04** with **ROS 2 Jazzy**.
 
@@ -14,102 +9,112 @@ Tested on **Ubuntu 24.04** with **ROS 2 Jazzy**.
 ## ✅ Features
 
 - Fully automatic boot configuration
-- Dynamic user detection (no hardcoded usernames)
-- Environment-based configuration for hotspot
-- Modular and easy to extend
-- Wayland/X11 check built-in for display rotation
+- Wi-Fi hotspot with environment-based configuration
+- Modular installation: separate network and core setup
+- Display rotation (dual HDMI supported)
+- SSH auto-start on boot
 
 ---
 
 ## 📦 Requirements
 
-Make sure the following packages are installed:
+Ensure the following are installed:
 
 ```bash
 sudo apt update
 sudo apt install openssh-server network-manager x11-xserver-utils
 ```
 
-Your setup must also include:
+Additional requirements:
 
-- A fully built ROS 2 workspace at `~/ros2_ws`
-- ROS 2 sourced inside `eye_launch.py` or via environment setup
-- X11 (Xorg) session (not Wayland)
-- Optional: Two HDMI displays
+- ROS 2 workspace at `~/ros2_ws`
+- ROS 2 sourced in your `eye_launch.py` or environment
+- X11 display server (not Wayland)
 
 ---
 
 ## 📁 Folder Structure
 
 ```
-scripts/robot_start_up/
-├── install.sh
-├── uninstall.sh
-├── README.md
+robot_start_up/
+├── install.sh                   # Installs SSH, screen rotation, eye display
+├── uninstall.sh                 # Removes above services
+├── install_network.sh           # Installs only Wi-Fi hotspot service
+├── uninstall_network.sh         # Uninstalls only the hotspot service
 ├── scripts/
-│   ├── .env.example
-│   ├── start_hotspot.sh
-│   ├── start_ssh.sh
-│   ├── rotate_screens.sh
-└── services/
-    ├── robot-hotspot.service
-    ├── robot-ssh-init.service
-    ├── robot-display.service
-    └── robot-launch-eye.service
+│   ├── .env.example             # Example env file
+│   ├── rotate_screens.sh        # Rotates HDMI displays
+│   ├── start_hotspot.sh         # Creates & activates hotspot from .env
+│   ├── stop_hotspot.sh          # Stops the hotspot
+│   ├── start_ssh.sh             # Enables SSH and starts server
+│   └── stop_ssh.sh              # Disables SSH and stops server
+├── services/
+│   ├── robot-display.service         # Starts eye_display_lld
+│   ├── robot-hotspot.service         # Starts the hotspot
+│   ├── robot-launch-eye.service      # Launches ROS 2 node
+│   └── robot-ssh-init.service        # Enables SSH
+└── README.md
 ```
 
 ---
 
 ## ⚙️ Hotspot Configuration
 
-To configure your robot's hotspot settings, edit the `.env` file:
+Copy and customize the env file:
 
 ```bash
-sudo nano /etc/robot_start_up/.env
+cp scripts/.env.example .env
+nano .env
 ```
 
-If no `.env` file is provided in the repo, the `install.sh` will fall back to `.env.example`.
-
-Use these environment variables:
+Example content:
 
 ```env
-HOTSPOT_SSID=MyRobotAP
+HOTSPOT_SSID=Mika
 HOTSPOT_PASSWORD=changeme123
-HOTSPOT_INTERFACE=wlan0
+HOTSPOT_INTERFACE=wlp2s0
 HOTSPOT_CONN_ID=robot-hotspot
 ```
-
-💡 You may include a custom `.env` file in `scripts/robot_start_up/scripts/` before installation — this will be copied into the system during install.
 
 ---
 
 ## 🚀 Installation
 
-From the root of your repo:
+Make scripts executable:
 
 ```bash
-cd scripts/robot_start_up
-chmod +x install.sh uninstall.sh
+chmod +x install.sh uninstall.sh install_network.sh uninstall_network.sh
+chmod +x scripts/*.sh
+```
+
+Then install the core services:
+
+```bash
 ./install.sh
 ```
 
-This will:
-- Copy all scripts to `/usr/local/bin/`
-- Copy `.env` or `.env.example` to `/etc/robot_start_up/.env`
-- Replace `user` placeholders with your current Linux username
-- Register and enable systemd services for auto-start on boot
+Optionally, install hotspot service:
+
+```bash
+./install_network.sh
+```
 
 ---
 
 ## ❌ Uninstall
 
+To remove everything except hotspot:
+
 ```bash
 ./uninstall.sh
 ```
 
-This will:
-- Stop and remove all related systemd services
-- Prompt to remove the `.env` file and config folder
+To remove the hotspot service:
+
+```bash
+./uninstall_network.sh
+```
+⚠️ Do not run `uninstall_network.sh` remotely unless you have another connection to the robot — it will disconnect the active hotspot.
 
 ---
 
@@ -126,25 +131,76 @@ journalctl -u robot-launch-eye.service
 
 ---
 
+## 🧪 Testing Individual Scripts
+
+You can test each script in the `scripts/` folder individually:
+
+- Rotate screens:
+  ```bash
+  ./scripts/rotate_screens.sh
+  ```
+
+- Start hotspot:
+  ```bash
+  ./scripts/start_hotspot.sh
+  ```
+
+- Stop hotspot:
+  ```bash
+  ./scripts/stop_hotspot.sh
+  ```
+
+- Enable SSH:
+  ```bash
+  ./scripts/start_ssh.sh
+  ```
+
+- Disable SSH:
+  ```bash
+  ./scripts/stop_ssh.sh
+  ```
+---
+
 ## 🔁 Display Rotation Notes
 
-The script `rotate_screens.sh`:
-- Checks if X11 is running
-- Detects HDMI displays
-- Applies screen rotation
-- Supports rotation override via:
+The `rotate_screens.sh` script will:
+
+- Detect whether X11 is running
+- Rotate HDMI displays to portrait mode
+- Allow manual overrides:
 
 ```bash
-MAIN_ROTATION=normal SECOND_ROTATION=left ./rotate_screens.sh
+MAIN_ROTATION=normal SECOND_ROTATION=left ./scripts/rotate_screens.sh
 ```
 
 ---
 
-## 🧰 Want to Add More Services?
+## 🛠️ Debugging
 
-1. Add a new `.service` file in `services/`
-2. Write a matching script in `scripts/`
-3. Use `user` as a placeholder for usernames
-4. Run `./install.sh`
+View logs for the hotspot service:
 
----
+```bash
+journalctl -u robot-hotspot.service
+```
+
+Check current network status:
+
+```bash
+nmcli device show
+nmcli connection show
+nmcli connection show --active
+```
+
+Check if `dnsmasq` is running:
+
+```bash
+journalctl -u NetworkManager | grep dnsmasq
+```
+
+## 🧼 Notes
+
+- Scripts are installed to `/usr/local/bin/`.
+- All services are managed by systemd and will auto-start on reboot.
+- The `.env` file controls Wi-Fi hotspot behavior.
+- Reboot the system to apply full behavior.
+- Hotspot gateway IP should be `10.42.0.1` — make sure devices can route via this address.

@@ -21,8 +21,4 @@ fi
 echo "Stopping Wi-Fi connection: $HOTSPOT_CONN_ID"
 nmcli con down "$HOTSPOT_CONN_ID" 2>/dev/null || echo "Hotspot '$HOTSPOT_CONN_ID' was not active or not found."
 
-# Stop SSH server
-echo "Stopping SSH server..."
-sudo systemctl stop ssh
-
-echo "SSH and Hotspot stopped."
+echo "Hotspot stopped."

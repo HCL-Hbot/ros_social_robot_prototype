@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/local/bin/start_ssh.sh
+User=%USER%
 Restart=on-failure
 
 [Install]

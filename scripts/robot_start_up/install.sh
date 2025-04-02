@@ -2,52 +2,37 @@
 
 echo "Installing robot services..."
 
+INSTALL_DIR="/usr/local/bin"
 BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
 SCRIPT_SRC="$BASE_DIR/scripts"
 SERVICE_SRC="$BASE_DIR/services"
 ROBOT_USER=$(logname)
 
-## Precondition: Check if .env file exists for wifi setup
-
-# Setup /etc/robot_start_up/.env
-ENV_TARGET="/etc/robot_start_up"
-
-if [ -f "$SCRIPT_SRC/.env" ]; then
-    sudo mkdir -p "$ENV_TARGET"
-    echo "📄 Using your local .env file"
-    sudo cp "$SCRIPT_SRC/.env" "$ENV_TARGET/.env"
-elif [ -f "$SCRIPT_SRC/.env.example" ]; then
-    sudo mkdir -p "$ENV_TARGET"
-    echo "📄 No .env found — using .env.example as fallback"
-    sudo cp "$SCRIPT_SRC/.env.example" "$ENV_TARGET/.env"
-else
-    echo "No .env or .env.example found in $SCRIPT_SRC. Cannot configure hotspot."
-    exit 1
-fi
-
-##-------------------------------------------------------
-
 # Make scripts executable
 chmod +x "$SCRIPT_SRC"/*.sh
 
 # Copy scripts to system path
-echo "Copying scripts to /usr/local/bin..."
-sudo cp "$SCRIPT_SRC"/*.sh /usr/local/bin/
+echo "Copying scripts to $INSTALL_DIR..."
+sudo cp "$SCRIPT_SRC"/*.sh "$INSTALL_DIR"
 
-# Replace 'user' placeholder in services with actual username
+
+# Replace %USER% in all services except robot-hotspot (robot-hotspot is optional and need root privileges)
 TEMP_DIR=$(mktemp -d)
 for FILE in "$SERVICE_SRC"/*.service; do
-  sed "s/user/$ROBOT_USER/g" "$FILE" > "$TEMP_DIR/$(basename "$FILE")"
+  FILENAME="$(basename "$FILE")"
+  if [[ "$FILENAME" != "robot-hotspot.service" ]]; then
+    sed "s|%USER%|$ROBOT_USER|g" "$FILE" > "$TEMP_DIR/$FILENAME"
+  fi
 done
 
 # Copy systemd services
 echo "Installing systemd services..."
 sudo cp "$TEMP_DIR"/*.service /etc/systemd/system/
-sudo systemctl daemon-reexec
 
 # Enable services
 echo "Enabling services..."
-sudo systemctl enable robot-hotspot.service
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
 sudo systemctl enable robot-ssh-init.service
 sudo systemctl enable robot-display.service
 #sudo systemctl enable robot-launch-eye.service

@@ -27,8 +27,8 @@ if ! xrandr --query &> /dev/null; then
 fi
 
 # Default rotation settings (if variables are not provided)
-MAIN_ROTATION="${MAIN_ROTATION:-left}"
-SECOND_ROTATION="${SECOND_ROTATION:-right}"
+MAIN_ROTATION="${MAIN_ROTATION:-right}"
+SECOND_ROTATION="${SECOND_ROTATION:-left}"
 
 # Detect connected screens
 connected_screens=$(xrandr --query | grep " connected" | awk '{ print $1 }')

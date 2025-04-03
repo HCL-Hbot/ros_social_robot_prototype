@@ -204,3 +204,49 @@ journalctl -u NetworkManager | grep dnsmasq
 - The `.env` file controls Wi-Fi hotspot behavior.
 - Reboot the system to apply full behavior.
 - Hotspot gateway IP should be `10.42.0.1` — make sure devices can route via this address.
+
+
+## 🔮 Future Improvements
+
+### 📺 Runtime Display Rotation Support
+
+Currently, the `rotate_screens.sh` script is triggered once at startup via the `robot-display.service`. This ensures screens are correctly rotated when the system boots, but does **not** handle dynamic screen changes at runtime — for example, when an HDMI display is plugged in or unplugged while the system is already running.
+
+There are two possible improvements to enable dynamic behavior:
+
+1. **Use udev triggers:**
+   - Set up a udev rule or ACPI hook to trigger `rotate_screens.sh` whenever a new display is detected or changed.
+   - This requires some experimentation and testing on specific hardware.
+
+   Udev is ideal for detecting hardware events, like plugging in a monitor. The steps would look something like this:
+
+   1. Create a new udev rule:
+
+    ```bash
+    sudo nano /etc/udev/rules.d/99-display-hotplug.rules
+    ```
+    Add the following line:
+    ```
+    SUBSYSTEM=="drm", ACTION=="change", RUN+="/usr/local/bin/rotate_screens.sh"
+    ```
+    2. Make sure the script is executable:
+    ``` bash
+    chmod +x /usr/local/bin/rotate_screens.sh
+    ```
+
+    3. Reload the rules:
+    ```bash
+    sudo udevadm control --reload-rules && sudo udevadm trigger
+
+    ```
+
+2. **Use systemd timer with auto-restart:**
+   - Modify `robot-display.service` to include:
+     ```ini
+     Restart=always
+     RestartSec=5
+     ```
+   - This will rerun the rotation script every 5 seconds, reapplying the correct orientation dynamically.
+   - Note: This method may consume unnecessary resources if not rate-limited.
+
+Until this is implemented, the screen rotation only applies during the system boot process.

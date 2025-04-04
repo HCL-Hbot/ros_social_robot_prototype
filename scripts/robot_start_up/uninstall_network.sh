@@ -5,6 +5,11 @@ echo "Uninstalling hotspot service..."
 
 HOTSPOT_ID="robot-hotspot"
 CONFIG_FILE="/etc/robot_start_up/.env"
+BIN_DIR="/usr/local/bin"
+SCRIPT_NAMES=(
+   start_hotspot.sh
+   stop_hotspot.sh
+)
 
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
@@ -30,4 +35,9 @@ done
 #remove .env config file
 sudo rm -rf /etc/robot_start_up
 
+for script in "${SCRIPT_NAMES[@]}"; do
+  sudo rm -f "$BIN_DIR/$script"
+done
+
+# Remove all installed scripts
 echo "Hotspot network uninstalled."

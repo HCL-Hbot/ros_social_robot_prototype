@@ -5,7 +5,7 @@ echo "Installing hotspot network service..."
 
 INSTALL_DIR="/usr/local/bin"
 BASE_DIR="$(cd "$(dirname "$0")"; pwd)"
-SCRIPT_SRC="$BASE_DIR/scripts"
+SCRIPT_SRC="$BASE_DIR/scripts/hotspot"
 SERVICE_SRC="$BASE_DIR/services"
 ROBOT_USER=$(logname)
 
@@ -42,6 +42,14 @@ for UUID in $(nmcli -t -f UUID,TYPE con show | grep '^.*:wifi$' | cut -d: -f1); 
     if [ "$CUR_ID" != "$HOTSPOT_CONN_ID" ]; then
         nmcli connection modify "$UUID" connection.autoconnect no || true
     fi
+done
+
+# Copy scripts to INSTALL_DIR
+echo "Copying scripts to $INSTALL_DIR..."
+for file in "$SCRIPT_SRC"/*.sh; do
+  script_name=$(basename "$file")
+  sudo cp "$file" "$INSTALL_DIR/$script_name"
+  sudo chmod +x "$INSTALL_DIR/$script_name"
 done
 
 # Activate hotspot systemd service

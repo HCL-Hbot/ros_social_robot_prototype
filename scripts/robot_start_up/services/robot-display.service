@@ -1,13 +1,14 @@
 [Unit]
-Description=Rotate robot display screens
+Description=Rotate HDMI displays on boot
 After=graphical.target
 Requires=graphical.target
 
 [Service]
 User=%USER%
 Environment=DISPLAY=:0
+Type=oneshot
 ExecStart=/usr/local/bin/rotate_screens.sh
-Restart=on-failure
+RemainAfterExit=yes
 
 [Install]
 WantedBy=graphical.target

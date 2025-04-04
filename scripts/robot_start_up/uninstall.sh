@@ -1,32 +1,45 @@
 #!/bin/bash
 
+set -e
+
 echo "Uninstalling robot services..."
 
-SERVICES=(
-  robot-ssh-init.service
-  robot-display.service
-  #robot-launch-eye.service
+SERVICE_NAMES=(
+  robot-ssh-init
+  robot-display
+  robot-eye
+  robot-micro-ros-agent
+  robot-interaction-controller
 )
 
-# Stop, disable, and remove each systemd service
-for SERVICE in "${SERVICES[@]}"; do
-  echo "Disabling and removing $SERVICE..."
-  sudo systemctl stop "$SERVICE" 2>/dev/null
-  sudo systemctl disable "$SERVICE" 2>/dev/null
-  sudo rm -f "/etc/systemd/system/$SERVICE"
+SYSTEMD_DIR="/etc/systemd/system"
+BIN_DIR="/usr/local/bin"
+
+# 1. Stop, disable, and remove systemd services
+for name in "${SERVICE_NAMES[@]}"; do
+  SERVICE_FILE="$name.service"
+  echo "Disabling and removing $SERVICE_FILE..."
+  sudo systemctl stop "$SERVICE_FILE" || true
+  sudo systemctl disable "$SERVICE_FILE" || true
+  sudo rm -f "$SYSTEMD_DIR/$SERVICE_FILE"
 done
 
-#Remove entire config folder  
-sudo rm -rf /etc/robot_start_up
+# 2. Remove all installed scripts
+echo "Removing installed scripts from $BIN_DIR..."
+SCRIPT_NAMES=(
+  start_ssh.sh
+  stop_ssh.sh
+  rotate_screens.sh
+)
 
-echo "Resetting autoconnect for all Wi-Fi profiles..."
-for UUID in $(nmcli -t -f UUID,TYPE con show | grep '^.*:wifi$' | cut -d: -f1); do
-    nmcli connection modify "$UUID" connection.autoconnect yes || true
+for script in "${SCRIPT_NAMES[@]}"; do
+  sudo rm -f "$BIN_DIR/$script"
 done
 
-# Reload systemd to apply changes
+# 3. Reload systemd
 echo "Reloading systemd..."
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 
-echo "Uninstall complete."
+# 4. Clean config folder
+echo "Uninstallation complete."

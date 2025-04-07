@@ -1,6 +1,6 @@
 # 🤖 Robot Startup Scripts
 
-This project automates the startup of ``Mika``, including starting a local Wi-Fi hotspot, rotating screens, enabling SSH, and launching ROS 2 display node.
+This project automates the startup of `Mika`, including starting a local Wi-Fi hotspot, rotating screens, enabling SSH, and launching various ROS 2 nodes like eye display and interaction controller.
 
 Tested on **Ubuntu 24.04** with **ROS 2 Jazzy**.
 
@@ -12,7 +12,8 @@ Tested on **Ubuntu 24.04** with **ROS 2 Jazzy**.
 - Wi-Fi hotspot with environment-based configuration
 - Modular installation: separate network and core setup
 - Display rotation (dual HDMI supported)
-- SSH auto-start on boot
+- SSH auto-start on boot (via openssh-server)
+- Launches ROS 2 nodes via systemd
 
 ---
 
@@ -25,11 +26,22 @@ sudo apt update
 sudo apt install openssh-server network-manager x11-xserver-utils
 ```
 
-Additional requirements:
+> ℹ️ `openssh-server` is automatically enabled after installation. To manually stop or start the SSH service:
+>
+> ```bash
+> sudo systemctl stop ssh
+> sudo systemctl start ssh
+> ```
 
-- ROS 2 workspace at `~/ros2_ws`
-- ROS 2 sourced in your `eye_launch.py` or environment
-- X11 display server (not Wayland)
+### 🖥️ Enable X11 instead of Wayland (default on Ubuntu)
+
+Ubuntu 24.04 uses **Wayland** by default, but for full compatibility with display rotation  it's required to use **X11**:
+
+1. Log out of your current session.
+2. At the login screen, click your username.
+3. Before entering your password, click the **gear icon ⚙️** in the bottom right corner.
+4. Select **"Ubuntu on Xorg"** or **"GNOME on Xorg"**.
+5. Log in normally — the system will remember your choice for next time.
 
 ---
 
@@ -37,22 +49,23 @@ Additional requirements:
 
 ```
 robot_start_up/
-├── install.sh                   # Installs SSH, screen rotation, eye display
-├── uninstall.sh                 # Removes above services
-├── install_network.sh           # Installs only Wi-Fi hotspot service
-├── uninstall_network.sh         # Uninstalls only the hotspot service
+├── install.sh                         # Installs all systemd services (display, micro-ROS-agent, interaction-controller launch)
+├── uninstall.sh                       # Removes above services
+├── install_network.sh                 # Installs only Wi-Fi hotspot service and only boots up with Wi-Fi hotspot
+├── uninstall_network.sh               # Uninstalls only the hotspot service
 ├── scripts/
-│   ├── .env.example             # Example env file
-│   ├── rotate_screens.sh        # Rotates HDMI displays
-│   ├── start_hotspot.sh         # Creates & activates hotspot from .env
-│   ├── stop_hotspot.sh          # Stops the hotspot
-│   ├── start_ssh.sh             # Enables SSH and starts server
-│   └── stop_ssh.sh              # Disables SSH and stops server
+│   ├── hotspot/
+│   │   ├── .env                       # Active hotspot configuration
+│   │   ├── .env.example               # Example config
+│   │   ├── start_hotspot.sh           # Starts the hotspot based on .env
+│   │   └── stop_hotspot.sh            # Stops the hotspot
+│   └── rotate_screens.sh              # Rotates HDMI displays
 ├── services/
-│   ├── robot-display.service         # Starts eye_display_lld
-│   ├── robot-hotspot.service         # Starts the hotspot
-│   ├── robot-launch-eye.service      # Launches ROS 2 node
-│   └── robot-ssh-init.service        # Enables SSH
+│   ├── robot-display.service                # Rotates HDMI screens at boot
+│   ├── robot-eye.service                    # Starts eye_display_lld (Electron)
+│   ├── robot-hotspot.service                # Starts hotspot from .env
+│   ├── robot-interaction-controller.service # Starts ROS interaction_controller and depending nodes (see launch file)
+│   ├── robot-micro-ros-agent.service        # Starts micro-ROS Agent
 └── README.md
 ```
 
@@ -63,8 +76,8 @@ robot_start_up/
 Copy and customize the env file:
 
 ```bash
-cp scripts/.env.example .env
-nano .env
+cp scripts/hotspot/.env.example scripts/hotspot/.env
+nano scripts/hotspot/.env
 ```
 
 Example content:
@@ -84,7 +97,7 @@ Make scripts executable:
 
 ```bash
 chmod +x install.sh uninstall.sh install_network.sh uninstall_network.sh
-chmod +x scripts/*.sh
+chmod +x scripts/*.sh scripts/hotspot/*.sh
 ```
 
 Then install the core services:
@@ -103,37 +116,61 @@ Optionally, install hotspot service:
 
 ## ❌ Uninstall
 
-To remove everything except hotspot:
+To remove all services except the hotspot:
 
 ```bash
 ./uninstall.sh
 ```
 
-To remove the hotspot service:
+To remove only the hotspot service:
 
 ```bash
-./uninstall_network.sh
+sudo bash ./uninstall_network.sh
 ```
-⚠️ Do not run `uninstall_network.sh` remotely unless you have another connection to the robot — it will disconnect the active hotspot.
+
+⚠️ **Warning**: Do not run `uninstall_network.sh` remotely unless you have an alternate network connection — it will disable the current hotspot.
 
 ---
 
+## 🔧 Startup Order
+
+The services are managed by `systemd` and are automatically started in a specific sequence. Only some of them are interdependent:
+
+- `robot-micro-ros-agent.service` is independent and can start early.
+- The following services depend on each other and must start in order:
+
+```
+robot-display.service ➝ robot-eye.service ➝ robot-interaction-controller.service
+```
+
+### Details:
+
+1. **robot-micro-ros-agent.service** – starts the micro-ROS agent on `/dev/ttyACM0` at 115200 baud (no dependencies)
+2. **robot-display.service** – rotates HDMI displays (must run before eye node)
+3. **robot-eye.service** – launches the `eye_display_lld`
+4. **robot-interaction-controller.service** – launches the ROS interaction_controller and dependent nodes (like camera/audio/etc.)
+
+---
 ## 🧪 Manual Testing
+
+You can test each service individually with:
 
 ```bash
 sudo systemctl start robot-hotspot.service
 sudo systemctl start robot-ssh-init.service
 sudo systemctl start robot-display.service
-sudo systemctl start robot-launch-eye.service
+sudo systemctl start robot-eye.service
+sudo systemctl start robot-micro-ros-agent.service
+sudo systemctl start robot-interaction-controller.service
 
-journalctl -u robot-launch-eye.service
+journalctl -u robot-interaction-controller.service #Check logs of robot-interaction-controller.service
 ```
 
 ---
 
 ## 🧪 Testing Individual Scripts
 
-You can test each script in the `scripts/` folder individually:
+From the `scripts/` and `scripts/hotspot/` folders, test like so:
 
 - Rotate screens:
   ```bash
@@ -142,22 +179,12 @@ You can test each script in the `scripts/` folder individually:
 
 - Start hotspot:
   ```bash
-  ./scripts/start_hotspot.sh
+  ./scripts/hotspot/start_hotspot.sh
   ```
 
 - Stop hotspot:
   ```bash
-  ./scripts/stop_hotspot.sh
-  ```
-
-- Enable SSH:
-  ```bash
-  ./scripts/start_ssh.sh
-  ```
-
-- Disable SSH:
-  ```bash
-  ./scripts/stop_ssh.sh
+  ./scripts/hotspot/stop_hotspot.sh
   ```
 ---
 
@@ -175,15 +202,16 @@ MAIN_ROTATION=normal SECOND_ROTATION=left ./scripts/rotate_screens.sh
 
 ---
 
-## 🛠️ Debugging
+## 💥 Debugging
 
-View logs for the hotspot service:
+View logs for a service:
 
 ```bash
 journalctl -u robot-hotspot.service
+journalctl -u robot-interaction-controller.service
 ```
 
-Check current network status:
+Check network status:
 
 ```bash
 nmcli device show
@@ -197,6 +225,9 @@ Check if `dnsmasq` is running:
 journalctl -u NetworkManager | grep dnsmasq
 ```
 
+---
+
+
 ## 🧼 Notes
 
 - Scripts are installed to `/usr/local/bin/`.
@@ -205,6 +236,7 @@ journalctl -u NetworkManager | grep dnsmasq
 - Reboot the system to apply full behavior.
 - Hotspot gateway IP should be `10.42.0.1` — make sure devices can route via this address.
 
+---
 
 ## 🔮 Future Improvements
 
@@ -215,6 +247,7 @@ Currently, the `rotate_screens.sh` script is triggered once at startup via the `
 There are two possible improvements to enable dynamic behavior:
 
 1. **Use udev triggers:**
+
    - Set up a udev rule or ACPI hook to trigger `rotate_screens.sh` whenever a new display is detected or changed.
    - This requires some experimentation and testing on specific hardware.
 
@@ -222,31 +255,42 @@ There are two possible improvements to enable dynamic behavior:
 
    1. Create a new udev rule:
 
-    ```bash
-    sudo nano /etc/udev/rules.d/99-display-hotplug.rules
-    ```
-    Add the following line:
-    ```
-    SUBSYSTEM=="drm", ACTION=="change", RUN+="/usr/local/bin/rotate_screens.sh"
-    ```
-    2. Make sure the script is executable:
-    ``` bash
-    chmod +x /usr/local/bin/rotate_screens.sh
-    ```
+   ```bash
+   sudo nano /etc/udev/rules.d/99-display-hotplug.rules
+   ```
 
-    3. Reload the rules:
-    ```bash
-    sudo udevadm control --reload-rules && sudo udevadm trigger
+   Add the following line:
 
-    ```
+   ```
+   SUBSYSTEM=="drm", ACTION=="change", RUN+="/usr/local/bin/rotate_screens.sh"
+   ```
+
+   2. Make sure the script is executable:
+
+   ```bash
+   chmod +x /usr/local/bin/rotate_screens.sh
+   ```
+
+   3. Reload the rules:
+
+   ```bash
+   sudo udevadm control --reload-rules && sudo udevadm trigger
+   ```
 
 2. **Use systemd timer with auto-restart:**
+
    - Modify `robot-display.service` to include:
+
      ```ini
      Restart=always
      RestartSec=5
      ```
+
    - This will rerun the rotation script every 5 seconds, reapplying the correct orientation dynamically.
    - Note: This method may consume unnecessary resources if not rate-limited.
 
 Until this is implemented, the screen rotation only applies during the system boot process.
+
+
+
+

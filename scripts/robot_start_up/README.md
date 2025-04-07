@@ -150,6 +150,8 @@ robot-display.service ➝ robot-eye.service ➝ robot-interaction-controller.ser
 3. **robot-eye.service** – launches the `eye_display_lld`
 4. **robot-interaction-controller.service** – launches the ROS interaction_controller and dependent nodes (like camera/audio/etc.)
 
+Dependencies are defined via After= and Requires= in each .service file
+
 ---
 ## 🧪 Manual Testing
 

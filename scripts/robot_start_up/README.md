@@ -33,6 +33,15 @@ sudo apt install openssh-server network-manager x11-xserver-utils
 > sudo systemctl start ssh
 > ```
 
+A user needs to be added to the video and audio (system) group. This way the system has rights to the video and audio after bootup (without user input).
+
+Adding user to video and audio user group:
+```bash
+sudo usermod -aG audio <your-pc-username> #In my case pc user name is hcl
+sudo usermod -aG video <your-pc-username> #In my case pc user name is hcl
+```
+A reboot or re-login is need to apply this change!
+
 ### 🖥️ Enable X11 instead of Wayland (default on Ubuntu)
 
 Ubuntu 24.04 uses **Wayland** by default, but for full compatibility with display rotation  it's required to use **X11**:
@@ -169,6 +178,16 @@ journalctl -u robot-interaction-controller.service #Check logs of robot-interact
 ```
 
 ---
+
+## 🧪 Possible errors and their fixes
+At the moment is possible that the face recogonition model (in camera\_hld) does not recognize any face. A quick fix for this is to restart this node. We van simply do this by restarting the ``robot-interaction-controller.service``:
+
+```bash
+sudo systemctl stop robot-micro-ros-agent.service
+sudo systemctl start robot-micro-ros-agent.service
+```
+
+Any service can be restarted by using ``sudo systemctl stop <service_name>`` and ``sudo systemctl start <service_name>`` command 
 
 ## 🧪 Testing Individual Scripts
 

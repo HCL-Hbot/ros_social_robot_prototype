@@ -39,7 +39,7 @@ An example with camera_hld package
 ```bash
  colcon test --packages-select camera_hld
 ```
-Building the project this way will include unittest and cppcheck.
+Building the project this way will include unittest and cppcheck (if there is any available in the packages).
 
 ```bash
 colcon build --packages-select camera_hdl #build one package

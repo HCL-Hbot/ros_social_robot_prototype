@@ -12,7 +12,7 @@ USER_NAME=$(whoami)
 # Find npm path (for Electron apps)
 NPM_PATH=$(which npm || true)
 if [ -z "$NPM_PATH" ]; then
-  echo "❌ Error: npm is not installed or not in PATH. Please install Node.js and npm first."
+  echo "Error: npm is not installed or not in PATH. Please install Node.js and npm first."
   exit 1
 fi
 NPM_DIR=$(dirname "$NPM_PATH")

@@ -16,6 +16,8 @@ def generate_launch_description():
         }]
     )
 
+    camera_front_frame_id = 'camera_1_front'
+
     camera_hld_node_front_view = Node(
         package='camera_hld',
         executable='camera_hld_node',
@@ -23,11 +25,24 @@ def generate_launch_description():
         output='screen', #Log to terminal
         remappings=[('raw_image', '/camera_1/raw_image')],
         parameters=[{
-            'tf_frame_id': 'camera_1_front'  # Configurable parameters for this node <param name> : <value>
+            'tf_frame_id': camera_front_frame_id  # Configurable parameters for this node <param name> : <value>
         }]
     )
 
-    # Test later when we have two (USB) camera's
+    parent_frame_id = camera_front_frame_id
+    child_frame_id = 'robot_eyes_between'
+
+    static_transform_camera_front_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_camera_to_eyes',
+        #arguments=['0', '0', '0.25', '0', '0', '0', parent_frame_id, child_frame_id],  #Setup on my desktop (from camera to between the eyes is 25cm upwards.)
+        #arguments=['0', '0', '-0.175', '0', '0', '0', parent_frame_id, child_frame_id], #Setup for desktop at work.
+        arguments=['0', '0', '-0.040', '0', '0', '0', parent_frame_id, child_frame_id], #Setup for the real robot
+        output='screen'
+    )
+
+    # Test in another project/iteration when we have two (USB) camera's
     # camera_lld_node_side_view = Node(
     #     package='camera_lld',
     #     executable='camera_lld_node',
@@ -51,6 +66,7 @@ def generate_launch_description():
     #)
 
     return LaunchDescription([
+        static_transform_camera_front_publisher,
         camera_lld_node_front_view,
         camera_hld_node_front_view,
         ])

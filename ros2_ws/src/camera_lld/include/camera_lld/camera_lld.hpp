@@ -18,14 +18,14 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
 
+namespace camera_lld {
 /**
  * @brief Low level driver for a camera 
  * 
  * @todo Maybe add configuration to choose from a usb port? 
  *       Currently it will search for any camera. Would be problem if you have multiple camera's attached.
  */
-class CameraLLD : public rclcpp::Node
-{
+class CameraLLD : public rclcpp::Node {
 public:
   /**
   * @brief Construct a new Camera LLD object
@@ -47,5 +47,7 @@ private:
   std::string camera_device_location_; //where can we the camera
   std::thread camera_thread_;
 };
+
+}  // namespace camera_lld
 
 #endif // CAMERA_LLD_INCLUDE_CAMERA_LDD_CAMERA_LLD_HPP_

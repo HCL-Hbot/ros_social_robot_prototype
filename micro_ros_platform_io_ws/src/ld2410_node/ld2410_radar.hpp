@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include "ld2410.h"
 
+namespace radar_lld {
+
 /*For this project only support for normal mode (Engineer mode not needed)*/
 
 /**
@@ -73,5 +75,8 @@ class Ld2410Radar
         ld2410 radar_sensor_;      /**< The radar sensor object. */
         TargetFrameData target_frame_; /**< The current target frame data. */
 };
+
+} // namespace radar_lld
+
 
 #endif //LD2410_RADAR_HPP_

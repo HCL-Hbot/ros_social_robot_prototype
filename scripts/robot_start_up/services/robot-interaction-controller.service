@@ -1,0 +1,29 @@
+[Unit]
+Description=Start interaction_controller
+After=robot-eye.service dev-video0.device graphical.target
+Requires=robot-eye.service
+
+[Service]
+Type=simple
+User=%USER%
+Group=video
+SupplementaryGroups=audio
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=HOME=/home/%USER%
+WorkingDirectory=%REPO_PATH%/ros2_ws
+ExecStartPre=/bin/bash -c 'echo "[robot] Wait for camera device..."; \
+until [ -e /dev/video0 ]; do sleep 1; done; \
+echo "[robot] Wait for ALSA playback device..."; \
+until ls /dev/snd/pcmC*p >/dev/null 2>&1; do sleep 1; done; \
+echo "[robot] Let'\''s wait 3 more seconds, this is enough time for the eye windows to pop up!"; \
+sleep 3;'
+
+ExecStart=/bin/bash -c 'source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 launch interaction_controller interaction_controller_launch.py'
+Restart=on-failure
+RestartSec=2
+RemainAfterExit=no
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical.target

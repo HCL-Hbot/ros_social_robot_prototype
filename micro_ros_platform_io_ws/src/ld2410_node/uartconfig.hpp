@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+namespace radar_lld {
 /**
  * @struct UartConfig
  * @brief A structure to hold UART configuration details.
@@ -17,5 +18,7 @@ struct UartConfig
     uint8_t uart_num_;  /**< The UART number. */
     uint32_t baudrate_; /**< The baud rate for the UART connection. */
 };
+
+}
 
 #endif // UART_CONFIG_HPP_

@@ -1,0 +1,10 @@
+# Request (Goal)
+SoundCommand sound_command # Should be one of SoundCommand (eg. GREET, FAREWELL)
+---
+# Response (Result)
+bool success
+uint8 executed_count  # Number of successful plays before stopping
+string message
+---
+# Feedback (stream)
+uint8 executing_count  # Number of plays in progress

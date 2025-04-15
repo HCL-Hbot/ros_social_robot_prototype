@@ -1,0 +1,30 @@
+{
+  "name": "eye_ui_with_electron_symposium_demo",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "sass": "sass styles.scss styles.css",
+    "sass-watch": "sass --watch styles.scss styles.css",
+    "start": "NODE_ENV=production npm run sass && electron .",
+    "start-left-first": "NODE_ENV=production npm run sass && electron . --left-eye=0 --right-eye=1",
+    "start-right-first": "NODE_ENV=production npm run sass && electron . --left-eye=1 --right-eye=0",
+    "start-left-only": "NODE_ENV=production npm run sass && electron . --left-eye=0",
+    "start-right-only": "NODE_ENV=production npm run sass && electron . --right-eye=0",
+    "dev": "NODE_ENV=development concurrently \"npm run sass-watch\" \"electron .\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Agit Tunc",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "electron": "^33.2.1",
+    "sass": "^1.83.1"
+  },
+  "dependencies": {
+    "electron-reload": "^2.0.0-alpha.1",
+    "websocket": "^1.0.35",
+    "ws": "^8.18.0"
+  }
+}

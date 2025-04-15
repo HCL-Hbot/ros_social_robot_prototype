@@ -1,0 +1,20 @@
+[Unit]
+Description=Start eye_display_lld
+After=robot-display.service graphical.target
+Requires=robot-display.service
+
+[Service]
+User=%USER%
+Environment=DISPLAY=:0
+Environment=ROS_DOMAIN_ID=0
+Environment=PATH=%NPM_DIR%:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Type=simple
+WorkingDirectory=%REPO_PATH%/ros2_ws
+ExecStart=/bin/bash -c 'source /opt/ros/jazzy/setup.bash && source install/setup.bash && ros2 launch eye_display_lld electron_launch.py'
+Restart=on-failure
+RestartSec=1
+
+RemainAfterExit=no
+
+[Install]
+WantedBy=graphical.target

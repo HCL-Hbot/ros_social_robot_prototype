@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 
+namespace radar_lld {
 /**
  * @struct WifiConfig
  * @brief A structure to hold WiFi configuration details.
@@ -18,5 +19,7 @@ struct WifiConfig
     std::string ssid_;    /**< The SSID (network name) for the WiFi connection. */
     std::string password_;/**< The password for the WiFi connection. */
 };
+
+}
 
 #endif // WIFI_CONFIG_HPP_

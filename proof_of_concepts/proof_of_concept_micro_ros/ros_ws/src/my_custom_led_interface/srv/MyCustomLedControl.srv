@@ -1,0 +1,5 @@
+uint8 led_color  # 1 = rood, 2 = geel
+bool led_on     # True = aan, False = uit
+---
+bool success    # Geeft aan of de actie succesvol was
+string message  # Optioneel bericht

@@ -1,0 +1,16 @@
+@startuml Component_Diagram_controller
+
+skin rose 
+
+component interaction_controller <<ROS2 Node>> as Interaction_Controller
+interface "/radar_presence" <<ROS2 Topic>> as provided_interface_radar_presence
+interface "/face_position" <<ROS2 Topic>> as provided_interface_face_info
+interface "/eye_control" <<ROS2 Topic>> as provided_interface_eye_control
+interface "/screen_expression" <<ROS2 Topic>> as provided_interface_screen_expression
+
+Interaction_Controller -down- provided_interface_radar_presence
+Interaction_Controller -down- provided_interface_face_info
+Interaction_Controller -right-( provided_interface_eye_control
+Interaction_Controller --( provided_interface_screen_expression
+
+@enduml

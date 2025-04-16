@@ -1,0 +1,36 @@
+@startuml ClassDiagram_Eye_display_hld
+
+title Class Diagram eye_display_hld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+namespace rclcpp {
+    class Node #back:palegreen;
+}
+
+enum Eye {
+    LEFT,
+    RIGHT,
+    BOTH
+}
+
+    
+class EyeDisplayHLD {
+    - bothEyesCallback(eye_control_msg : const eye_display_hld::msg::EyeControl::SharedPtr) : void
+    - sendToLowLevelDriver(eye : Eye, eye_control_msg : const eye_display_hld::msg::EyeControl::SharedPtr) : void
+    - getPupilDialation(target_distance_cm : uint16_t) : float
+    - getEyeDirectionMsg(yaw : float, pitch : float) : eye_display_lld::msg::EyesDirection
+    - screenExpressionCallback(screen_expression_msg : const eye_display_hld::msg::ScreenExpression::SharedPtr) : void
+
+    - both_eyes_subscriber_ : rclcpp::Subscription<eye_display_hld::msg::EyeControl>::SharedPtr
+    - screen_expression_ : rclcpp::Subscription<eye_display_hld::msg::ScreenExpression>::SharedPtr
+    - pupil_control_publisher_ : rclcpp::Publisher<eye_display_lld::msg::PupilControl>::SharedPtr
+    - eyes_direction_publisher_ : rclcpp::Publisher<eye_display_lld::msg::EyesDirection>::SharedPtr
+    - eye_lid_publisher_ : rclcpp::Publisher<eye_display_lld::msg::EyeLidControl>::SharedPtr
+}
+
+Node <|-- EyeDisplayHLD
+Eye <.. EyeDisplayHLD
+
+@enduml

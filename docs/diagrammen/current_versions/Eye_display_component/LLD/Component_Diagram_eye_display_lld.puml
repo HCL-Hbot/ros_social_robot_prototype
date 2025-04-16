@@ -1,0 +1,20 @@
+@startuml component_diagram_eye_display_lld
+
+skin rose
+
+component eye_display_lld <<ROS2 Node>> as Eye_display_LLD {
+    component "Main" <<module>> as main_class
+    component "Renderer" <<module>> as renderer_class
+    interface "IpcRenderer" <<functional>> as provided_interface_ipc_renderer
+    main_class -down-( provided_interface_ipc_renderer
+    renderer_class -up- provided_interface_ipc_renderer
+}
+interface "/eyes_direction_control" <<ROS2 Topic>> as provided_interface_eye_direcion_control
+interface "/eye_lid_control" <<ROS2 Topic>> as provided_interface_eye_lid_control
+interface "/pupil_control" <<ROS2 Topic>> as provided_interface_pupil_control
+
+main_class -up- provided_interface_eye_direcion_control
+main_class -up- provided_interface_eye_lid_control
+main_class -up- provided_interface_pupil_control
+
+@enduml

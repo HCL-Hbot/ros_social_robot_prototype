@@ -1,0 +1,82 @@
+@startuml
+
+title Class Diagram Controller part 1
+
+skin rose
+skinparam classAttributeIconSize 0
+
+
+class Context {
+    - state : std::unique_ptr<AbstractState>
+    + setCurrentState(aState: std::unique_ptr<AbstractState>): void
+}
+
+AbstractEventHandler <|-- AbstractState
+
+abstract class AbstractEventHandler {
+    + {abstract} handleEvent(event: Event): void
+}
+
+AbstractEventHandler .> Event
+
+enum Event {
+    Ev_TARGET_MOVING
+    Ev_TARGET_STATIONARY
+    Ev_GREETED
+    Ev_TIMER_EXPIRED
+    Ev_FACE_DETECTED
+    Ev_IGNORED
+}
+
+abstract class AbstractState {
+    + AbstractState(aContext: Context*): void
+    + {abstract} entry(): void
+    + {abstract} doActivity(): void
+    + {abstract} exit(): void
+    + getContext() : Context*
+    - context_ : Context*
+}
+
+AbstractState -o Context
+
+abstract class AbstractControllerState {
+    + AbstractControllerState(aController: Controller*): void
+    + entry(): void
+    + doActivity(): void
+    + exit(): void
+    + getContext() : Controller*
+}
+
+AbstractState <|-- AbstractControllerState 
+
+AbstractControllerState o-> Controller : controller_
+
+class Controller  {
+    - eventQueue_ : Queue<Event> 
+    + closeEyes() : void
+    + openEyes() : void
+    + sleepyEyes() : void
+    + startFaceDetection() : void
+    + stopFaceDetection() : void
+    + askForAttention() : void
+    + greet() : void
+    + openMic() : void
+    + closeMic() : void
+}
+
+Context <|-- Controller
+
+class Queue<T> {
+    - queue_list_ : std::queue<T>
+    - queue_busy_ : std::mutex
+    - queue_not_empty_ : std::condition_variable
+    + add(item: const T&): void
+    + wait_and_pop(): T
+    + try_pop(T* item): bool
+    + isEmpty(): bool
+    + emptyQueue(): void
+}
+
+Queue <--- Controller : event_queue_
+
+@enduml

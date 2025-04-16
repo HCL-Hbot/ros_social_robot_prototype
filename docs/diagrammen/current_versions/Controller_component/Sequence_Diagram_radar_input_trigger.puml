@@ -1,0 +1,25 @@
+@startuml Sequence_Diagram_radar_input_trigger
+
+title Sequence Diagram radar trigger in controller
+
+skin rose
+
+autonumber
+
+participant "radar_presence_sub_: Subscription" as radar_presence_sub_
+participant "InteractionController" as InteractionController
+participant "screen_expression_pub_: Publisher" as screen_expression_pub_
+
+radar_presence_sub_ -> InteractionController: radarPresenceCallback(presence_msg)
+activate InteractionController
+    InteractionController -> InteractionController: is_presence_state_changed = isPresenceStateChanged(presence_msg)
+    alt is_presence_state_changed == true
+        InteractionController -> InteractionController: screen_expression_msg = convertPresenceDetectionToScreenExpression(presence_msg)
+        alt screen_expression_msg != NULL
+            InteractionController -> InteractionController: updateLastPresenceDetection(presence_msg)
+            InteractionController -> screen_expression_pub_: publish(*screen_expression_msg)
+        end
+    end
+deactivate InteractionController
+
+@enduml

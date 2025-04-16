@@ -1,0 +1,40 @@
+@startuml ClassDiagram_Eye_display_lld
+
+title Class Diagram eye_display_lld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+class Main {
+    - setupScreens() : void
+    - parseArguments() : any[]
+    - createWindowForScreen(display : Electron.Display, eye: String) : void
+    - sendToRenderer(event_name : String, msg: any) : void
+    - startRclNodejs() : void
+    - windows : BrowserWindow[]
+    - app : Electron.App
+    - screen : Electron.Screen
+    - ipcMain : Electron.IpcMain
+    - rclnodejs: rclnodejs
+}
+
+class Renderer {
+    - initEyes() : void
+    - updatePupilDilation(dilation: float) : void
+    - moveEyes(yaw: float, pitch: float) : void
+    - yawToX(yaw: float) : number
+    - pitchToY(pitch: float) : number
+    - moveEye(eye: String, x: number, y: number) : void
+    - moveLid(lid: String, position: number) : void
+
+    - ipcRenderer : Electron.IpcRenderer
+    - eyes : NodeListOf<Element>
+    - irises : NodeListOf<Element>
+    - pupils : NodeListOf<Element>
+    - topLids : NodeListOf<Element>
+    - bottomLids : NodeListOf<Element>
+}
+
+Main --> "1..2" Renderer
+
+@enduml

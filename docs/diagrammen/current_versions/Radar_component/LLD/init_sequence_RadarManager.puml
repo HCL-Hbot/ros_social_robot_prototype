@@ -1,0 +1,50 @@
+@startuml init_sequence_RadarManager
+
+title setup() + loop() function presence_sensing.cpp 
+autonumber
+
+participant "Main" as Main
+participant "radar_manager: RadarLd2410Manager" as RadarLd2410Manager
+participant "LD2410" as LD2410
+participant "state_led_visualizer_: RGBLed" as RGBLed
+
+
+group setup()
+  Main --> RadarLd2410Manager **: <<create>> Serial or Wifi Mode
+  activate RadarLd2410Manager
+  
+  group Constructor
+    RadarLd2410Manager -> RGBLed **: <<create>> RGBLed(pin) 
+    activate RGBLed
+    
+    note over LD2410
+      An array of LD2410 is kept
+      as a member variable "sensors_"
+    end note
+
+    RadarLd2410Manager -> LD2410 ** : <<create>>
+    activate LD2410
+ 
+    RadarLd2410Manager->RadarLd2410Manager: intializeRadar(radarConfigs)
+    activate RadarLd2410Manager
+    
+    loop For each radar_config in radarConfigs
+        RadarLd2410Manager -> HardwareSerial **: <<create>> serials_[i] = HardwareSerial(radar_config.uart_num_) 
+        activate HardwareSerial
+        
+        RadarLd2410Manager -> HardwareSerial : begin(radar_config.baudrate_, SERIAL_8N1, radar_config.rx_pin_, radar_config.tx_pin_)
+        
+  
+        RadarLd2410Manager -> LD2410 : sensors_[i].begin(&serials_[i])
+    end
+  end
+  deactivate RadarLd2410Manager
+  
+  RadarLd2410Manager -> RadarLd2410Manager : initCommonParts();
+
+
+end
+
+group loop()
+  Main -> RadarLd2410Manager: updateStateMachine()
+end

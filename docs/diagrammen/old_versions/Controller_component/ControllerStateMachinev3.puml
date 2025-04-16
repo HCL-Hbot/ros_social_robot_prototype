@@ -1,0 +1,64 @@
+@startuml
+
+skin rose
+
+title Controller State Machine Interactive mode
+
+[*] --> SLEEP
+
+state SLEEP {
+  SLEEP: entry/ closeEyes()
+  SLEEP: stopFaceDetection()
+  SLEEP: setUserIsGreeted(false)
+  SLEEP: exit/ openEyes()
+  SLEEP: startFaceDetection()
+}
+
+SLEEP --> TRACKING: Ev_TARGET_MOVING '[radar_distance < 4 m]'
+
+state TRACKING {
+    TRACKING: entry/ startTimer(timeout = 5s)
+    TRACKING: do/ updateEyePosition()
+    TRACKING: exit/ stopTimer()
+}
+
+note left of TRACKING
+    startTimer will start a timer that
+    will expire after 5 seconds.
+    When the timer expires the event
+    Ev_TIMER_EXPIRED will be generated.
+end note
+
+GREETING <- TRACKING: Ev_TARGET_STATIONARY ['isUserGreeted() && isFaceDetected() && radar_distance < 4 m']
+GREETING --> TRACKING: Ev_GREETED
+
+state GREETING {
+    GREETING: entry/ greet()
+    GREETING: exit/ setUserIsGreeted(true)
+}
+
+TRACKING -> ASK_FOR_ATTENTION: Ev_TIMER_EXPIRED '[radar_distance < 4 m && !isUserGreeted()]'
+TRACKING -> SLEEP: '[radar_distance >= 4 m]'
+' Hoe ga ik hier EvIGNORED implementeren? Ik moet iets met timers doen.
+state ASK_FOR_ATTENTION {
+    ASK_FOR_ATTENTION: do/ askForAttention()
+}
+
+note top of ASK_FOR_ATTENTION
+    askForAttention() will be executed every 5 seconds
+    after three tries the event Ev_IGNORED will be generated
+end note
+
+ASK_FOR_ATTENTION --> IGNORE: Ev_IGNORED '[ignored >= 3]'
+ASK_FOR_ATTENTION -> TRACKING: Ev_FACE_DETECTED '[radar_distance < 4 m]'
+
+state IGNORE {
+    IGNORE: entry/ openMic()
+    IGNORE: sleepyEyes()
+    IGNORE: exit/ closeMic()
+}
+
+IGNORE --> TRACKING: Ev_WAKE_WORD_DETECTED '[radar_distance < 4 m]'
+IGNORE --> SLEEP: '[radar_distance >= 4 m]'
+
+@enduml

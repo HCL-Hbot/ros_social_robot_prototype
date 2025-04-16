@@ -1,0 +1,52 @@
+@startuml Component_diagram
+
+skin rose 
+
+component Radar_LLD <<Micro ROS Node>> as Radar_LLD
+component Radar_HLD <<ROS2 Node>> as Radar_HLD
+interface "/ld2410_target_frames" <<ROS2 Topic>> as provided_interface_radar_hld
+
+component Camera_LLD <<ROS2 Node>> as Camera_LLD
+component Camera_HLD <<ROS2 Node>> as Camera_HLD
+interface "/raw_image" <<ROS2 Topic>> as provided_interface_camera_hld
+
+component Interaction_Controller <<ROS2 Node>> as Interaction_Controller
+interface "/radar_presence" <<ROS2 Topic>> as provided_interface_radar_presence
+interface "/face_position" <<ROS2 Topic>> as provided_interface_face_info
+
+component Eye_display_HLD <<ROS2 Node>> as Eye_display_HLD
+interface "/eye_control" <<ROS2 Topic>> as provided_interface_eye_control
+interface "/screen_expression" <<ROS2 Topic>> as provided_interface_screen_expression
+
+component Eye_display_LLD <<ROS2 Node>> as Eye_display_LLD
+interface "/eyes_direction_control" <<ROS2 Topic>> as provided_interface_eye_direcion_control
+interface "/eye_lid_control" <<ROS2 Topic>> as provided_interface_eye_lid_control
+interface "/pupil_control" <<ROS2 Topic>> as provided_interface_pupil_control
+
+Radar_LLD -up-( provided_interface_radar_hld
+Radar_HLD -- provided_interface_radar_hld
+
+Radar_HLD -up-( provided_interface_radar_presence
+Interaction_Controller -down- provided_interface_radar_presence
+
+Camera_LLD -up-( provided_interface_camera_hld
+Camera_HLD -down- provided_interface_camera_hld
+
+Camera_HLD -up-( provided_interface_face_info
+Interaction_Controller -down- provided_interface_face_info
+
+Interaction_Controller -right-( provided_interface_eye_control
+Eye_display_HLD -left- provided_interface_eye_control
+
+Interaction_Controller --( provided_interface_screen_expression
+Eye_display_HLD -up- provided_interface_screen_expression
+
+Eye_display_HLD -down-( provided_interface_eye_direcion_control
+Eye_display_LLD -up- provided_interface_eye_direcion_control
+
+Eye_display_HLD -down-( provided_interface_eye_lid_control
+Eye_display_LLD -up- provided_interface_eye_lid_control
+Eye_display_HLD -down-( provided_interface_pupil_control
+Eye_display_LLD -up- provided_interface_pupil_control
+
+@enduml

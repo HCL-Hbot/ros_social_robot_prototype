@@ -1,0 +1,24 @@
+@startuml Sequence_Diagram_eye_control
+
+title Sequence Diagram eye control
+
+skin rose
+
+autonumber
+
+participant "both_eyes_subscriber_: Subscription" as both_eyes_subscriber_
+participant "EyeDisplayHLD" as EyeDisplayHLD
+participant "eyes_direction_publisher_: Publisher" as eyes_direction_publisher_
+participant "pupil_control_publisher_: Publisher" as pupil_control_publisher_
+
+both_eyes_subscriber_ -> EyeDisplayHLD: bothEyesCallback(eye_control_msg)
+activate EyeDisplayHLD
+    EyeDisplayHLD -> EyeDisplayHLD: sendToLowLevelDriver(eye::BOTH, eye_control_msg)
+    activate EyeDisplayHLD
+    EyeDisplayHLD -> EyeDisplayHLD: pupil_control_msg.dilation_percentage = getPupilDialation(target_distance_cm)
+    EyeDisplayHLD -> EyeDisplayHLD: eyes_direction_msg = getEyeDirectionMsg(yaw, pitch)
+    EyeDisplayHLD -> eyes_direction_publisher_: publish(eyes_direction_msg)
+    EyeDisplayHLD -> pupil_control_publisher_: publish(pupil_control_msg)
+    deactivate EyeDisplayHLD
+
+@enduml

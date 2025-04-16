@@ -1,0 +1,51 @@
+@startuml
+
+skin rose
+
+title Controller State Machine Interactive mode
+
+[*] --> SLEEP
+
+state SLEEP {
+  SLEEP: entry/ closeEyes()
+  SLEEP: stopFaceDetection()
+}
+
+state AWAKE {
+  /'AWAKE: entry/ startFaceDection()'/
+}
+
+state TRACKING {
+  state FACE_TRACKING 
+  state EYE_TRACKING
+}
+state FACE_TRACKING {
+  FACE_TRACKING: do/ eyesPosition([left_eye, right_eye], face_center_x, face_center_y)
+} 
+
+state EYE_TRACKING {
+  EYE_TRACKING: do/ eyesPosition([left_eye], left_target_eye_x, left_target_eye_y)
+  EYE_TRACKING: eyesPosition([right_eye], right_target_eye_x, right_target_eye_y)
+}
+
+state ASK_FOR_ATTENTION {
+    ASK_FOR_ATTENTION: entry/ askForAttention()
+}
+
+state IGNORE {
+
+}
+
+state GREETING {
+    GREETING: entry/ greet()
+}
+
+SLEEP --> AWAKE : Radar [<4m] / openEyes(); startFaceDetection()
+AWAKE --> SLEEP : Radar [>4m] 
+AWAKE --> TRACKING : Radar [<4m] 
+TRACKING --> AWAKE : Radar [>4m]
+FACE_TRACKING --> EYE_TRACKING : Radar [<2m]
+TRACKING --> ASK_FOR_ATTENTION : Radar [<4m] and face not detected
+
+
+@enduml

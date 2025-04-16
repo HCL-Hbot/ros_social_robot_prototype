@@ -27,7 +27,7 @@ done
 
 # 2. Replace placeholders and install services
 echo "Installing systemd services..."
-SERVICE_NAMES=("robot-ssh-init" "robot-display" "robot-eye" "robot-micro-ros-agent" "robot-interaction-controller")
+SERVICE_NAMES=("robot-display" "robot-eye" "robot-micro-ros-agent" "robot-interaction-controller")
 
 
 for name in "${SERVICE_NAMES[@]}"; do

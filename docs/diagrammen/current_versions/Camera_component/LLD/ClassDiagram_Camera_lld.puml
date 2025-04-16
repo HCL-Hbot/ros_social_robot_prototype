@@ -1,0 +1,22 @@
+@startuml ClassDiagram_Camera_lld
+
+title Class Diagram camera lld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+namespace rclcpp {
+    class Node #back:palegreen;
+}
+
+
+class CameraLLD {
+    - captureAndPublish(): void
+    - raw_image_pub_: rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr
+    - camera_device_location_: std::string
+    - camera_thread_: std::thread
+}
+
+Node <|-- CameraLLD
+
+@enduml

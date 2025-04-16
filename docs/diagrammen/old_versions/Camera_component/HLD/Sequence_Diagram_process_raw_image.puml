@@ -1,0 +1,34 @@
+@startuml Sequence_Diagram_process_raw_image
+
+title Sequence Diagram process raw image data
+
+skin rose
+
+autonumber
+
+participant "raw_image_sub_: Subscription" as raw_image_sub_
+participant "CameraHLD" as CameraHLD
+participant "face_detector_: CLFML::FaceDetection::FaceDetector" as face_detector_
+
+raw_image_sub_ -> CameraHLD: imageCallback(image_msg)
+activate CameraHLD
+    CameraHLD -> CameraHLD: frame = convertImageMsgToCvMat(image_msg)
+    alt !frame.empty()
+        CameraHLD -> face_detector_: load_image(frame)
+        CameraHLD -> face_detector_: face_detected = detected() + 1
+
+        alt face_detected == true
+            CameraHLD -> CameraHLD: publishFacePosition(frame)
+            activate CameraHLD
+                CameraHLD -> face_detector_: face_keypoints = get_face_landmarks()
+                CameraHLD -> face_detector_: face_roi = get_face_roi()
+                CameraHLD -> CameraHLD: center_of_face = getCenterOfFace(face_roi)
+                CameraHLD -> CameraHLD: eye_roi = getEyeRoi(face_keypoints[0], face_keypoints[1])
+                CameraHLD -> CameraHLD: distance_to_face = getDistanceToFace(face_roi, eye_roi, frame.size().width)
+                CameraHLD -> CameraHLD: face_position_msg = createFacePositionMsg(center_of_face, distance_to_face)
+                CameraHLD -> face_detector_: publish(face_position_msg)
+            deactivate CameraHLD
+        end
+    end
+deactivate CameraHLD
+@enduml

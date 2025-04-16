@@ -1,0 +1,90 @@
+@startuml ClassDiagram_Radar_esp32
+
+title Class Diagram radar_lld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+class Ld2410Radar {
+    - radar_sensor_ : ld2410
+    - target_frame_: TargetFrameData
+    + begin(Stream &uart_radar) : bool
+    + read() : bool
+    + getCurrentTargetFrame() : const TargetFrameData&
+}
+
+enum  RadarManagerState {
+  WAITING_FOR_AGENT
+  CREATE_ROS_NODE
+  RUNNING_ROS_NODE
+  DESTROY_ROS_NODE
+}
+
+class RadarLd2410Manager <N_SENSORS> {
+    - ros_serial_ :  std::unique_ptr<HardwareSerial>
+    - node_name_ : std::string
+    - radar_publish_topic_name_ : std::string
+    - device_id_ : uint8_t
+    - state_led_visualizer_ : RGBLed
+    - current_state_ : RadarManagerState
+    - sensors_ : std::array<Ld2410Radar, N_SENSORS>
+    - serials_ : std::array<std::unique_ptr<HardwareSerial>, N_SENSORS>
+    - allocator_ : rclc_allocator
+    - support_ : rclc_support_t
+    - node_ : rcl_node_t
+    - executor_ : rclc_executor_t
+    - target_frame_array_publisher_ : rcl_publisher_t
+    - publish_target_frame_array_timer_ : rcl_timer_t
+    - target_frame_array_msg_ : ld2410_interface__msg__LD2410TargetDataFrameArray
+    - {static} radar_manager_instance_map_: std::map<rcl_timer_t*, RadarLd2410Manager>
+    
+    + isAgentAvailable(): bool
+    + initMicroRos(): bool
+    + destroyMicroRos(): void
+    + spinSome(timeout_ms: uint32_t): bool
+    + updateStateMachine() : void
+    - initializeRadars(radar_configs:const std::array<UartConfig, N_RADAR_SENSORS>&): void
+    - initCommonParts(): void
+    - collectAndPublishRadarData(): void
+    - addTargetFrameDataToArray(fd: const TargetFrameData&, radar_id: size_t): void
+}
+
+class RGBLed {
+    - strip_: Adafruit_NeoPixel
+    + RGBLed(pin: uint8_t)
+    + setColor(r: uint8_t , g: uint8_t, b: uint8_t ) : void
+    + setBrightness(brightness: uint8_t) : void
+    + show() : void
+}
+
+struct TargetFrameData {
+    + target_state_: uint8_t
+    + movement_distance_: uint16_t
+    + movement_energy_: uint8_t
+    + stationary_distance_: uint16_t
+    + stationary_energy_: uint8_t
+    + detection_distance_: uint16_t
+}
+
+struct UartConfig {
+    + rx_pin_ : uint8_t
+    + tx_pin_ : uint8_t 
+    + uart_num_ : uint8_t
+    + baud_rate_ : uint32_t
+}
+
+struct WifiConfig {
+    + port_ : uint8_t
+    + ip_ : string
+    + ssid_ : string
+    + password_ : string
+}
+
+Ld2410Radar --> TargetFrameData
+RadarLd2410Manager --> Ld2410Radar
+RadarLd2410Manager --> RadarManagerState
+RadarLd2410Manager --> RGBLed
+RadarLd2410Manager -left.> UartConfig
+RadarLd2410Manager .> WifiConfig
+
+@enduml

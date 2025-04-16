@@ -8,6 +8,8 @@ De laatste versie van het SDD bevat geen documentatie voer de audio. Dit is gere
 
 Todo: geupdate SDD nog uploaden (alleen compontent en interface beschrijving van audio is dan verwerkt in SDD)
 
+Compiler setting "XeLatex"
+
 # Requirements check table
 
 BuddyBot/Mika is een sociale robot die gebruik maakt van radar-, audio- en visuele sensoren om te interacteren met mensen in zijn omgeving. Dit document bevat een overzicht van de requirements voor het systeem, inclusief de implementatiestatus en toelichting.

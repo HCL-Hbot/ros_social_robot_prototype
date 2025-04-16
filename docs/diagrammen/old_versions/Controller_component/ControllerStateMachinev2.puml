@@ -1,0 +1,47 @@
+@startuml
+
+skin rose
+
+title Controller State Machine Interactive mode
+
+[*] --> SLEEP
+
+state SLEEP {
+  SLEEP: entry/ closeEyes()
+  SLEEP: radar()
+  SLEEP: first_time_greeting = 0
+  SLEEP: exit/ openEyes()
+}
+
+state AWAKE {
+  AWAKE: entry/ startFaceDetection()
+  AWAKE: updateEyePosition()
+}
+
+ state ASK_FOR_ATTENTION {
+     ASK_FOR_ATTENTION: entry/ Ignored = 0
+     ASK_FOR_ATTENTION: do/ askForAttention()
+     ASK_FOR_ATTENTION: Ignored++
+ }
+
+state IGNORE {
+  IGNORE: entry/  sleepyEyes()
+  IGNORE: exit/ openEyes()
+}
+
+state GREETING {
+    GREETING: entry/ greet()
+    GREETING: updateEyePosition()
+    GREETING: first_time_greeting = 1
+}
+
+SLEEP --> AWAKE : Radar [<4m] 
+AWAKE --> SLEEP : Radar [>4m] 
+AWAKE --> GREETING : Radar [<4m] && face detected && first_time_greeting == 0
+GREETING --> AWAKE
+AWAKE --> ASK_FOR_ATTENTION : Radar [<4m] and face not detected 
+ASK_FOR_ATTENTION --> IGNORE : Ignored > 3
+ASK_FOR_ATTENTION --> AWAKE: Face detected
+IGNORE --> AWAKE : Wake word detected && Radar [<4m]
+IGNORE --> SLEEP : Radar [>4m]
+@enduml

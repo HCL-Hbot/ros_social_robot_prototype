@@ -1,0 +1,15 @@
+@startuml Sequence_Diagram_move_eye_lids
+
+title Sequence Diagram move eye lids
+
+skin rose
+
+autonumber
+
+participant "Renderer" as Renderer
+
+alt eye_lid_control_msg.eye_id == 2
+    Renderer -> Renderer: moveLid("all", eye_lid_control_msg.position)
+end
+
+@enduml

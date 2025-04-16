@@ -1,0 +1,25 @@
+@startuml Sequence_Diagram_process_radar_data
+
+title Sequence Diagram process raw radar data
+
+skin rose
+
+autonumber
+
+participant "radar_lld_sub_: Subscription" as radar_presence_subscriber_
+participant "RadarPresenceHLD" as RadarPresenceHLD
+
+radar_presence_subscriber_ -> RadarPresenceHLD: radarPresenceCallback(radar_presence_msg)
+activate RadarPresenceHLD
+    RadarPresenceHLD -> RadarPresenceHLD: smallest_distance_sensor = findSmallestDistanceSensor(radar_presence_msg)
+    alt smallest_distance_sensor != nullptr
+        RadarPresenceHLD -> RadarPresenceHLD: new_radar_presence_msg = translateToPresenceDetection(*smallest_distance_sensor)
+        RadarPresenceHLD -> RadarPresenceHLD: is_presence_changed = isPresenceDetectionChanged(new_radar_presence_msg)
+
+        alt is_presence_changed
+            RadarPresenceHLD -> RadarPresenceHLD: updateAndPublishPresenceDetection(new_radar_presence_msg)
+        end
+    end
+deactivate RadarPresenceHLD
+
+@enduml

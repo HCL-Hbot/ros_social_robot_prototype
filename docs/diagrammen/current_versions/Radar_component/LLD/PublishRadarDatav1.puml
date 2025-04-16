@@ -1,0 +1,55 @@
+@startuml
+
+title collectAndPublishRadarData()
+skin rose
+
+participant "RadarLd2410Manager" as Manager
+
+participant "Ld2410Radar" as Sensor
+participant "ld2410" as ld2410
+
+participant "publisher.c" as Publisher
+note over Publisher
+  This a C module
+  from microROS
+  (C APIs)
+end note
+Manager -> Manager: collectAndPublishRadarData()
+activate Manager
+
+note over of Manager : target_frame_array_msg_.sensors.size = 0;
+
+loop For each sensor in sensors_
+    Manager -> Sensor: read_result = read()
+    activate Sensor
+    Sensor -> ld2410 : read()
+    activate ld2410
+    ld2410 --> Sensor : boolean
+    deactivate ld2410
+    Sensor -> ld2410 : isConnected()
+    activate ld2410
+    ld2410 --> Sensor : boolean
+    deactivate ld2410
+    note left of Sensor
+      returns only true when
+      read() and isConnected()
+      return true
+    end note 
+    Sensor --> Manager : boolean
+    deactivate Sensor
+    
+    alt read_result == true
+        Manager -> Sensor: fd = getCurrentTargetFrame()
+        activate Sensor
+        Sensor --> Manager: TargetFrameData
+        deactivate Sensor
+        Manager -> Manager: addTargetFrameDataToArray(array_pos, fd)
+    else Sensor read failed
+        note right of Manager: Skip this radar sensor
+    end
+end
+
+Manager -> Publisher: rcl_publish(&target_frame_array_publisher_, &target_frame_array_msg_, NULL)
+Publisher --> Manager: publish_result
+
+@enduml

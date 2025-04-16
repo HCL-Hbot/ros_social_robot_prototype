@@ -1,0 +1,41 @@
+@startuml
+
+skin rose
+
+title RadarLd2410Manager State Diagram
+
+[*] --> WAITING_FOR_AGENT 
+note on link 
+  In the constructor state is 
+  set to WAITING_FOR_AGENT 
+  and the LED set to blue color
+  with a brightness value
+  of 10.
+end note
+
+state WAITING_FOR_AGENT {
+  WAITING_FOR_AGENT: do/ isAgentAvailable();
+}
+
+state CREATE_ROS_NODE {
+  CREATE_ROS_NODE : do/ initMicroRos();
+}    
+
+state RUNNING_ROS_NODE {
+  RUNNING_ROS_NODE: do/ rclc_executor_spin_some(&executor, timeout);
+  RUNNING_ROS_NODE:     isAgentAvailable();
+}
+state DESTROY_ROS_NODE {
+  DESTROY_ROS_NODE: do/ destroyMicroRos();
+
+}
+
+WAITING_FOR_AGENT --> CREATE_ROS_NODE : agent available / turn LED cyan
+
+
+CREATE_ROS_NODE --> RUNNING_ROS_NODE : node created / turn LED green
+RUNNING_ROS_NODE --> DESTROY_ROS_NODE : agent NOT available / turn LED red
+DESTROY_ROS_NODE -up-> WAITING_FOR_AGENT : node destroyed / turn LED blue
+CREATE_ROS_NODE --> DESTROY_ROS_NODE : failed to create node / turn LED red
+
+@enduml

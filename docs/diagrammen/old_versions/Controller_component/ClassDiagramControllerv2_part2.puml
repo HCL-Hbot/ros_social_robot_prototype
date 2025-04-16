@@ -1,0 +1,54 @@
+@startuml
+
+title Class Diagram Controller part 2
+
+skin rose
+skinparam classAttributeIconSize 0
+
+abstract class AbstractControllerState {
+    + AbstractControllerState(aController: Controller*): void
+    + entry(): void
+    + doActivity(): void
+    + exit(): void
+    + getContext() : Controller*
+}
+
+AbstractControllerState <|-- Sleep
+AbstractControllerState <|-- Tracking
+AbstractControllerState <|-- Greeting
+AbstractControllerState <|-- Ignore
+AbstractControllerState <|-- AskForAttention
+
+class Sleep {
+    + entry(): void
+    + exit(): void
+}
+
+class Tracking {
+    - timer_ : EventTimer
+    - startTimer(timeout: uint32_t): void
+    - stopTimer(): void
+    + entry(): void
+    + doActivity(): void    
+    + exit(): void
+}
+
+class Greeting {
+    + entry(): void
+    + exit(): void
+}
+
+class AskForAttention {
+    - ignore_counter_ : uint8_t
+    - previous_time_ : uint32_t
+    - threshold_time_ : uint32_t
+    - isAllowedToAskForAttention(): bool
+    + doActivity(): void
+}
+
+class Ignore {
+    + entry(): void
+    + exit(): void
+}
+
+@enduml

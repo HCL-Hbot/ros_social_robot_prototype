@@ -1,0 +1,29 @@
+@startuml ClassDiagram_controller
+
+title Class Diagram interaction_controller component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+namespace rclcpp {
+    class Node #back:palegreen;
+}
+
+class InteractionController {
+    - facePositionCallback(face_position : const geometry_msgs::msg::PointStamped::SharedPtr): void
+    - convertFacePositionToEyeControl(face_position : const geometry_msgs::msg::PointStamped::SharedPtr&): eye_display_hld::msg::EyeControl
+    - radarPresenceCallback(presence_msg : const radar_presence_hld::msg::PresenceDetection::SharedPtr): void
+    - isPresenceStateChanged(presence_msg : const radar_presence_hld::msg::PresenceDetection::SharedPtr&): bool
+    - convertPresenceDetectionToScreenExpression(presence_msg : const radar_presence_hld::msg::PresenceDetection::SharedPtr&): eye_display_hld::msg::ScreenExpression::SharedPtr
+    - updateLastPresenceDetection(presence_msg : const radar_presence_hld::msg::PresenceDetection::SharedPtr&): void
+
+    - face_position_sub_ : rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr
+    - eye_control_pub_ : rclcpp::Publisher<eye_display_hld::msg::EyeControl>::SharedPtr
+    - radar_presence_sub_ : rclcpp::Subscription<radar_presence_hld::msg::PresenceDetection>::SharedPtr
+    - screen_expression_pub_ : rclcpp::Publisher<eye_display_hld::msg::ScreenExpression>::SharedPtr
+    - last_presence_msg_ : radar_presence_hld::msg::PresenceDetection
+}
+
+Node <|-- InteractionController
+
+@enduml

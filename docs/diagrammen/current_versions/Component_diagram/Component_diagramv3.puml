@@ -1,0 +1,78 @@
+@startuml component_diagram
+
+skin rose 
+
+component radar_lld <<Micro ROS Node>> as Radar_LLD
+component radar_hld <<ROS2 Node>> as Radar_HLD
+interface "/ld2410_target_frames" <<ROS2 Topic>> as provided_interface_radar_hld
+
+component camera_lld <<ROS2 Node>> as Camera_LLD
+component camera_hld <<ROS2 Node>> as Camera_HLD
+interface "/raw_image" <<ROS2 Topic>> as provided_interface_camera_hld
+interface "/debug_image" <<ROS2 Topic>> as provided_interface_debug_image
+
+component interaction_controller <<ROS2 Node>> as Interaction_Controller
+interface "/radar_presence" <<ROS2 Topic>> as provided_interface_radar_presence
+interface "/face_position" <<ROS2 Topic>> as provided_interface_face_info
+
+component eye_display_hld <<ROS2 Node>> as Eye_display_HLD
+interface "/eye_control" <<ROS2 Topic>> as provided_interface_eye_control
+interface "/screen_expression" <<ROS2 Topic>> as provided_interface_screen_expression
+
+component eye_display_lld <<ROS2 Node>> as Eye_display_LLD
+interface "/eyes_direction_control" <<ROS2 Topic>> as provided_interface_eye_direcion_control
+interface "/eye_lid_control" <<ROS2 Topic>> as provided_interface_eye_lid_control
+interface "/pupil_control" <<ROS2 Topic>> as provided_interface_pupil_control
+
+component audio_hld <<ROS2 Node>> as Audio_HLD
+interface "/play_sound" <<ROS2 Action>> as provided_interface_play_sound
+
+component audio_lld <<ROS2 Node>> as Audio_LLD
+interface "/play_audio_file" <<ROS2 Service>> as provided_interface_play_audio_file
+interface "/pause_audio_file" <<ROS2 Service>> as provided_interface_pause_audio_file
+interface "/resume_audio_file" <<ROS2 Service>> as provided_interface_resume_audio_file
+interface "/stop_audio_file" <<ROS2 Service>> as provided_interface_stop_audio_file
+interface "/audio_device_is_free" <<ROS2 Topic>> as provided_interface_audio_device_is_free
+
+
+Radar_LLD -up-( provided_interface_radar_hld
+Radar_HLD -- provided_interface_radar_hld
+
+Radar_HLD -up-( provided_interface_radar_presence
+Interaction_Controller -down- provided_interface_radar_presence
+
+Camera_LLD -up-( provided_interface_camera_hld
+Camera_HLD -down- provided_interface_camera_hld
+
+Camera_HLD -left-( provided_interface_debug_image
+
+Camera_HLD -up-( provided_interface_face_info
+Interaction_Controller -down- provided_interface_face_info
+
+Interaction_Controller -right-( provided_interface_eye_control
+Eye_display_HLD -left- provided_interface_eye_control
+
+Interaction_Controller --( provided_interface_screen_expression
+Eye_display_HLD -up- provided_interface_screen_expression
+
+Eye_display_HLD -down-( provided_interface_eye_direcion_control
+Eye_display_LLD -up- provided_interface_eye_direcion_control
+
+Eye_display_HLD -down-( provided_interface_eye_lid_control
+Eye_display_LLD -up- provided_interface_eye_lid_control
+Eye_display_HLD -down-( provided_interface_pupil_control
+Eye_display_LLD -up- provided_interface_pupil_control
+
+Interaction_Controller -right-( provided_interface_play_sound
+Audio_HLD -up- provided_interface_play_sound
+
+Audio_HLD -down-( provided_interface_play_audio_file
+Audio_LLD -up- provided_interface_play_audio_file
+Audio_HLD -down-( provided_interface_stop_audio_file
+Audio_LLD -up- provided_interface_stop_audio_file
+Audio_HLD -down- provided_interface_audio_device_is_free
+Audio_LLD -up-( provided_interface_audio_device_is_free
+
+Audio_LLD -down- provided_interface_pause_audio_file
+Audio_LLD -down- provided_interface_resume_audio_file
+@enduml

@@ -10,11 +10,11 @@ REPO_PATH=$(realpath "$BASE_DIR/../..")
 USER_NAME=$(whoami)
 
 # Find npm path (for Electron apps)
-NPM_PATH=$(which npm || true)
-if [ -z "$NPM_PATH" ]; then
-  echo "Error: npm is not installed or not in PATH. Please install Node.js and npm first."
-  exit 1
-fi
+# NPM_PATH=$(which npm || true)
+# if [ -z "$NPM_PATH" ]; then
+#   echo "Error: npm is not installed or not in PATH. Please install Node.js and npm first."
+#   exit 1
+# fi
 NPM_DIR=$(dirname "$NPM_PATH")
 
 # 1. Copy scripts
@@ -27,7 +27,7 @@ done
 
 # 2. Replace placeholders and install services
 echo "Installing systemd services..."
-SERVICE_NAMES=("robot-ssh-init" "robot-display" "robot-eye" "robot-micro-ros-agent" "robot-interaction-controller")
+SERVICE_NAMES=("robot-display" "robot-eye" "robot-micro-ros-agent" "robot-interaction-controller")
 
 
 for name in "${SERVICE_NAMES[@]}"; do

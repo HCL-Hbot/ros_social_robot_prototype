@@ -52,6 +52,10 @@ Ubuntu 24.04 uses **Wayland** by default, but for full compatibility with displa
 4. Select **"Ubuntu on Xorg"** or **"GNOME on Xorg"**.
 5. Log in normally — the system will remember your choice for next time.
 
+### 🔐 Disable Auto-Login
+For the startup scripts and display services to work correctly, auto-login must be disabled.
+If auto-login is enabled, the system will boot to the login screen and no services or scripts will be able to interact with the displays.
+
 ---
 
 ## 📁 Folder Structure
@@ -175,6 +179,8 @@ sudo systemctl start robot-micro-ros-agent.service
 sudo systemctl start robot-interaction-controller.service
 
 journalctl -u robot-interaction-controller.service #Check logs of robot-interaction-controller.service
+
+journalctl -u robot-interaction-controller.service -n 50 #Check the last 50 logs
 ```
 
 ---
@@ -183,8 +189,8 @@ journalctl -u robot-interaction-controller.service #Check logs of robot-interact
 At the moment is possible that the face recogonition model (in camera\_hld) does not recognize any face. A quick fix for this is to restart this node. We van simply do this by restarting the ``robot-interaction-controller.service``:
 
 ```bash
-sudo systemctl stop robot-micro-ros-agent.service
-sudo systemctl start robot-micro-ros-agent.service
+sudo systemctl stop robot-interaction-controller.service
+sudo systemctl start robot-interaction-controller.service
 ```
 
 Any service can be restarted by using ``sudo systemctl stop <service_name>`` and ``sudo systemctl start <service_name>`` command 

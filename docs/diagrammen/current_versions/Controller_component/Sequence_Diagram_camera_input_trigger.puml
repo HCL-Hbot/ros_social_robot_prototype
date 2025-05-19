@@ -1,0 +1,19 @@
+@startuml Sequence_Diagram_camera_input_trigger
+
+title Sequence Diagram face position trigger in controller
+
+skin rose
+
+autonumber
+
+participant "face_position_sub_: Subscription" as face_position_sub_
+participant "InteractionController" as InteractionController
+participant "eye_control_pub_: Publisher" as eye_control_pub_
+
+face_position_sub_ -> InteractionController: facePositionCallback(face_position)
+activate InteractionController
+    InteractionController -> InteractionController: eye_control_msg = convertFacePositionToEyeControl(face_position)
+    InteractionController -> eye_control_pub_: publish(eye_control_msg)
+deactivate InteractionController
+
+@enduml

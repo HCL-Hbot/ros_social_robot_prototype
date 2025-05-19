@@ -1,0 +1,22 @@
+@startuml Sequence_Diagram_ROS_msg_naar_renderer
+
+title Sequence Diagram forward ROS message to renderer
+
+skin rose
+
+autonumber
+
+participant "rclnodejs : rclnodejs.Node" as ROS2
+participant "Main" as Main
+participant "Electron.BrowserWindow" as ElectronWindow
+
+ROS2 -> Main: sendToRenderer(channel_name, msg)
+activate Main
+loop For each eye_window in windows
+    alt windows[eye_window]
+        Main -> ElectronWindow: send(channel_name, msg)
+    end
+end
+
+
+@enduml

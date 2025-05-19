@@ -1,0 +1,17 @@
+@startuml Sequence_Diagram_move_eyes
+
+title Sequence Diagram move eyes
+
+skin rose
+
+autonumber
+
+participant "Renderer" as Renderer
+
+Renderer -> Renderer: moveEyes(eyes_direction.yaw, eyes_direction.pitch)
+activate Renderer
+Renderer -> Renderer: x = yawToX(eyes_direction.yaw)
+Renderer -> Renderer: y = pitchToY(eyes_direction.pitch)
+Renderer -> Renderer: moveEye("both", x, y)
+
+@enduml

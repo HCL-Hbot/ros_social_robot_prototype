@@ -1,0 +1,10 @@
+@startuml Component_Diagram_camera_lld
+
+skin rose 
+
+component camera_lld <<ROS2 Node>> as Camera_LLD
+interface "/raw_image" <<ROS2 Topic>> as provided_interface_camera_hld
+
+Camera_LLD -up-( provided_interface_camera_hld
+
+@enduml

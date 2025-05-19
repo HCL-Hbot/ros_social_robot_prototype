@@ -1,0 +1,17 @@
+@startuml Component_Diagram_radar_lld_v2
+
+skin rose 
+
+component radar_lld <<Micro ROS Node>> as Radar_LLD {
+    component "Ld2410Radar" <<class>> as radar_class
+    interface "getCurrentTargetFrameData" <<functional>> as provided_interface_radar_class
+    radar_class -up- provided_interface_radar_class
+
+    component "RadarLd2410Manager" <<class>> as radar_manager
+    radar_manager -down-( provided_interface_radar_class
+}
+interface "/ld2410_target_frames" <<ROS2 Topic>> as provided_interface_radar_hld
+
+radar_manager -up-( provided_interface_radar_hld
+
+@enduml

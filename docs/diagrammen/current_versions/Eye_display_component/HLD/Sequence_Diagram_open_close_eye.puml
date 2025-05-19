@@ -1,0 +1,22 @@
+@startuml Sequence_Diagram_eye_open_close_eye
+
+title Sequence Diagram screen expression open and close eyes
+
+skin rose
+
+autonumber
+
+participant "screen_expression_: Subscription" as screen_expression_subscriber_
+participant "EyeDisplayHLD" as EyeDisplayHLD
+participant "eye_lid_publisher_: Publisher" as eye_lid_publisher_
+
+screen_expression_subscriber_ -> EyeDisplayHLD: screenExpressionCallback(screen_expression_msg)
+activate EyeDisplayHLD
+    alt screen_expression_msg.expression == ScreenExpression::EYE_AWAKE
+        EyeDisplayHLD -> eye_lid_publisher_: publish(eye_lid_msg)
+    else screen_expression_msg.expression == ScreenExpression::EYE_SLEEP
+        EyeDisplayHLD -> eye_lid_publisher_: publish(eye_lid_msg)
+    end
+    deactivate EyeDisplayHLD
+
+@enduml

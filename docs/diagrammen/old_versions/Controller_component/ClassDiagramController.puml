@@ -1,0 +1,56 @@
+@startuml
+
+title Class Diagram Controller
+
+skin rose
+
+class Context {
+    - state : std::shared_ptr<AbstractState>
+    + setCurrentState(aState: std::shared_ptr<AbstractState>): void
+}
+
+abstract class AbstractState {
+    + AbstractState(aContext: Context*): void
+    + entry(): void
+    + doActivity(): void
+    + exit(): void
+    + getContext() : Context*
+    - context : Context*
+}
+
+AbstractState -o Context : aggregation
+
+abstract class AbstractControllerState {
+    + AbstractControllerState(aController: Controller*): void
+    + getContext() : Controller*
+}
+
+AbstractState <|-- AbstractControllerState 
+
+AbstractControllerState <|-- Sleep
+AbstractControllerState <|-- Ignore
+AbstractControllerState <|-- Awake
+
+AbstractControllerState o-> Controller : aggregation
+' AbstractControllerState -> Controller : association
+
+class Controller  {
+    + closeEyes() : void
+    + openEyes() : void
+    + sleepyEyes() : void
+    + startFaceDetection() : void
+    + stopFaceDetection() : void
+    + askForAttention() : void
+    + greet() : void
+    + openMic() : void
+    + closeMic() : void
+}
+
+Context <|-- Controller
+
+class Ignore {
+    - ignoreCounter : uint8_t
+    - resetCounter(): void
+}
+
+@enduml

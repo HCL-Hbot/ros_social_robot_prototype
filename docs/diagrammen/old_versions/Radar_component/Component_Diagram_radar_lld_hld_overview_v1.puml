@@ -1,0 +1,14 @@
+@startuml component_diagram_radar_lld_hld_overview
+
+skin rose 
+
+component Radar_LLD <<Micro ROS Node>> as Radar_LLD
+interface "/ld2410_target_frames" <<ROS2 Topic>> as provided_interface_radar_lld
+component Radar_HLD <<ROS2 Node>>
+interface "/target_list" <<ROS2 Topic>> as provided_interface_radar_hld  
+
+Radar_LLD -up- provided_interface_radar_lld
+Radar_HLD --( provided_interface_radar_lld
+Radar_HLD -up- provided_interface_radar_hld
+
+@enduml

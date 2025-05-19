@@ -1,0 +1,23 @@
+@startuml component_diagram_eye_display_lld_hld_overview
+
+skin rose
+
+component eye_display_hld <<ROS2 Node>> as Eye_display_HLD
+interface "/eye_control" <<ROS2 Topic>> as provided_interface_eye_control
+interface "/screen_expression" <<ROS2 Topic>> as provided_interface_screen_expression
+
+component eye_display_lld <<ROS2 Node>> as Eye_display_LLD
+interface "/eyes_direction_control" <<ROS2 Topic>> as provided_interface_eye_direcion_control
+interface "/eye_lid_control" <<ROS2 Topic>> as provided_interface_eye_lid_control
+interface "/pupil_control" <<ROS2 Topic>> as provided_interface_pupil_control
+
+Eye_display_HLD -up- provided_interface_eye_control
+Eye_display_HLD -up- provided_interface_screen_expression
+Eye_display_HLD -down-( provided_interface_eye_direcion_control
+Eye_display_LLD -up- provided_interface_eye_direcion_control
+Eye_display_HLD -down-( provided_interface_eye_lid_control
+Eye_display_LLD -up- provided_interface_eye_lid_control
+Eye_display_HLD -down-( provided_interface_pupil_control
+Eye_display_LLD -up- provided_interface_pupil_control
+
+@enduml

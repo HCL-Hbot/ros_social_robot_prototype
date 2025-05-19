@@ -1,0 +1,17 @@
+@startuml Sequence_Diagram_pupil_dialation
+
+title Sequence Diagram dilate pupils
+
+skin rose
+
+autonumber
+
+participant "Renderer" as Renderer
+
+Renderer -> Renderer: updatePupilDilation(msg.dilation_percentage);
+activate Renderer
+loop For each pupil in pupils
+    Renderer -> Pupil: setWidth(msg.dilation_percentage);
+    Renderer -> Pupil: setHeight(msg.dilation_percentage);
+end
+@enduml

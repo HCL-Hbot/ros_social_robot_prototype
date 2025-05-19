@@ -1,0 +1,31 @@
+@startuml ClassDiagram_radar_hld_node
+
+title Class Diagram radar_hld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+namespace rclcpp {
+    class Node #back:palegreen;
+}
+
+namespace radar_presence_hld {
+    class RadarPresenceHLD {
+        - radarPresenceCallback(radar_presence_msg: const ld2410_interface::msg::LD2410TargetDataFrameArray::SharedPtr): void
+        - findSmallestDistanceSensor(radar_presence_msg: const ld2410_interface::msg::LD2410TargetDataFrameArray::SharedPtr): const ld2410_interface::msg::LD2410TargetDataFrame*
+        - getDistanceFromSensor(sensor: const ld2410_interface::msg::LD2410TargetDataFrame&): uint16_t
+        - translateToPresenceDetection(radar_sensor: const ld2410_interface::msg::LD2410TargetDataFrame&): interaction_controller::msg::PresenceDetection
+        - isPresenceDetectionChanged(new_radar_presence_msg: const interaction_controller::msg::PresenceDetection&): bool
+        - updateAndPublishPresenceDetection(new_radar_presence_msg: const interaction_controller::msg::PresenceDetection&): void
+
+        - radar_lld_sub_: rclcpp::Subscription<ld2410_interface::msg::LD2410TargetDataFrameArray>::SharedPtr
+        - radar_presence_pub_: rclcpp::Publisher<interaction_controller::msg::PresenceDetection>::SharedPtr
+        - current_radar_presence_msg_: interaction_controller::msg::PresenceDetection
+    }
+}
+
+
+Node <|-- RadarPresenceHLD
+
+
+@enduml

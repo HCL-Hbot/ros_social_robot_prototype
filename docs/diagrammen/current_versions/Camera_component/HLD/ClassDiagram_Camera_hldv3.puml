@@ -1,0 +1,31 @@
+@startuml ClassDiagram_Camera_hld
+
+title Class Diagram camera hld component
+
+skin rose
+skinparam classAttributeIconSize 0
+
+namespace rclcpp {
+    class Node #back:palegreen;
+}
+
+
+class CameraHLD {
+    - imageCallback(image_msg : const sensor_msgs::msg::Image::SharedPtr) : void
+    - convertImageMsgToCvMat(image_msg : const sensor_msgs::msg::Image::SharedPtr) : cv::Mat
+    - publishFacePosition(frame : const cv::Mat&) : void
+    - getCenterOfFace(face_roi : const cv::Rect&) : cv::Point
+    - getDistanceToFace(face_roi : const cv::Rect) : float
+    - createFacePositionMsg(center_of_face : const cv::Point, distance_to_face : float) : geometry_msgs::msg::PointStamped
+    - publishDebugImage(frame : const cv::Mat&) : void
+  
+    - face_detector_ : CLFML::FaceDetection::FaceDetector
+    - raw_image_sub_ : rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr
+    - face_position_pub_ : rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr
+    - debug_image_pub_ : rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr
+    - tf_frame_id_ : std::string
+}
+
+Node <|-- CameraHLD
+
+@enduml

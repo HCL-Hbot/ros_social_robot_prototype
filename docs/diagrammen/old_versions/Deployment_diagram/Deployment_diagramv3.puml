@@ -1,0 +1,39 @@
+@startuml deployment_diagram
+
+left to right direction
+
+node "left-radar" <<ld2410 radar sensor>> as left_radar
+node "right-radar" <<ld2410 radar sensor>> as right_radar
+
+node "ESP32-s3" as lld_radar_node <<device>> {
+  component "radar_lld" <<Micro-ROS node>> as micro_ros_node
+}
+
+node "front camera" as front_camera <<device OV5640 Usb Camera>>
+
+node "Left eye" as lcd_left_eye <<device 4 inch LCD>>
+node "Right eye" as lcd_right_eye <<device 4 inch LCD>>
+
+node "Mini-PC-N100" <<device>> {
+  node "Ubuntu 24.04 OS" <<execution-environment>> {
+    artifact "ROS 2 jazzy" as ros2
+    component "Micro-ROS Agent" as ros_agent
+    component "My ROS2 Nodes" as ros_nodes
+  }
+
+  ros_agent -[dashed]> ros2 : "depended"
+  ros_nodes -[dashed]> ros2 : "depended"
+  ros_nodes -- ros_agent : ""<<protocol>>""\n ROS2 Topics & Services
+}
+
+lld_radar_node -- left_radar : ""<<protocol>>""\n UART
+lld_radar_node -- right_radar : ""<<protocol>>""\n UART
+
+' Verbinding tussen de ESP32 en de mini-PC via seriële communicatie of UDP communicatie (beide kan maar niet tegelijk)
+lld_radar_node -- "Mini-PC-N100"  : ""<<protocol>>""\n Serial OR UDP  
+
+front_camera -- "Mini-PC-N100" : ""<<protocol>>""\n USB
+lcd_left_eye -- "Mini-PC-N100" : ""<<protocol>>""\n HDMI
+lcd_right_eye -- "Mini-PC-N100" : ""<<protocol>>""\n HDMI
+
+@enduml

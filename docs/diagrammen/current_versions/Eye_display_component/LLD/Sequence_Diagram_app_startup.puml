@@ -1,0 +1,45 @@
+@startuml Sequence_Diagram_app_startup
+
+title Sequence Diagram app startup eye_display_lld
+
+skin rose
+
+autonumber
+
+participant "app : Electron.App" as ElectronApp
+participant "Main" as Main
+participant "screen: Electron.Screen" as ElectronScreen
+
+ElectronApp -> Main: setupScreens()
+activate Main
+Main -> Main: options = ParseArguments()
+Main -> ElectronScreen: displays = getAllDisplays()
+activate ElectronScreen
+deactivate ElectronScreen
+
+alt displays.length == 0 
+    Main -> Main: process.exit(1)
+end
+
+alt options.left == undefined && options.right == undefinded
+    alt displays.length > 1
+        Main -> Main: createWindowForScreen(displays[0], "left")
+        Main -> Main: createWindowForScreen(displays[1], "right")
+    else
+    Main -> Main: createWindowForScreen(displays[0], "both")
+    end
+end 
+
+alt options.left != undefined && leftDisplay
+    Main -> Main: createWindowForScreen(leftDisplay, "left")
+end
+
+alt options.right != undefinded && rightDisplay
+     Main -> Main: createWindowForScreen(rightDisplay, "right")
+end
+deactivate Main
+
+ElectronApp -> Main: startRclNodejs()
+activate Main
+
+@enduml

@@ -1,0 +1,14 @@
+@startuml Component_Diagram_camera_lld_hld_overview
+
+skin rose 
+
+component camera_lld <<ROS2 Node>> as Camera_LLD
+component camera_hld <<ROS2 Node>> as Camera_HLD
+interface "/raw_image" <<ROS2 Topic>> as provided_interface_camera_hld
+interface "/face_position" <<ROS2 Topic>> as provided_interface_face_info
+
+Camera_LLD -up-( provided_interface_camera_hld
+Camera_HLD -down- provided_interface_camera_hld
+Camera_HLD -up-( provided_interface_face_info
+
+@enduml

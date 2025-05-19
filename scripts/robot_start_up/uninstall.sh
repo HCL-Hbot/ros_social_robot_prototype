@@ -5,7 +5,6 @@ set -e
 echo "Uninstalling robot services..."
 
 SERVICE_NAMES=(
-  robot-ssh-init
   robot-display
   robot-eye
   robot-micro-ros-agent

@@ -33,9 +33,7 @@ npm install #install all the required packages
 ```
 
 ## Run from ros cli
-```bash
-
-```
+If it is desired to run this node from the ros cli, run the launch file of this package.
 
 ## Executing application outside vscode terminal (chrome-sandbox)
 Chrome sandbox is needed outside visual studio code
@@ -43,7 +41,10 @@ Chrome sandbox is needed outside visual studio code
 ```bash
 sudo chown root /home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/eye_display_lld/src/node_modules/electron/dist/chrome-sandbox
 ```
-2.Stel de juiste permissies in (setuid root):
+2. Stel de juiste permissies in (setuid root):
 ```bash
 sudo chmod 4755 /home/hcl/Documents/ros_social_robot_prototype/ros2_ws/src/eye_display_lld/src/node_modules/electron/dist/chrome-sandbox
 ```
+
+# Note 
+The eyes are by default open, altough the controller thinks it is closed, because this was easier for testing with the camera for following a face. Opening and closing the eyes are done based on radar ``event`` trigger.

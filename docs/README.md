@@ -115,3 +115,19 @@ Er zijn geen performance requirements vereist voor deze uitvoering van het proje
 
 ---
 
+
+
+# Demo
+
+In het volgende [filmpje](./demo_robot.mp4) is een demo van MIKA te zien. Het volgende wordt hier mee aangetoond:
+
+- Software handmatig opstarten via SSH
+- Openen en sluiten van ogen.
+- Gebruiker volgen met ogen.
+- Pupillen vernouwen en verwijden op basis van afstand. Goed de ogen bekijken tijdens de video, ik vertel namelijk niks hierover kom ik achter.
+- Groeten (bij aankomst en vertrek)
+
+Wat niet te zien is:
+- Automatisch opstarten van de software bij opstarten van robot/pc. In de video start ik alles handmatig op.
+
+
